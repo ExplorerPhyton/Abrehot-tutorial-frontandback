@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abrehot Online Tutorials</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+        }
+
+        :root {
+            --primary: #1A5276;
+            /* Dark Blue */
+            --primary-dark: #15425F;
+            /* Darker hover */
+            --secondary: #2980B9;
+            /* Main secondary */
+            --secondary-light: #5499C7;
+            /* Cards, icons */
+            --accent: #85C1E9;
+            /* Highlights */
+            --primary-light: #AED6F1;
+            /* Very light backgrounds */
+            --success: #2E8B57;
+            /* Success / Accept */
+            --warning: #E67E22;
+            /* Warning / Pending */
+            --danger: #C0392B;
+            /* Error / Decline */
+            --background: #F4F9FC;
+            /* Main page background */
+            --surface: #FFFFFF;
+            /* Cards, forms, modals */
+            --text: #1F2933;
+            /* Main text */
+            --text-secondary: #5F6B7A;
+            /* Paragraphs */
+            --border: #D6EAF8;
+            --shadow: 0 4px 12px rgba(26, 82, 118, .15);
+            --radius: 10px;
+            --transition: .3s ease;
+
+        }
+
+        body {
+            background-color: var(--background);
+            margin: 0 auto;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            z-index: 1005;
+            width: auto;
+            color: white;
+        }
+
+        .header button {
+            margin-top: 0;
+        }
+
+        .head {
+            font-size: 20px;
+            color: white;
+        }
+
+        .right-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-top: 0;
+
+        }
+
+        .right-header img {
+            border-radius: 50%;
+            border: none;
+            width: 80px;
+            height: 80px;
+        }
+
+        .right-header button {
+            width: 60px;
+        }
+
+        #menuBtn {
+            font-size: 40px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            z-index: 1002;
+        }
+
+        #google_translate_element {
+            padding: 16px 0px 16px 65px;
+            background-color: var(--primary);
+        }
+
+        .ver-nav {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 24px;
+            position: fixed;
+            top: 0;
+            left: -324px;
+            width: 225px;
+            height: 92vh;
+            background-color: var(--secondary);
+            overflow-y: auto;
+            transition: .35s;
+            z-index: 1001;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, .3);
+        }
+
+        .ver-nav.show {
+            left: 0;
+        }
+
+        .ver-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ver-nav a {
+            display: block;
+            text-decoration: none;
+            padding: 5px;
+            color: white;
+        }
+
+        .ver-nav a:hover {
+            margin: 0 0 5px 5px;
+            background-color: var(--primary-light);
+            color: black;
+        }
+
+        .ver-nav .bx,
+        .search-input-section {
+            font-size: 20px;
+        }
+
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .3);
+            opacity: 0;
+            visibility: hidden;
+            transition: .35s;
+            z-index: 1000;
+        }
+
+        #overlay.show {
+            opacity: 0.7;
+            visibility: visible;
+        }
+
+        /* DONT FORGET TO COPY THE CSS ABOVE THIS LINE TO EVERY SINGLE PAGE(HEADER CSS) */
+
+        .main-headings {
+            margin: 30px 0px 20px 54px;
+            font-weight: bold;
+            font-size: 32px;
+        }
+
+        .sub-headings {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .hero {
+            min-height: 500px;
+            height: auto;
+            position: relative;
+            background-image: url('images/tutoring.jpg');
+            background-size: cover;
+            background-position: center;
+            background-position: center;
+        }
+
+        .hero p {
+            margin-top: 20px;
+            text-align: justify;
+
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .hero-content,
+        .hero-buttons {
+            padding: 0 80px;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .how-section {
+            background-color: rgb(246, 137, 73);
+            padding: 10px 0 44px 0;
+        }
+
+        .how {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            place-items: center;
+            grid-gap: 16px;
+
+        }
+
+        .how>div {
+            min-height: 200px;
+            background-color: var(--secondary-light);
+            padding: 20px;
+            margin: 16px;
+        }
+
+        .how button {
+            margin: 0;
+            margin-right: 10px;
+        }
+
+        .popular-courses {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-column-gap: 24px;
+            padding: 0px 40px;
+            margin-bottom: 20px;
+        }
+
+        .popular-courses>div {
+            text-align: center;
+            border-left: 5px solid var(--primary);
+            border-radius: 10px;
+            padding: 10px 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            background: var(--primary-light);
+
+        }
+
+        .become-a-tutor {
+            position: relative;
+            min-height: 450px;
+            height: auto;
+            background-image: url('images/tutor-home.jpg');
+            background-size: cover;
+            background-position: start;
+            color: white;
+            text-align: justify;
+        }
+
+        .become-a-tutor-content {
+            padding: 0 80px;
+        }
+
+        .become-a-tutor-content button {
+            display: flex;
+            gap: 10px;
+        }
+
+        .look-up {
+            background-color: rgb(6, 132, 88);
+            padding: 10px 0px;
+            color: white;
+        }
+
+        .search-input-section {
+            margin: 25px 50px;
+        }
+
+        input {
+            border: 1.5px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            width: 30%;
+            transition: width 1s ease-in-out, border .3s ease-in-out;
+        }
+
+        input:focus {
+            width: 90%;
+            border-color: #999;
+            outline: none;
+        }
+
+        .tutor-card-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 32px;
+            gap: 32px;
+        }
+
+        .tutor-background {
+            padding: 10px 0px;
+            background-color: rgb(255, 217, 0);
+        }
+
+        .tutor-name-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tutor-card {
+            padding: 20px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 20px;
+            position: relative;
+            height: 550px;
+        }
+
+        .tutor-card img,
+        .testimonial img {
+            border-radius: 50%;
+            width: 90px;
+            height: 90px;
+            margin-right: 24px;
+            margin-bottom: 24px;
+        }
+
+        .tutor-info {
+            font-weight: 525;
+        }
+
+        .tutor {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
+
+        }
+
+        .favorite-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: white;
+            color: black;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+            padding: 8px 0 0 0;
+            margin: 0;
+            transition: .3s;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .favorite-btn.active {
+            color: rgb(0, 126, 252);
+        }
+
+        .star {
+            font-size: 30px;
+            color: #ccc;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .star.active {
+            color: gold;
+        }
+
+        .star:hover {
+            color: gold;
+        }
+
+        #ratingText {
+            font-weight: 500;
+        }
+
+
+        .testimonials-section {
+            overflow: hidden;
+            padding: 40px 0;
+            background: var(--accent);
+        }
+
+        .testimonial-section2 {
+            display: flex;
+            align-items: center;
+            animation: scrollTestimonials 25s linear infinite;
+            gap: 25px;
+        }
+
+        .testimonial {
+            max-width: 320px;
+            padding: 25px;
+            margin: 20px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .15);
+            flex-shrink: 0;
+        }
+
+        @keyframes scrollTestimonials {
+
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+
+        }
+
+        button {
+            margin-top: 20px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 5px;
+            padding: 10px 20px;
+            border: none;
+            font-weight: 500;
+        }
+
+        button:hover {
+            transition: var(--transition);
+            background-color: var(--primary-dark);
+        }
+
+        /*BELOW IS THE FOOTER CSS , DONT FORGET TO COPY THE CSS BELOW THIS TO EVERY PAGE AFTER ITS DONE*/
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .footer {
+            padding: 32px;
+            background-color: rgb(0, 94, 153);
+            color: white;
+
+        }
+
+        .footer a {
+            color: white;
+        }
+
+        .footer-links {
+            display: grid;
+            align-items: center;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 25px;
+        }
+
+        /*FOOTER CSS ENDS HERE*/
+
+        @media (max-width: 900px) {
+            .header {
+                position: static;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+                font-size: 18px;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .right-header img {
+                width: 60px;
+                height: 60px;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            #menuBtn {
+                position: sticky;
+                top: 0;
+                left: 0;
+                font-size: 30px;
+                z-index: 2;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .ver-nav {
+                max-width: 150px;
+                height: 100vh;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .ver-nav .bx,
+            .search-input-section {
+                font-size: 16px;
+            }
+
+            /*COPY TO EVERY PAGE BUT LEAVE OUT THE CLASS search-input-section*/
+
+            .head-buttons {
+                display: flex;
+                gap: 10px;
+                text-align: center;
+
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .hero {
+                min-height: 800px;
+                padding: 0;
+            }
+
+            .become-a-tutor {
+                min-height: 500px;
+            }
+
+            .hero-content,
+            .become-a-tutor-content {
+                padding: 0px 20px;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .hero h2 {
+                font-size: 24px;
+            }
+
+            .hero p {
+                font-size: 16px;
+                line-height: 1.6;
+                text-align: center;
+
+            }
+
+            .overlay {
+                overflow: hidden;
+                text-align: center;
+
+            }
+
+            .main-headings {
+                margin: 30px 0px 10px 0px;
+                font-weight: bold;
+                font-size: 28px;
+                text-align: center;
+            }
+
+            .sub-headings {
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .how {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                grid-gap: 20px;
+            }
+
+            .popular-courses {
+                padding: 10px 20px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-links {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .tutor-card {
+                min-height: 550px;
+                margin-bottom: 44px;
+                padding: 16px;
+            }
+
+
+            .tutor-card-section {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+
+            input {
+                border: 1.5px solid #ccc;
+                padding: 10px;
+                width: 30%;
+                transition: width 1s ease-in-out, border .3s ease-in-out;
+            }
+
+            input:focus {
+                width: 87%;
+                border-color: #999;
+                outline: none;
+            }
+
+            .testimonials-section {
+                padding: 0;
+            }
+
+            .testimonial-section2 {
+                flex-direction: column;
+                animation: none;
+                grid-gap: 0;
+            }
+
+            .testimonial {
+                max-width: auto;
+                margin-bottom: 20px;
+            }
+
+            .mob-hide {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="right-header">
+            <button id="menuBtn"><i class="bx bx-menu"></i></button>
+            <div id="overlay"></div>
+            <div class="ver-nav" id="verNav">
+                <div>
+                    <ul>
+                        <li><a href="home.html">
+                                <i class="bx bx-home"></i> <span>Home</span>
+                            </a></li>
+                        <li>
+                            <a href="aboutus.html">
+                                <i class="bx bxs-graduation"></i> <span>About Us</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tutors.html">
+                                <i class="bx bx-book-open"></i> <span>Tutors</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="becomeatutor.html">
+                                <i class="bx bx-group"></i> <span>Become A Tutor</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="myprofile.html">
+                                <i class="bx bx-user"></i> <span>My Profile</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li>
+                            <a href="create-account.html">
+                                <i class="bx bx-edit"></i> <span>Sign Up</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="login.html">
+                                <i class="bx bx-user-circle"></i> <span>Log In</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="donate.html">
+                                <i class="bx bx-donate-heart"></i> <span>Donate</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li>
+                            <a href="contact.html">
+                                <i class="bx bx-support"></i> <span>Contact Us</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="saftey.html">
+                                <i class="bx bx-shield-quarter"></i> <span>Safety</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="terms.html">
+                                <i class="bx bx-file"></i> <span>Terms Of Service</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="privacy.html">
+                                <i class="bx bx-lock-alt"></i> <span>Privacy Policy</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Online Tutorials Logo">
+            <h1 class="head">Abrehot Online Tutorials</h1>
+        </div>
+
+        <div class="head-buttons">
+            <a href="create-account.html"><button>Sign Up</button></a>
+            <a href="login.html"><button>Log In</button></a>
+            <a href="donate.html"><button>Donate</button></a>
+        </div>
+    </div>
+    <div id="google_translate_element"></div>
+
+    <!--DONT FORGET TO COPY THE HEADER AND NAVIGATION BAR HTML CODE ABOVE TO EVERY SINGLE PAGE AFTER YOU HAVE ADDED CSS AND JAVASCRIPT-->
+
+    <div class="hero">
+        <div class="overlay">
+            <div class="hero-content">
+                <h1>Welcome to Abrehot Online Tutorials</h1>
+                <h2>Find the Right Tutor for Every Student!</h2>
+                <div>Connect with qualified tutors for KG to Grade 12, anytime and anywhere.</div>
+                <p>Whether your child needs help with Mathematics, English, Science, or any other subject, Abrehot
+                    Online
+                    Tutorials makes it easy to find experienced tutors who match your learning needs. Choose from online
+                    or
+                    in-person sessions and book at a time that works for you. Browse tutor profiles, compare
+                    qualifications
+                    and prices, and book online or in-person tutoring sessions with ease. Our platform supports English,
+                    Amharic, Afaan Oromo, and Tigrinya, making quality education more accessible for everyone.</p>
+            </div>
+            <div class="hero-buttons">
+                <!--CHECK IF USER HAS SIGNED UP OR LOGGED IN BEFORE THEY BOOK A SESSION OR BECOME A TUTOR-->
+                <a href="tutors.html"><button>Book A Session</button></a>
+                <a href="becomeatutor.html"><button>Become A Tutor</button></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="how-section">
+        <div class="main-headings">How It Works</div>
+        <div class="how">
+            <div>
+                <div class="sub-headings">Create an Account</div>
+                <br>
+                <div><a href="create-account.html"><button>Sign Up</button></a>to create a free account as a parent
+                    or a student to unlock personalized features, book a session and connect with tutors.</div>
+            </div>
+            <div>
+                <div class="sub-headings">Search for Tutors</div>
+                <br>
+                <div>Find qualified tutors by searching based on subject, grade level, language, location, or
+                    teaching mode on our <a href="tutors.html"> Tutors page </a>.</div>
+            </div>
+            <div>
+                <div class="sub-headings">Compare Tutors</div>
+                <br>
+                <div>Browse tutor profiles, compare qualifications, experience, ratings, and hourly rates to choose
+                    the best tutor.</div>
+            </div>
+            <div>
+                <div class="sub-headings">Book a Session</div>
+                <br>
+                <div>Select your preferred date and time, then book an online or in-person tutoring session with
+                    your chosen tutor.</div>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <!--CHECK IF USER HAS SIGNED UP OR LOGGED IN BEFORE THEY BOOK A SESSION OR BECOME A TUTOR-->
+            <a href="tutors.html"><button>Book Now!</button></a>
+        </div>
+    </div>
+
+    <br><br>
+
+    <div class="main-headings">Popular Courses</div>
+    <div>
+        <div class="popular-courses">
+            <div>Mathematics</div>
+            <div>English</div>
+            <div>Physics</div>
+            <div>Chemistry</div>
+            <div>Biology</div>
+            <div>Geography</div>
+            <div>History</div>
+            <div>ICT</div>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="become-a-tutor">Become a Tutor
+        <div class="overlay">
+            <div class="become-a-tutor-content">
+                <h2>Become a Tutor and Inspire Future Success</h2>
+                <h3>Share your knowledge, earn extra income, and help students reach their academic goals.</h3>
+                <div>Join our growing community of qualified tutors and connect with students from Kindergarten to Grade
+                    12. Create your account, choose the subjects and grades you want to teach, set your availability and
+                    hourly rate, and start making a difference through online or in-person tutoring.</div>
+                <br>
+                <!--CHECK IF USER HAS SIGNED UP OR LOGGED IN BEFORE THEY BOOK A SESSION OR BECOME A TUTOR-->
+                <a href="becomeatutor.html"><button>Become A Tutor. Apply Now!</button></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="look-up">
+        <div class="sub-headings" style="margin: 20px 0px 0px 54px;">Look up our available tutors:</div>
+        <div class="search-input-section"><i class="bx bx-search"></i><input type="search"
+                placeholder="Search for tutors"></div>
+    </div>
+
+    <div class="tutor-background">
+        <div class="main-headings">Verified Tutors</div>
+        <div class="tutor-card-section">
+            <div class="tutor-card">
+                <div class="tutor">
+                    <div class="tutor-name-section">
+                        <img src="images/photo_2026-07-08_08-44-00.jpg" alt="Profile-Picture">
+                        <h3>Abraham</h3>
+                    </div>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)"><i class="bx bx-heart"></i></button>
+                </div>
+                <div><span class="tutor-info">Subject:</span> Chemistry</div>
+                <div><span class="tutor-info">Grade Levels:</span> Grade 9 - Grade 10</div>
+                <div><span class="tutor-info">Languages:</span> English, Amharic</div>
+                <div><span class="tutor-info">Experience:</span> 9 Years</div>
+                <div><span class="tutor-info">Rating:</span>⭐ 5 </div>
+                <div><span class="tutor-info">Location:</span> Addis Ababa</div>
+                <div><span class="tutor-info">Availability:</span> Mon - Fri</div>
+                <div><span class="tutor-info">Teaching Mode:</span> Online & In-Person</div>
+                <h4>700 ETB / Hour</h4>
+                <a href="book.html"><button>Book a Session</button></a>
+                <br><br>
+                <div style="font-weight:500;">Rate this Tutor</div>
+                <div class="rating">
+                    <span class="star" onclick="rateTutor(this,1)">★</span>
+                    <span class="star" onclick="rateTutor(this,2)">★</span>
+                    <span class="star" onclick="rateTutor(this,3)">★</span>
+                    <span class="star" onclick="rateTutor(this,4)">★</span>
+                    <span class="star" onclick="rateTutor(this,5)">★</span>
+                    <div class="ratingText">No rating yet.</div>
+                </div>
+            </div>
+
+            <div class="tutor-card">
+                <div class="tutor">
+                    <div class="tutor-name-section">
+                        <img src="images/pfp.webp" alt="Profile-Picture">
+                        <h3>Abel Berhane</h3>
+                    </div>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)"><i class="bx bx-heart"></i></button>
+                </div>
+
+                <div><span class="tutor-info">Subject:</span> Physics</div>
+                <div><span class="tutor-info">Grade Levels:</span> Grade 9 - Grade 12</div>
+                <div><span class="tutor-info">Languages:</span> English, Afaan Oromo</div>
+                <div><span class="tutor-info">Experience:</span> 4 Years</div>
+                <div><span class="tutor-info">Rating:</span> ⭐ 4.9</div>
+                <div><span class="tutor-info">Location:</span> Adama</div>
+                <div><span class="tutor-info">Availability:</span> Weekends</div>
+                <div><span class="tutor-info">Teaching Mode:</span> Online Only</div>
+                <h4>450 ETB / Hour</h4>
+                <a href="book.html"><button>Book a Session</button></a>
+                <br><br>
+                <div style="font-weight:500;">Rate this Tutor</div>
+                <div class="rating">
+                    <span class="star" onclick="rateTutor(this,1)">★</span>
+                    <span class="star" onclick="rateTutor(this,2)">★</span>
+                    <span class="star" onclick="rateTutor(this,3)">★</span>
+                    <span class="star" onclick="rateTutor(this,4)">★</span>
+                    <span class="star" onclick="rateTutor(this,5)">★</span>
+                    <div class="ratingText">No rating yet.</div>
+                </div>
+            </div>
+
+            <div class="tutor-card">
+                <div class="tutor">
+                    <div class="tutor-name-section">
+                        <img src="images/pfp.webp" alt="Profile-Picture">
+                        <h3>Hanna Alemu</h3>
+                    </div>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)"><i class="bx bx-heart"></i></button>
+
+                </div>
+                <div><span class="tutor-info">Subject:</span> Chemistry</div>
+                <div><span class="tutor-info">Grade Levels:</span> Grade 9 - Grade 12</div>
+                <div><span class="tutor-info">Languages:</span> English, Amharic</div>
+                <div><span class="tutor-info">Experience:</span> 6 Years</div>
+                <div><span class="tutor-info">Rating:</span> ⭐ 4.4</div>
+                <div><span class="tutor-info">Location:</span> Bahir Dar</div>
+                <div><span class="tutor-info">Availability:</span> Mon - Sat</div>
+                <div><span class="tutor-info">Teaching Mode:</span> Online & In-Person</div>
+                <h4>600 ETB / Hour</h4>
+                <a href="book.html"><button>Book a Session</button></a>
+                <br><br>
+                <div style="font-weight:500;">Rate this Tutor</div>
+                <div class="rating">
+                    <span class="star" onclick="rateTutor(this,1)">★</span>
+                    <span class="star" onclick="rateTutor(this,2)">★</span>
+                    <span class="star" onclick="rateTutor(this,3)">★</span>
+                    <span class="star" onclick="rateTutor(this,4)">★</span>
+                    <span class="star" onclick="rateTutor(this,5)">★</span>
+                    <div class="ratingText">No rating yet.</div>
+                </div>
+            </div>
+
+            <div class="tutor-card">
+                <div class="tutor">
+                    <div class="tutor-name-section">
+                        <img src="images/pfp.webp" alt="Profile-Picture">
+                        <h3>Daniel Tesfaye</h3>
+                    </div>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)"><i class="bx bx-heart"></i></button>
+
+                </div>
+                <div><span class="tutor-info">Subject:</span> English</div>
+                <div><span class="tutor-info">Grade Levels:</span> Grade 1 - Grade 12</div>
+                <div><span class="tutor-info">Languages:</span> English, Amharic, Tigrinya</div>
+                <div><span class="tutor-info">Experience:</span> 8 Years</div>
+                <div><span class="tutor-info">Rating:</span> ⭐ 4.8</div>
+                <div><span class="tutor-info">Location:</span> Mekelle</div>
+                <div><span class="tutor-info">Availability:</span> Evenings</div>
+                <div><span class="tutor-info">Teaching Mode:</span> Online Only</div>
+                <h4>400 ETB / Hour</h4>
+                <a href="book.html"><button>Book a Session</button></a>
+                <br><br>
+                <div style="font-weight:500;">Rate this Tutor</div>
+                <div class="rating">
+                    <span class="star" onclick="rateTutor(this,1)">★</span>
+                    <span class="star" onclick="rateTutor(this,2)">★</span>
+                    <span class="star" onclick="rateTutor(this,3)">★</span>
+                    <span class="star" onclick="rateTutor(this,4)">★</span>
+                    <span class="star" onclick="rateTutor(this,5)">★</span>
+                    <div class="ratingText">No rating yet.</div>
+                </div>
+            </div>
+
+            <div class="tutor-card">
+                <div class="tutor">
+                    <div class="tutor-name-section">
+                        <img src="images/pfp.webp" alt="Profile-Picture">
+                        <h3>Meron Paulos</h3>
+                    </div>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)"><i class="bx bx-heart"></i></button>
+
+                </div>
+                <div><span class="tutor-info">Subject:</span> Biology</div>
+                <div><span class="tutor-info">Grade Levels:</span> Grade 7 - Grade 12</div>
+                <div><span class="tutor-info">Languages:</span> English, Amharic</div>
+                <div><span class="tutor-info">Experience:</span> 3 Years</div>
+                <div><span class="tutor-info">Rating:</span> ⭐ 4.6</div>
+                <div><span class="tutor-info">Location:</span> Hawassa</div>
+                <div><span class="tutor-info">Availability:</span> Mon - Fri</div>
+                <div><span class="tutor-info">Teaching Mode:</span> In-Person Only</div>
+                <h4>350 ETB / Hour</h4>
+                <a href="book.html"><button>Book a Session</button></a>
+                <br><br>
+                <div style="font-weight:700;">Rate this Tutor</div>
+                <div class="rating">
+                    <span class="star" onclick="rateTutor(this,1)">★</span>
+                    <span class="star" onclick="rateTutor(this,2)">★</span>
+                    <span class="star" onclick="rateTutor(this,3)">★</span>
+                    <span class="star" onclick="rateTutor(this,4)">★</span>
+                    <span class="star" onclick="rateTutor(this,5)">★</span>
+                    <div class="ratingText">No rating yet.</div>
+                </div>
+            </div>
+
+            <div class="tutor-card">
+                <div class="tutor">
+                    <div class="tutor-name-section">
+                        <img src="images/pfp.webp" alt="Profile-Picture">
+                        <h3>Grima H/Eyesus</h3>
+                    </div>
+                    <button class="favorite-btn" onclick="toggleFavorite(this)"><i class="bx bx-heart"></i></button>
+                </div>
+                <div><span class="tutor-info">Subject:</span> ICT</div>
+                <div><span class="tutor-info">Grade Levels:</span> Grade 5 - Grade 12</div>
+                <div><span class="tutor-info">Languages:</span> English, Afaan Oromo</div>
+                <div><span class="tutor-info">Experience:</span> 5 Years</div>
+                <div><span class="tutor-info">Rating:</span> ⭐ 4.9</div>
+                <div><span class="tutor-info">Location:</span> Addis Ababa</div>
+                <div><span class="tutor-info">Availability:</span> Flexible</div>
+                <div><span class="tutor-info">Teaching Mode:</span> Online & In-Person</div>
+                <h4>550 ETB / Hour</h4>
+                <a href="book.html"><button>Book a Session</button></a>
+                <br><br>
+                <div style="font-weight:500;">Rate this Tutor</div>
+                <div class="rating">
+                    <span class="star" onclick="rateTutor(this,1)">★</span>
+                    <span class="star" onclick="rateTutor(this,2)">★</span>
+                    <span class="star" onclick="rateTutor(this,3)">★</span>
+                    <span class="star" onclick="rateTutor(this,4)">★</span>
+                    <span class="star" onclick="rateTutor(this,5)">★</span>
+                    <div class="ratingText">No rating yet.</div>
+                </div>
+            </div>
+
+        </div>
+        <a href="tutors.html">
+            <div style="text-align: center; margin-bottom: 32px;"><button>Find Your Tutor!</button></div>
+        </a>
+    </div>
+
+    <div class="testimonials-section">
+        <div class="main-headings">Testimonials</div>
+        <div class="testimonial-section2">
+            <div class="testimonial">
+                <img src="images/pfp-test.png">
+                <h3>Dawit Tesfaye</h3>
+                <p>Finding a qualified tutor for my daughter was quick and easy. She has become more confident in
+                    Mathematics, and the booking process was very simple.</p>
+                <br>
+                <p>a Parent</p>
+            </div>
+
+            <div class="testimonial">
+                <img src="images/pfp-test.png">
+                <h3>Sara Tessema</h3>
+                <p>I found an excellent Physics tutor through this platform. The tutor was professional, patient, and
+                    helped me prepare for my exams. Additionally, most, if not, everything is affordable.</p>
+                <br>
+                <p>a Grade 12 Student</p>
+            </div>
+
+            <div class="testimonial">
+                <img src="images/pfp-test.png">
+                <h3>Ahmed Abdulaziz</h3>
+                <p>This platform made it easy to compare tutors and choose one that fit my budget. I highly recommend it
+                    to parents and students looking for extra academic support.</p>
+                <br>
+                <p>a Grade 10 Student</p>
+            </div>
+            <div class="testimonial mob-hide">
+                <img src="images/pfp-test.png">
+                <h3>Dawit Tesfaye</h3>
+                <p>Finding a qualified tutor for my daughter was quick and easy. She has become more confident in
+                    Mathematics, and the booking process was very simple.</p>
+                <br>
+                <p>a Parent</p>
+            </div>
+
+            <div class="testimonial mob-hide">
+                <img src="images/pfp-test.png">
+                <h3>Sara Tessema</h3>
+                <p>I found an excellent Physics tutor through this platform. The tutor was professional, patient, and
+                    helped me prepare for my exams. Additionally, most, if not, everything is affordable.</p>
+                <br>
+                <p>a Grade 12 Student</p>
+            </div>
+
+            <div class="testimonial mob-hide">
+                <img src="images/pfp-test.png">
+                <h3>Ahmed Abdulaziz</h3>
+                <p>This platform made it easy to compare tutors and choose one that fit my budget. I highly recommend it
+                    to parents and students looking for extra academic support.</p>
+                <br>
+                <p>a Grade 10 Student</p>
+            </div>
+        </div>
+    </div>
+
+    <!--DONT FORGET TO COPY THE FOOTER HTML CODE BELOW TO EVERY PAGE-->
+    <div class="footer">
+        <div class="footer-links">
+            <div>
+                <a href="home.html">
+                    <div>Home</div>
+                </a>
+                <a href="aboutus.html">
+                    <div>About Us</div>
+                </a>
+                <a href="tutors.html">
+                    <div>Tutors</div>
+                </a>
+                <!--CHECK IF USER HAS SIGNED UP OR LOGGED IN BEFORE THEY BOOK A SESSION OR BECOME A TUTOR-->
+                <a href="becomeatutor.html">
+                    <div>Become A Tutor</div>
+                </a>
+                <a href="contact.html">
+                    <div>Contact Us</div>
+                </a>
+
+            </div>
+            <div>
+                <a href="myprofile.html">
+                    <div>My Profile</div>
+                </a>
+                <a href="create-account.html">
+                    <div>Sign Up</div>
+                </a>
+                <a href="login.html">
+                    <div>Log In</div>
+                </a>
+                <a href="donate.html">
+                    <div>Donate</div>
+                </a>
+            </div>
+            <div>
+                <a href="https://t.me/" target="_blank">
+                    <div>Telegram</div>
+                </a>
+                <a href="https://www.facebook.com/" target="_blank">
+                    <div>Facebook</div>
+                </a>
+                <a href="https://twitter.com/" target="_blank">
+                    <div>Twitter</div>
+                </a>
+                <a href="https://www.instagram.com/" target="_blank">
+                    <div>Instagram</div>
+                </a>
+                <a href="https://www.linkedin.com/" target="_blank">
+                    <div>LinkedIn</div>
+                </a>
+            </div>
+            <div>
+                <a href="saftey.html">
+                    <div>Safety</div>
+                </a>
+                <a href="terms.html">
+                    <div>Terms Of Service</div>
+                </a>
+                <a href="privacy.html">
+                    <div>Privacy Policy</div>
+                </a>
+            </div>
+        </div>
+        <br>
+        <div class="mob-hide">FAQs:
+            <div>
+                <h4>How do I book a tutoring session?</h4>
+                <p>First create an account, then browse tutors, choose one, and finally complete the booking form.
+                </p>
+            </div>
+
+            <div>
+                <h4>How are tutors verified?</h4>
+                <p>Each tutor is reviewed before being approved on the platform.</p>
+            </div>
+
+            <div>
+                <h4>Can I choose online or in-person tutoring?</h4>
+                <p>Yes, you can select your preferred teaching mode when booking.</p>
+            </div>
+
+            <div>
+                <h4>Who can use this platform?</h4>
+                <p>Parents and students from KG to Grade 12 can find qualified tutors.Tutors can apply to become
+                    verified tutors on this platform where they can support students and make money on the side.</p>
+            </div>
+
+            <div>
+                <h4>Can I become a tutor?</h4>
+                <p>Yes, simply sign up, complete the tutor application form and submit your details.</p>
+            </div>
+        </div>
+        <br>
+        <div style="text-align: center;">Copyright © 2026 Abrehot Online Tutorials. All rights reserved.</div>
+    </div>
+    <!--FOOTER HTML ENDS HERE-->
+    <script>
+        const favoriteButtons = document.querySelectorAll(".favorite-btn");
+
+        favoriteButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                const icon = this.querySelector("i");
+
+                if (icon.classList.contains("bx-heart")) {
+                    icon.classList.remove("bx-heart");
+                    icon.classList.add("bxs-heart");
+                    icon.style.color = "#2563eb";
+                } else {
+                    icon.classList.remove("bxs-heart");
+                    icon.classList.add("bx-heart");
+                    icon.style.color = "";
+                }
+            });
+        });
+
+    </script>
+    <script>
+        function rateTutor(star, rating) {
+            let ratingBox = star.parentElement;
+            let stars = ratingBox.querySelectorAll(".star");
+            let text = ratingBox.querySelector(".ratingText");
+            stars.forEach(function (s, index) {
+                if (index < rating) {
+                    s.classList.add("active");
+                }
+                else {
+                    s.classList.remove("active");
+                }
+            });
+            text.innerHTML = "You rated this tutor " + rating + "/5 ⭐";
+        }
+    </script>
+    <script>
+        const menu = document.getElementById("menuBtn");
+        const nav = document.getElementById("verNav");
+        const overlay = document.getElementById("overlay");
+
+        menu.style.transition = 'opacity 2s ease';
+        menu.style.opacity = '1';
+
+        function hideMenu() {
+            menu.style.opacity = '0';
+            setTimeout(() => {
+                menu.style.visibility = 'hidden';
+            });
+        }
+
+        function showMenuSlowly() {
+            menu.style.visibility = 'visible';
+            menu.style.opacity = '0';
+            requestAnimationFrame(() => {
+                menu.style.opacity = '1';
+            });
+        }
+
+        menu.onclick = function () {
+            nav.classList.add("show");
+            overlay.classList.add("show");
+            hideMenu();
+        }
+
+        overlay.onclick = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        window.onscroll = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                nav.classList.remove("show");
+                overlay.classList.remove("show");
+                showMenuSlowly();
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en', // Default language of your website
+                includedLanguages: 'am,om,ti', // Languages to display (comma-separated)
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element'); // ID of the container div
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+
+</html>

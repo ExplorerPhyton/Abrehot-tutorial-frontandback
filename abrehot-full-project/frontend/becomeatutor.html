@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <title>Become A Tutor | Abrehot Online Tutors</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary: #1A5276;
+            --primary-dark: #15425F;
+            --secondary: #2980B9;
+            --secondary-light: #5499C7;
+            --accent: #85C1E9;
+            --primary-light: #AED6F1;
+            --success: #2E8B57;
+            --warning: #E67E22;
+            --danger: #C0392B;
+            --background: #F4F9FC;
+            --surface: #FFFFFF;
+            --text: #1F2933;
+            --text-secondary: #5F6B7A;
+            --border: #D6EAF8;
+            --shadow: 0 4px 12px rgba(26, 82, 118, .15);
+            --radius: 10px;
+            --transition: .3s ease;
+
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            z-index: 1005;
+            width: auto;
+            color: white;
+        }
+
+        .header button {
+
+            color: white;
+            background-color: var(--primary);
+            border-radius: 5px;
+            padding: 10px 20px;
+            border: none;
+            font-weight: 500;
+        }
+
+        .header button:hover {
+            transition: var(--transition);
+            background-color: var(--primary-dark);
+        }
+
+        .head {
+            font-size: 20px;
+            color: white;
+        }
+
+        .right-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-top: 0;
+
+        }
+
+        .right-header img {
+            border-radius: 50%;
+            border: none;
+            width: 80px;
+            height: 80px;
+        }
+
+        .right-header button {
+            width: 60px;
+        }
+
+        #menuBtn {
+            font-size: 40px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            z-index: 1002;
+        }
+
+        #google_translate_element {
+            padding: 16px 0px 16px 65px;
+            background-color: var(--primary);
+        }
+
+        .ver-nav {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 24px;
+            position: fixed;
+            top: 0;
+            left: -324px;
+            width: 225px;
+            height: 92vh;
+            box-sizing: content-box;
+            background-color: var(--secondary);
+            overflow-y: auto;
+            transition: .35s;
+            z-index: 1001;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, .3);
+        }
+
+        .ver-nav.show {
+            left: 0;
+
+
+        }
+
+        .ver-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ver-nav a {
+            display: block;
+            text-decoration: none;
+            padding: 5px;
+            color: white;
+        }
+
+        .ver-nav a:hover {
+            margin: 0 0 5px 5px;
+            background-color: var(--primary-light);
+            color: black;
+        }
+
+        .ver-nav .bx,
+        .search-input-section {
+            font-size: 20px;
+        }
+
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .3);
+            opacity: 0;
+            visibility: hidden;
+            transition: .35s;
+            z-index: 1000;
+        }
+
+        #overlay.show {
+            opacity: 0.7;
+            visibility: visible;
+        }
+
+        main {
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        .field-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-column-gap: 20px;
+
+        }
+
+        fieldset {
+            min-width: auto;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        legend {
+            font-size: larger;
+            padding: 0 10px;
+            font-weight: 600;
+            color: var(--secondary)
+        }
+
+        .main-label {
+            font-weight: 500;
+            margin-bottom: 16px;
+            margin-top: 10px;
+        }
+
+        select,
+        input[type=text],
+        input[type=number],
+        input[type=tel],
+        input[type=email],
+        input[type=date],
+        input[type=date],
+        input[type=time],
+        textarea {
+            max-width: 100%;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        input[type=radio],
+        input[type=checkbox] {
+            margin-right: 5px;
+        }
+
+        input[type=text]:focus,
+        input[type=number]:focus,
+        input[type=tel]:focus,
+        input[type=email]:focus,
+        input[type=date]:focus,
+        input[type=time]:focus,
+        textarea:focus {
+            border-color: #7e7e7e;
+            outline: none;
+
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            padding: 10px 0px 20px 0px;
+        }
+
+        input[type="submit"],
+        input[type=reset] {
+            flex: 1;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            font-weight: 500;
+        }
+
+        input[type=reset] {
+            background: #ddd;
+
+        }
+
+        input[type="reset"]:hover {
+            background: #999;
+            transition: var(--transition);
+        }
+
+        input[type="submit"] {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        input[type="submit"]:hover {
+            transition: var(--transition);
+            background-color: var(--primary-dark);
+        }
+
+        .status {
+            background: #d5f7ff;
+            padding: 25px;
+            border-left: 5px solid var(--primary);
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+
+        .status div {
+            color: var(--primary);
+            font-size: larger;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        #applicationStatus {
+            font-weight: bold;
+            color: #d97706;
+        }
+
+        #statusMessage {
+            margin-top: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .footer {
+            padding: 32px;
+            background-color: rgb(0, 94, 153);
+            color: white;
+
+        }
+
+        .footer a {
+            color: white;
+        }
+
+        .footer-links {
+            display: grid;
+            align-items: center;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 25px;
+        }
+
+        @media (max-width:900px) {
+            .header {
+                position: static;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+                font-size: 18px;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .right-header img {
+                width: 60px;
+                height: 60px;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            #menuBtn {
+                position: sticky;
+                top: 0;
+                left: 0;
+                font-size: 30px;
+                z-index: 2;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .ver-nav {
+                max-width: 150px;
+                height: 100vh;
+            }
+
+            /*COPY TO EVERY PAGE*/
+
+            .ver-nav .bx {
+                font-size: 16px;
+            }
+
+            /*COPY TO EVERY PAGE BUT LEAVE OUT THE CLASS search-input-section*/
+
+            .head-buttons {
+                display: flex;
+                gap: 10px;
+                text-align: center;
+
+            }
+
+            /*COPY TO EVERY PAGE*/
+            .footer-links {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            /*COPY TO EVERY PAGE*/
+            .buttons {
+                flex-direction: column;
+            }
+
+            .check-radio {
+                grid-template-columns: 1fr;
+            }
+
+            input[type=file] {
+                width: 100%;
+                max-width: 100%;
+                overflow: hidden;
+            }
+
+            .field-container {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+            }
+
+            .mob-hide {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="right-header">
+            <button id="menuBtn"><i class="bx bx-menu"></i></button>
+            <div id="overlay"></div>
+            <div class="ver-nav" id="verNav">
+                <div>
+                    <ul>
+                        <li><a href="home.html">
+                                <i class="bx bx-home"></i> <span>Home</span>
+                            </a></li>
+                        <li>
+                            <a href="aboutus.html">
+                                <i class="bx bxs-graduation"></i> <span>About Us</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tutors.html">
+                                <i class="bx bx-book-open"></i> <span>Tutors</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="becomeatutor.html">
+                                <i class="bx bx-group"></i> <span>Become A Tutor</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="myprofile.html">
+                                <i class="bx bx-user"></i> <span>My Profile</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li>
+                            <a href="create-account.html">
+                                <i class="bx bx-edit"></i> <span>Sign Up</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="login.html">
+                                <i class="bx bx-user-circle"></i> <span>Log In</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="donate.html">
+                                <i class="bx bx-donate-heart"></i> <span>Donate</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li>
+                            <a href="contact.html">
+                                <i class="bx bx-support"></i> <span>Contact Us</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="saftey.html">
+                                <i class="bx bx-shield-quarter"></i> <span>Safety</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="terms.html">
+                                <i class="bx bx-file"></i> <span>Terms Of Service</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="privacy.html">
+                                <i class="bx bx-lock-alt"></i> <span>Privacy Policy</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Online Tutorials Logo">
+            <h1 class="head">Abrehot Online Tutorials</h1>
+        </div>
+
+        <div class="head-buttons">
+            <a href="create-account.html"><button>Sign Up</button></a>
+            <a href="login.html"><button>Log In</button></a>
+            <a href="donate.html"><button>Donate</button></a>
+        </div>
+    </div>
+    <div id="google_translate_element"></div>
+    <main class="become-tutor">
+
+        <h1>Become A Tutor</h1>
+        <p class="subtitle">Complete the application form below to join our tutoring platform.</p>
+        <form action="#" method="post" enctype="multipart/form-data">
+            <div class="field-container">
+
+                <!-- Personal Information -->
+                <fieldset>
+                    <legend><strong>Personal Information</strong></legend>
+
+                    <div class="main-label"><label for="fullname">Full Name</label></div>
+                    <input type="text" id="fullname" name="fullname" required placeholder="Enter your Full Name"><br>
+
+                    <div class="main-label"><label for="gender">Gender</label></div>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select><br>
+
+                    <div class="main-label"><label for="dob">Date of Birth</label></div>
+                    <input type="date" id="dob" name="dob"><br>
+
+                    <!--The phone number and email address can be filled from login information through backend and database integration-->
+                    <div class="main-label"><label for="phone">Phone Number</label></div>
+                    <input type="tel" id="phone" name="phone" required placeholder="+251 XX XX XX XXX"><br>
+
+                    <div class="main-label"><label for="email">Email Address</label></div>
+                    <input type="email" id="email" name="email" placeholder="example@gmail.com" required><br><br>
+                </fieldset>
+
+
+
+                <!-- Education -->
+                <fieldset>
+                    <legend><strong>Education & Qualifications</strong></legend>
+
+                    <div class="main-label"><label for="education">Highest Qualification</label></div>
+                    <input type="text" id="education" name="education" placeholder="Example: BSc in Mathematics"><br>
+
+                    <div class="main-label"><label for="institution">College/University</label></div>
+                    <input type="text" id="institution" name="institution" placeholder="Addis Ababa University"><br>
+
+                    <div class="main-label"><label for="experience">Tutoring/Teaching Experience</label></div>
+                    <select id="experience" name="experience">
+                        <option>Less than 1 Year</option>
+                        <option>1-2 Years</option>
+                        <option>3-5 Years</option>
+                        <option>More than 5 Years</option>
+                    </select><br>
+
+                    <div class="main-label"><label for="certificate">Upload Certificate or CV</label></div>
+                    <input type="file" id="certificate" name="certificate">
+                    <br><br>
+                </fieldset>
+
+
+                <div class="check-radio">
+                    <!-- Subjects -->
+                    <fieldset>
+                        <legend><strong>Subjects You Can Teach</strong></legend>
+
+                        <input type="checkbox" name="subject" value="Mathematics"> Mathematics<br>
+                        <input type="checkbox" name="subject" value="English"> English<br>
+                        <input type="checkbox" name="subject" value="Physics"> Physics<br>
+                        <input type="checkbox" name="subject" value="Chemistry"> Chemistry<br>
+                        <input type="checkbox" name="subject" value="Biology"> Biology<br>
+                        <input type="checkbox" name="subject" value="ICT"> ICT<br>
+                        <input type="checkbox" name="subject" value="History"> History<br>
+                        <input type="checkbox" name="subject" value="Geography"> Geography
+                    </fieldset>
+
+
+
+                    <!-- Grade Levels -->
+                    <fieldset>
+                        <legend><strong>Grade Levels You Teach</strong></legend>
+                        <input type="checkbox" name="grade" value="KG">All Grades<br>
+                        <input type="checkbox" name="grade" value="KG"> KG<br>
+                        <input type="checkbox" name="grade" value="Grade 1-4"> Grade 1-6<br>
+                        <input type="checkbox" name="grade" value="Grade 5-8"> Grade 7-8<br>
+                        <input type="checkbox" name="grade" value="Grade 9-10"> Grade 9-10<br>
+                        <input type="checkbox" name="grade" value="Grade 11-12"> Grade 11-12
+                    </fieldset>
+
+
+
+                    <!-- Languages -->
+                    <fieldset>
+                        <legend><strong>Languages Spoken</strong></legend>
+
+                        <input type="checkbox" name="language" value="English"> English<br>
+                        <input type="checkbox" name="language" value="Amharic"> Amharic<br>
+                        <input type="checkbox" name="language" value="Afaan Oromo"> Afaan Oromo<br>
+                        <input type="checkbox" name="language" value="Tigrinya"> Tigrinya
+                    </fieldset>
+
+                </div>
+
+                <!-- Tutoring Preferences -->
+                <fieldset>
+                    <legend><strong>Tutoring Preferences</strong></legend>
+
+                    <div class="main-label"><label>Teaching Mode</label></div>
+                    <input type="radio" name="mode" value="Online"> Online <br>
+                    <input type="radio" name="mode" value="In-Person"> In-Person <br>
+                    <input type="radio" name="mode" value="Both"> Both
+                    <br><br>
+                    <div class="main-label"><label for="location">Location(Only for in-person sessions):</label></div>
+                    <div class="main-label"><label for="city">City/Subcity</label></div>
+                    <input type="text" id="city" name="city" placeholder="eg. Addis Ababa, Lemi Kura" required><br>
+                    <div class="main-label"><label for="address">Address</label></div>
+                    <input type="text" id="address" name="address" placeholder="Enter Address"><br>
+                    <br>
+                    <div class="main-label"><label for="price">Hourly Rate (ETB)</label></div>
+                    <input type="number" id="price" name="price" placeholder="Example: 500"><br>
+
+                    <div class="main-label"><label for="availability">Availability</label></div>
+                    <textarea id="availability" name="availability" rows="4" cols="50"
+                        placeholder="Example: Monday-Friday, 4:00 PM - 8:00 PM"></textarea>
+                </fieldset>
+            </div>
+
+
+            <!-- About Yourself -->
+            <fieldset>
+                <legend><strong>About Yourself</strong></legend>
+
+                <div class="main-label"><label for="bio">Short Biography</label></div>
+                <textarea id="bio" name="bio" rows="6" cols="50"
+                    placeholder="Tell students and parents about yourself, your teaching style, and why they should choose you."></textarea>
+            </fieldset>
+            <br>
+            <div class="buttons">
+                <input type="submit" value="Submit Application">
+                <input type="reset" value="Clear Form">
+            </div>
+            <br>
+            <div class="status">
+                <div>
+                    <p><strong>Application Status</strong></p>
+                </div>
+                <p><strong>Status:</strong> <span id="applicationStatus">Pending</span></p>
+                <p id="statusMessage">
+                    Your tutor application has been submitted successfully and is currently under review. You will be
+                    notified once a decision has been made.
+                </p>
+            </div>
+
+            <br>
+        </form>
+
+    </main>
+    <div class="footer">
+        <div class="footer-links">
+            <div>
+                <a href="home.html">
+                    <div>Home</div>
+                </a>
+                <a href="aboutus.html">
+                    <div>About Us</div>
+                </a>
+                <a href="tutors.html">
+                    <div>Tutors</div>
+                </a>
+                <!--CHECK IF USER HAS SIGNED UP OR LOGGED IN BEFORE THEY BOOK A SESSION OR BECOME A TUTOR-->
+                <a href="becomeatutor.html">
+                    <div>Become A Tutor</div>
+                </a>
+                <a href="contact.html">
+                    <div>Contact Us</div>
+                </a>
+
+            </div>
+            <div>
+                <a href="myprofile.html">
+                    <div>My Profile</div>
+                </a>
+                <a href="create-account.html">
+                    <div>Sign Up</div>
+                </a>
+                <a href="login.html">
+                    <div>Log In</div>
+                </a>
+                <a href="donate.html">
+                    <div>Donate</div>
+                </a>
+            </div>
+            <div>
+                <a href="https://t.me/" target="_blank">
+                    <div>Telegram</div>
+                </a>
+                <a href="https://www.facebook.com/" target="_blank">
+                    <div>Facebook</div>
+                </a>
+                <a href="https://twitter.com/" target="_blank">
+                    <div>Twitter</div>
+                </a>
+                <a href="https://www.instagram.com/" target="_blank">
+                    <div>Instagram</div>
+                </a>
+                <a href="https://www.linkedin.com/" target="_blank">
+                    <div>LinkedIn</div>
+                </a>
+            </div>
+            <div>
+                <a href="saftey.html">
+                    <div>Safety</div>
+                </a>
+                <a href="terms.html">
+                    <div>Terms Of Service</div>
+                </a>
+                <a href="privacy.html">
+                    <div>Privacy Policy</div>
+                </a>
+            </div>
+        </div>
+        <br>
+        <div class="mob-hide">FAQs:
+            <div>
+                <h4>How do I book a tutoring session?</h4>
+                <p>First create an account, then browse tutors, choose one, and finally complete the booking form.
+                </p>
+            </div>
+
+            <div>
+                <h4>How are tutors verified?</h4>
+                <p>Each tutor is reviewed before being approved on the platform.</p>
+            </div>
+
+            <div>
+                <h4>Can I choose online or in-person tutoring?</h4>
+                <p>Yes, you can select your preferred teaching mode when booking.</p>
+            </div>
+
+            <div>
+                <h4>Who can use this platform?</h4>
+                <p>Parents and students from KG to Grade 12 can find qualified tutors.Tutors can apply to become
+                    verified tutors on this platform where they can support students and make money on the side.</p>
+            </div>
+
+            <div>
+                <h4>Can I become a tutor?</h4>
+                <p>Yes, simply sign up, complete the tutor application form and submit your details.</p>
+            </div>
+        </div>
+        <br>
+        <div style="text-align: center;">Copyright © 2026 Abrehot Online Tutorials. All rights reserved.</div>
+    </div>
+    <script>
+        function updateStatus(status) {
+            let statusText = document.getElementById("applicationStatus");
+            let message = document.getElementById("statusMessage");
+            statusText.innerHTML = status;
+            if (status == "Pending") {
+                statusText.style.color = "#d97706";
+                message.innerHTML = "Your tutor application has been submitted successfully and is currently under review. Please wait for our team to evaluate your application.";
+            }
+            else if (status == "Approved") {
+                statusText.style.color = "green";
+                message.innerHTML = "Congratulations! Your application has been approved. You can now begin accepting tutoring requests through Abrehot Online Tutorials.";
+            }
+            else if (status == "Rejected") {
+                statusText.style.color = "red";
+                message.innerHTML = "Unfortunately, your application was not approved at this time. Please review the requirements and submit a new application if eligible.";
+            }
+        }
+    </script>
+    <script>
+        const menu = document.getElementById("menuBtn");
+        const nav = document.getElementById("verNav");
+        const overlay = document.getElementById("overlay");
+
+        menu.style.transition = 'opacity 2s ease';
+        menu.style.opacity = '1';
+
+        function hideMenu() {
+            menu.style.opacity = '0';
+            setTimeout(() => {
+                menu.style.visibility = 'hidden';
+            });
+        }
+
+        function showMenuSlowly() {
+            menu.style.visibility = 'visible';
+            menu.style.opacity = '0';
+            requestAnimationFrame(() => {
+                menu.style.opacity = '1';
+            });
+        }
+
+        menu.onclick = function () {
+            nav.classList.add("show");
+            overlay.classList.add("show");
+            hideMenu();
+        }
+
+        overlay.onclick = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        window.onscroll = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                nav.classList.remove("show");
+                overlay.classList.remove("show");
+                showMenuSlowly();
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en', // Default language of your website
+                includedLanguages: 'am,om,ti', // Languages to display (comma-separated)
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element'); // ID of the container div
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.querySelector('form');
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                var subjects = Array.from(form.querySelectorAll('input[name="subject"]:checked')).map(function (el) { return el.value; });
+                var grades = Array.from(form.querySelectorAll('input[name="grade"]:checked')).map(function (el) { return el.value; });
+                var languages = Array.from(form.querySelectorAll('input[name="language"]:checked')).map(function (el) { return el.value; });
+                var modeInput = form.querySelector('input[name="mode"]:checked');
+                var certInput = document.getElementById('certificate');
+                var certificateUrl = (certInput && certInput.files && certInput.files[0]) ? certInput.files[0].name : undefined;
+
+                var payload = {
+                    fullname: document.getElementById('fullname').value,
+                    gender: document.getElementById('gender').value,
+                    dob: document.getElementById('dob').value,
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value,
+                    education: document.getElementById('education').value,
+                    institution: document.getElementById('institution').value,
+                    experience: document.getElementById('experience').value,
+                    certificateUrl: certificateUrl,
+                    subject: subjects,
+                    grade: grades,
+                    language: languages,
+                    mode: modeInput ? modeInput.value : undefined,
+                    city: document.getElementById('city').value,
+                    address: document.getElementById('address').value,
+                    price: document.getElementById('price').value,
+                    availability: document.getElementById('availability').value,
+                    bio: document.getElementById('bio').value,
+                };
+
+                try {
+                    var data = await apiRequest('/tutors/apply', {
+                        method: 'POST',
+                        body: payload,
+                        auth: !!getToken(),
+                    });
+                    showFormMessage(form, data.message || 'Application submitted! We will review it shortly.', false);
+                    form.reset();
+                } catch (err) {
+                    showFormMessage(form, err.message, true);
+                }
+            });
+        });
+    </script>
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+
+</html>

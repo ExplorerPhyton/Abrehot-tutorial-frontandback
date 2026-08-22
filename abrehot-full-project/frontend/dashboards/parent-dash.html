@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Dashboard | Abrehot Online Tutorials</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary: #1A5276;
+            --primary-dark: #15425F;
+            --secondary: #2980B9;
+            --secondary-light: #5499C7;
+            --accent: #85C1E9;
+            --primary-light: #AED6F1;
+            --success: #2E8B57;
+            --warning: #E67E22;
+            --danger: #C0392B;
+            --background: #F4F9FC;
+            --surface: #FFFFFF;
+            --text: #1F2933;
+            --text-secondary: #5F6B7A;
+            --border: #D6EAF8;
+            --shadow: 0 4px 12px rgba(26, 82, 118, .15);
+            --radius: 10px;
+            --transition: .3s ease;
+
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #333;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 0.3fr;
+        }
+
+        .head {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            place-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+        }
+
+        header p {
+            margin-top: 5px;
+            font-size: 15px;
+        }
+
+        .notification {
+            position: relative;
+        }
+
+        .noti-icon {
+            font-size: 32px;
+            color: gold;
+        }
+
+        #notificationBtn {
+            background: none;
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: red;
+            color: white;
+            font-size: 12px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .notification-menu {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 60px;
+            min-width: 320px;
+            color: black;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .2);
+            padding: 15px;
+            z-index: 1000;
+        }
+
+        .notification-menu h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .notification-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification.show .notification-menu {
+            display: block;
+        }
+
+        .info {
+            font-weight: 500;
+        }
+
+        .logout {
+            padding: 10px 18px;
+            background: white;
+            color: var(--primary);
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .logout:hover {
+            background: var(--primary-dark);
+            color: white;
+            transition: var(--transition);
+        }
+
+        main {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .profile {
+            display: flex;
+            gap: 100px;
+        }
+
+        .profile-img-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-img-section button {
+            color: black;
+        }
+
+        .profile img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+        }
+
+        .profile button {
+            margin-top: 15px;
+            padding: 10px 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .1);
+        }
+
+        .card h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .1);
+        }
+
+        .stat h2 {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .table-scroll {
+            overflow-x: auto
+        }
+
+        .actionButtons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .actionButtons button {
+            padding: 15px;
+            font-size: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .6);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: white;
+            width: min(95%, 650px);
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .detail {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail strong {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .1);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--secondary);
+        }
+
+        @media(max-width:900px) {
+            header {
+                grid-template-columns: 1fr;
+                place-items: center;
+            }
+
+            .head {
+                grid-template-columns: 1fr;
+            }
+
+            .header-text {
+                text-align: center;
+            }
+
+            #notificationBtn {
+                margin-top: 35px;
+                margin-bottom: 10px;
+            }
+
+            .notification-menu {
+                position: relative;
+                top: -5px;
+                left: 1px;
+                width: auto;
+                max-width: none;
+                margin-bottom: 10px;
+            }
+
+            .profile,
+            .profile-img-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile {
+                gap: 20px;
+                padding-bottom: 10px;
+            }
+
+            .profile-img-section {
+                gap: 5px;
+            }
+
+            .cards,
+            .stats,
+            .actionButtons {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 18px;
+            }
+
+            .detail {
+                font-size: 15px;
+            }
+
+            .close {
+                font-size: 26px;
+                right: 15px;
+                top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-text">
+            <h1>My Dashboard</h1>
+            <p>Welcome back, John Doe!</p>
+        </div>
+        <div class="head">
+            <a href="../home.html"><button style="margin-right:12px;">Home</button></a>
+            <div class="notification">
+                <button id="notificationBtn">
+                    <i class="bx bxs-bell noti-icon"></i><span class="notification-count">4</span>
+                </button>
+                <div class="notification-menu">
+                    <h3>Notifications</h3>
+                    <div class="notification-item">
+                        Your tutoring session with Sarah Tadesse starts tomorrow at 3:00 PM.
+                    </div>
+                    <div class="notification-item">
+                        Your booking has been confirmed.
+                    </div>
+                    <div class="notification-item">
+                        Abel Teshome accepted your booking request.
+                    </div>
+                    <div class="notification-item">
+                        Your profile information was updated successfully.
+                    </div>
+                </div>
+            </div>
+            <button class="logout" id="logoutBtn">Log Out</button>
+        </div>
+    </header>
+    <main>
+        <div class="section">
+            <div class="profile">
+                <div class="profile-img-section">
+                    <img src="../images/pfp.webp" alt="Parent">
+                    <div>
+                        <br>
+                        <input type="file" id="uploadPhoto" accept="image/*" hidden>
+                        <button type="button" onclick="document.getElementById('uploadPhoto').click()">
+                            Upload New Photo
+                        </button>
+                        <br><br>
+                    </div>
+                </div>
+                <div>
+                    <h2 id="profileName">John Doe</h2>
+                    <p><i class="bx bx-envelope"></i><span class="info"> Email:</span> <span id="profileEmail">johndoe@email.com</span></p>
+                    <p><i class="bx bx-phone"></i><span class="info"> Phone:</span> <span id="profilePhone">+251 XX XX XXXXX</span></p>
+                    <p><i class="bx bx-pin"></i> <span class="info">City:</span> <span id="profileCity">Addis Ababa</span></p>
+                    <button id="editProfileBtn">Edit Profile</button>
+                </div>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat">
+                <h2 id="statChildren">2</h2>
+                <p>Children</p>
+            </div>
+            <div class="stat">
+                <h2 id="statUpcoming">6</h2>
+                <p>Upcoming Sessions</p>
+            </div>
+            <div class="stat">
+                <h2 id="statCompleted">28</h2>
+                <p>Completed Sessions</p>
+            </div>
+            <div class="stat">
+                <h2 id="statTutors">4</h2>
+                <p>Booked Tutors</p>
+            </div>
+        </div>
+        <div class="section">
+            <h2>My Children</h2>
+            <div class="table-scroll">
+                <table id="childrenTable">
+                    <tr>
+                        <th>Name</th>
+                        <th>Grade</th>
+                        <th>School</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align:center; font-style: italic; color: #666;">
+                            Linking specific children to your account isn't built yet — bookings you make are
+                            tracked under your account directly. Ask your developer to add this if you need it.
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Upcoming Sessions</h2>
+            <div class="table-scroll">
+                <table id="upcomingSessionsTable">
+                    <tr>
+                        <th>Student</th>
+                        <th>Tutor</th>
+                        <th>Subject</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Mode</th>
+                        <th>Full Information</th>
+                        <th>Booking Request Status</th>
+                        <th>Cancel Session</th>
+                    </tr>
+                    <tr>
+                        <td>Samuel Doe</td>
+                        <td>Abraham</td>
+                        <td>Chemistry</td>
+                        <td>18 Jul 2026</td>
+                        <td>9:00 AM</td>
+                        <td>Online</td>
+                        <td> <button onclick="openBooking(
+'Samuel Doe',
+'Abraham',
+'Chemistry',
+'Unit 5',
+'Exam Preparation',
+'Online',
+'Google Meet',
+'-',
+'-',
+'English',
+'23 Jul 2026',
+'4:00 AM',
+'2+ Hours',
+'-'
+)">View More</button></td>
+                        <td>Accepted</td>
+                        <td><button>Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>Sara Doe</td>
+                        <td>Sarah Tadesse</td>
+                        <td>Mathematics</td>
+                        <td>19 Jul 2026</td>
+                        <td>2:00 PM</td>
+                        <td>In-Person</td>
+                        <td> <button onclick="openBooking(
+'Sara Doe',
+'Sarah Tadesse',
+'Mathematics',
+'Unit 1-2',
+'Concept Revision',
+'-',
+'In-Person',
+'Addis Ababa',
+'Gift Real Estate',
+'English',
+'19 Aug 2026',
+'11:00 AM',
+'2+ Hours',
+'-'
+)">View More</button></td>
+                        <td>Pending</td>
+                        <td><button>Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>Samuel Doe</td>
+                        <td>Abel Teshome</td>
+                        <td>Physics</td>
+                        <td>10 Jul 2026</td>
+                        <td>11:00 AM</td>
+                        <td>Online</td>
+                        <td> <button onclick="openBooking(
+'Samuel Doe',
+'Abel Teshome',
+'Mathematics',
+'Unit 1-2',
+'Concept Revision',
+'Online',
+'Zoom',
+'-',
+'-',
+'English',
+'10 July 2026',
+'11:00 AM',
+'2 Hours',
+'-'
+)">View More</button></td>
+                        <td>Pending</td>
+                        <td><button>Remove</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Booking History</h2>
+            <div class="table-scroll">
+                <table id="bookingHistoryTable">
+                    <tr>
+                        <th>Date</th>
+                        <th>Student</th>
+                        <th>Tutor</th>
+                        <th>Subject</th>
+                        <th>Full Information</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>3 Jul 2026</td>
+                        <td>Sara Doe</td>
+                        <td>Hanna Alemu</td>
+                        <td>Chemistry</td>
+                        <td> <button onclick="openBooking(
+'Sara Doe',
+'Hanna Alemu',
+'Chemistry',
+'Stotiometry',
+'Concept Revision',
+'Online',
+'Zoom',
+'-',
+'-',
+'English',
+'3 June 2026',
+'11:00 PM',
+'2 Hours',
+'-'
+)">View More</button></td>
+                        <td>Completed</td>
+                    </tr>
+                    <tr>
+                        <td>1 Jun 2026</td>
+                        <td>Samuel Doe</td>
+                        <td>Daniel Tesfaye</td>
+                        <td>English</td>
+                        <td> <button onclick="openBooking(
+'Samuel Doe',
+'Daniel Tesfaye',
+'English',
+'Unit 1-5',
+'Exam Preparation',
+'In-Person',
+'-',
+'',
+'Gift Real Estate',
+'English',
+'1 June 2026',
+'3:00 AM',
+'2+ Hours',
+'-'
+)">View More</button></td>
+                        <td>Completed</td>
+                    </tr>
+                    <tr>
+                        <td>29 May 2026</td>
+                        <td>Sara Doe</td>
+                        <td>Abel Teshome</td>
+                        <td>Physics</td>
+                        <td> <button onclick="openBooking(
+'Sara Doe',
+'Abel Teshome',
+'Physics',
+'-',
+'Assignment Support',
+'In-Person',
+'-',
+'Addis Ababa',
+'Gift Real Estate',
+'English',
+'29 May 2026',
+'5:00 AM',
+'1 Hour',
+'Student needs help with two assignments'
+)">View More</button></td>
+                        <td>Completed</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="cards">
+            <div class="card">
+                <h3>Favorite Tutors</h3>
+                <ul>
+                    <li><i class="bx bx-clipboard"></i> Abraham - Chemistry</li>
+                    <li><i class="bx bx-clipboard"></i> Sarah Tadesse - Mathematics</li>
+                    <li><i class="bx bx-clipboard"></i> Abel Teshome - Physics</li>
+                    <li><i class="bx bx-clipboard"></i> Hanna Alemu - Biology</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Recommended Tutors</h3>
+                <ul>
+                    <li><i class="bx bx-like"></i> Abel Berhane</li>
+                    <li><i class="bx bx-like"></i> Grima H/Eyesus</li>
+                    <li><i class="bx bx-like"></i> Abraham</li>
+                    <li><i class="bx bx-like"></i> Daniel Tesfaye</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Notifications</h3>
+                <ul>
+                    <li><i class="bx bx-detail"></i> Session reminder for tomorrow.</li>
+                    <li><i class="bx bx-detail"></i> New tutor available.</li>
+                    <li><i class="bx bx-detail"></i> Profile updated successfully.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Quick Actions</h2>
+            <div class="actionButtons">
+                <button onclick="location.href='../book.html'">Book a Session</button>
+                <button onclick="location.href='../tutors.html'">Browse Tutors</button>
+                <button onclick="location.href='../contact.html'">Contact Support</button>
+                <button onclick="location.href='../donate.html'">Donate</button>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Need Help?</h2>
+            <p>If you have any questions about your bookings, payments, or your children's tutoring sessions, our
+                support team is here to help.</p>
+            <br>
+            <p>Use our contact page: <a href="../contact.html"><strong>Contact Us</strong></a></p>
+            <p><strong>Email:</strong> <a
+                    href="mailto:support@abrehotonlinetutorials.com">support@abrehotonlinetutorials.com</a></p>
+            <p><strong>Phone:</strong> <a href="tel:+251911234567">+251 911 234 567</a></p>
+        </div>
+    </main>
+    <div class="modal" id="bookingModal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Booking Details</h2>
+            <div class="detail">
+                <strong>Student Name</strong>
+                <span id="studentName"></span>
+            </div>
+            <div class="detail">
+                <strong>Tutor</strong>
+                <span id="tutor"></span>
+            </div>
+            <div class="detail">
+                <strong>Subject</strong>
+                <span id="subject"></span>
+            </div>
+            <div class="detail">
+                <strong>Topic / Chapter</strong>
+                <span id="topic"></span>
+            </div>
+            <div class="detail">
+                <strong>Learning Goal</strong>
+                <span id="goal"></span>
+            </div>
+            <div class="detail">
+                <strong>Session Type</strong>
+                <span id="sessionType"></span>
+            </div>
+            <div class="detail">
+                <strong>Meeting Platform</strong>
+                <span id="platform"></span>
+            </div>
+            <div class="detail">
+                <strong>Location</strong>
+                <span id="location"></span>
+            </div>
+            <div class="detail">
+                <strong>Address</strong>
+                <span id="address"></span>
+            </div>
+            <div class="detail">
+                <strong>Preferred Language</strong>
+                <span id="language"></span>
+            </div>
+            <div class="detail">
+                <strong>Date</strong>
+                <span id="date"></span>
+            </div>
+            <div class="detail">
+                <strong>Time</strong>
+                <span id="time"></span>
+            </div>
+            <div class="detail">
+                <strong>Duration</strong>
+                <span id="duration"></span>
+            </div>
+            <div class="detail">
+                <strong>Additional Notes</strong>
+                <span id="notes"></span>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById("bookingModal");
+        function openBooking(
+            student,
+            tutor,
+            subject,
+            topic,
+            goal,
+            sessionType,
+            platform,
+            location,
+            address,
+            language,
+            date,
+            time,
+            duration,
+            notes
+        ) {
+            document.getElementById("studentName").innerHTML = student;
+            document.getElementById("tutor").innerHTML = tutor;
+            document.getElementById("subject").innerHTML = subject;
+            document.getElementById("topic").innerHTML = topic;
+            document.getElementById("goal").innerHTML = goal;
+            document.getElementById("sessionType").innerHTML = sessionType;
+            document.getElementById("platform").innerHTML = platform;
+            document.getElementById("location").innerHTML = location;
+            document.getElementById("address").innerHTML = address;
+            document.getElementById("language").innerHTML = language;
+            document.getElementById("date").innerHTML = date;
+            document.getElementById("time").innerHTML = time;
+            document.getElementById("duration").innerHTML = duration;
+            document.getElementById("notes").innerHTML = notes;
+            modal.style.display = "flex";
+        }
+        document.querySelector(".close").onclick = function () {
+            modal.style.display = "none";
+        }
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        function updateStatus(status) {
+            let statusText = document.getElementById("applicationStatus");
+            let message = document.getElementById("statusMessage");
+            statusText.innerHTML = status;
+            if (status == "Pending") {
+                statusText.style.color = "#d97706";
+                message.innerHTML = "Your tutor application has been submitted successfully and is currently under review. Please wait for our team to evaluate your application.";
+            }
+            else if (status == "Approved") {
+                statusText.style.color = "green";
+                message.innerHTML = "Congratulations! Your application has been approved. You can now begin accepting tutoring requests through Abrehot Online Tutorials.";
+            }
+            else if (status == "Rejected") {
+                statusText.style.color = "red";
+                message.innerHTML = "Unfortunately, your application was not approved at this time. Please review the requirements and submit a new application if eligible.";
+            }
+        }
+    </script>
+    <script>
+        function updateStatus(status) {
+            let statusText = document.getElementById("applicationStatus");
+            let message = document.getElementById("statusMessage");
+            statusText.innerHTML = status;
+            if (status == "Pending") {
+                statusText.style.color = "#d97706";
+                message.innerHTML = "Your tutor application has been submitted successfully and is currently under review. Please wait for our team to evaluate your application.";
+            }
+            else if (status == "Approved") {
+                statusText.style.color = "green";
+                message.innerHTML = "Congratulations! Your application has been approved. You can now begin accepting tutoring requests through Abrehot Online Tutorials.";
+            }
+            else if (status == "Rejected") {
+                statusText.style.color = "red";
+                message.innerHTML = "Unfortunately, your application was not approved at this time. Please review the requirements and submit a new application if eligible.";
+            }
+        }
+    </script>
+    <script>
+        const notification = document.querySelector(".notification");
+        document.getElementById("notificationBtn").addEventListener("click", function (e) {
+            e.stopPropagation();
+            notification.classList.toggle("show");
+        });
+        document.addEventListener("click", function () {
+            notification.classList.remove("show");
+        });
+    </script>
+    <script>
+        const menu = document.getElementById("menuBtn");
+        const nav = document.getElementById("verNav");
+        const overlay = document.getElementById("overlay");
+
+        menu.style.transition = 'opacity 2s ease';
+        menu.style.opacity = '1';
+
+        function hideMenu() {
+            menu.style.opacity = '0';
+            setTimeout(() => {
+                menu.style.visibility = 'hidden';
+            });
+        }
+
+        function showMenuSlowly() {
+            menu.style.visibility = 'visible';
+            menu.style.opacity = '0';
+            requestAnimationFrame(() => {
+                menu.style.opacity = '1';
+            });
+        }
+
+        menu.onclick = function () {
+            nav.classList.add("show");
+            overlay.classList.add("show");
+            hideMenu();
+        }
+
+        overlay.onclick = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        window.onscroll = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                nav.classList.remove("show");
+                overlay.classList.remove("show");
+                showMenuSlowly();
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en', // Default language of your website
+                includedLanguages: 'am,om,ti', // Languages to display (comma-separated)
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element'); // ID of the container div
+        }
+    </script>
+    <script src="../js/api.js"></script>
+    <script>
+
+        (async function () {
+            var token = getToken();
+            if (!token) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                logout();
+                window.location.href = '../login.html';
+            });
+
+            document.getElementById('editProfileBtn').addEventListener('click', async function () {
+                var name = prompt('Full name', document.getElementById('profileName').textContent);
+                if (name === null) return;
+                var phone = prompt('Phone', document.getElementById('profilePhone').textContent);
+                if (phone === null) return;
+                var city = prompt('City', document.getElementById('profileCity').textContent);
+                if (city === null) return;
+                try {
+                    var updated = await apiRequest('/auth/me', { method: 'PATCH', auth: true, body: { fullname: name, phone: phone, city: city } });
+                    setUser(updated);
+                    applyProfile(updated);
+                } catch (err) {
+                    alert('Could not update profile: ' + err.message);
+                }
+            });
+
+            function applyProfile(user) {
+                document.getElementById('profileName').textContent = user.fullname;
+                document.getElementById('profileEmail').textContent = user.email;
+                document.getElementById('profilePhone').textContent = user.phone || '-';
+                document.getElementById('profileCity').textContent = user.city || '-';
+                var welcome = document.querySelector('.header-text p');
+                if (welcome) welcome.textContent = 'Welcome back, ' + user.fullname + '!';
+            }
+
+            function fmtDate(d) {
+                if (!d) return '-';
+                var date = new Date(d);
+                if (isNaN(date.getTime())) return d;
+                return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+
+            function bookingArgs(b) {
+                var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not yet assigned';
+                return [
+                    b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-',
+                    tutorName,
+                    (b.subject || []).join(', ') || b.otherSubject || '-',
+                    b.topic || '-',
+                    (b.goal || []).join(', ') || '-',
+                    b.session || '-',
+                    b.platform || '-',
+                    b.city || '-',
+                    b.address || '-',
+                    b.language || '-',
+                    fmtDate(b.date),
+                    b.time || '-',
+                    b.duration || '-',
+                    b.notes || '-',
+                ].map(function (v) { return "'" + String(v).replace(/'/g, "\\'") + "'"; }).join(',\n');
+            }
+
+            async function cancelBooking(id, btn) {
+                if (!confirm('Cancel this booking?')) return;
+                try {
+                    await apiRequest('/bookings/' + id + '/cancel', { method: 'PATCH', auth: true });
+                    loadDashboard();
+                } catch (err) {
+                    alert('Could not cancel: ' + err.message);
+                }
+            }
+            window.cancelBooking = cancelBooking;
+
+            async function loadDashboard() {
+                try {
+                    var user = await apiRequest('/auth/me', { auth: true });
+                    setUser(user);
+                    applyProfile(user);
+                } catch (err) {
+                    logout();
+                    window.location.href = '../login.html';
+                    return;
+                }
+
+                var bookings = [];
+                try {
+                    bookings = await apiRequest('/bookings/mine', { auth: true });
+                } catch (err) {
+                    console.error('Could not load bookings', err);
+                }
+
+                var upcoming = bookings.filter(function (b) { return b.status === 'pending' || b.status === 'confirmed'; });
+                var past = bookings.filter(function (b) { return b.status === 'completed' || b.status === 'cancelled'; });
+                var distinctTutors = {};
+                bookings.forEach(function (b) { if (b.tutor && b.tutor._id) distinctTutors[b.tutor._id] = true; });
+
+                document.getElementById('statUpcoming').textContent = upcoming.length;
+                document.getElementById('statCompleted').textContent = bookings.filter(function (b) { return b.status === 'completed'; }).length;
+                document.getElementById('statTutors').textContent = Object.keys(distinctTutors).length;
+
+                var upcomingTable = document.getElementById('upcomingSessionsTable');
+                var upcomingRows = upcomingTable.querySelectorAll('tr');
+                for (var i = 1; i < upcomingRows.length; i++) upcomingRows[i].remove();
+                if (!upcoming.length) {
+                    upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="9" style="text-align:center;color:#666;">No upcoming sessions yet. <a href="../book.html">Book one</a>.</td></tr>');
+                } else {
+                    upcoming.forEach(function (b) {
+                        var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not yet assigned';
+                        upcomingTable.insertAdjacentHTML('beforeend',
+                            '<tr>'
+                            + '<td>' + escapeHtml(b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-') + '</td>'
+                            + '<td>' + escapeHtml(tutorName) + '</td>'
+                            + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
+                            + '<td>' + escapeHtml(fmtDate(b.date)) + '</td>'
+                            + '<td>' + escapeHtml(b.time || '-') + '</td>'
+                            + '<td>' + escapeHtml(b.session || '-') + '</td>'
+                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
+                            + '<td>' + escapeHtml(b.status) + '</td>'
+                            + '<td><button onclick="cancelBooking(\'' + b._id + '\', this)">Remove</button></td>'
+                            + '</tr>');
+                    });
+                }
+
+                var historyTable = document.getElementById('bookingHistoryTable');
+                var historyRows = historyTable.querySelectorAll('tr');
+                for (var j = 1; j < historyRows.length; j++) historyRows[j].remove();
+                if (!past.length) {
+                    historyTable.insertAdjacentHTML('beforeend', '<tr><td colspan="6" style="text-align:center;color:#666;">No past sessions yet.</td></tr>');
+                } else {
+                    past.forEach(function (b) {
+                        var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not assigned';
+                        historyTable.insertAdjacentHTML('beforeend',
+                            '<tr>'
+                            + '<td>' + escapeHtml(fmtDate(b.date)) + '</td>'
+                            + '<td>' + escapeHtml(b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-') + '</td>'
+                            + '<td>' + escapeHtml(tutorName) + '</td>'
+                            + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
+                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
+                            + '<td>' + escapeHtml(b.status) + '</td>'
+                            + '</tr>');
+                    });
+                }
+            }
+
+            loadDashboard();
+        })();
+
+    </script>
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+
+</html>

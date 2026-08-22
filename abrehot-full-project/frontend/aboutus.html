@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <title>About Us | Abrehot Online Tutors</title>
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+            padding: 0;
+
+        }
+
+        body {
+            margin: 0;
+            background-color: #D6EAF8;
+
+
+        }
+
+        :root {
+            --primary: #1A5276;
+            /* Dark Blue */
+            --primary-dark: #15425F;
+            /* Darker hover */
+            --secondary: #2980B9;
+            /* Main secondary */
+            --secondary-light: #5499C7;
+            /* Cards, icons */
+            --accent: #85C1E9;
+            /* Highlights */
+            --primary-light: #AED6F1;
+            /* Very light backgrounds */
+            --success: #2E8B57;
+            /* Success / Accept */
+            --warning: #E67E22;
+            /* Warning / Pending */
+            --danger: #C0392B;
+            /* Error / Decline */
+            --background: #F4F9FC;
+            /* Main page background */
+            --surface: #FFFFFF;
+            /* Cards, forms, modals */
+            --text: #1F2933;
+            /* Main text */
+            --text-secondary: #5F6B7A;
+            /* Paragraphs */
+            --border: #D6EAF8;
+            --shadow: 0 4px 12px rgba(26, 82, 118, .15);
+            --radius: 10px;
+            --transition: .3s ease;
+
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background-color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            z-index: 1005;
+            width: auto;
+            color: white;
+        }
+
+        .header button {
+            color: white;
+            background-color: var(--primary);
+            border-radius: 5px;
+            padding: 10px 20px;
+            border: none;
+            font-weight: 500;
+        }
+       .header button:hover{
+            transition: var(--transition);
+            background-color: var(--primary-dark);
+        }
+
+        .head {
+            font-size: 20px;
+        }
+
+        .right-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-top: 0;
+
+        }
+
+        .right-header img {
+            border-radius: 50%;
+            border: none;
+            width: 80px;
+            height: 80px;
+        }
+
+        .right-header button {
+            width: 60px;
+        }
+
+        #menuBtn {
+            font-size: 40px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            z-index: 1002;
+        }
+
+        #google_translate_element {
+            padding: 16px 0px 16px 65px;
+            background-color: var(--primary);
+        }
+
+        .ver-nav {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 24px;
+            position: fixed;
+            top: 0;
+            left: -324px;
+            width: 225px;
+            height: 92vh;
+            background-color: var(--secondary);
+            overflow-y: auto;
+            transition: .35s;
+            z-index: 1001;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, .3);
+        }
+
+        .ver-nav.show {
+            left: 0;
+        }
+
+        .ver-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ver-nav a {
+            display: block;
+            text-decoration: none;
+            padding: 5px;
+            color: white;
+        }
+
+        .ver-nav a:hover {
+            margin: 0 0 5px 5px;
+            background-color: var(--primary-light);
+            color: black;
+        }
+
+        .ver-nav .bx,
+        .search-input-section {
+            font-size: 20px;
+        }
+
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .3);
+            opacity: 0;
+            visibility: hidden;
+            transition: .35s;
+            z-index: 1000;
+        }
+
+        #overlay.show {
+            opacity: 0.7;
+            visibility: visible;
+        }
+
+        h1,
+        h2 {
+            padding: 20px;
+
+        }
+
+        .about,
+        .mission,
+        .vision {
+            margin: 50px;
+            padding: 20px 40px 20px 40px;
+            border-left: 5px solid var(--primary);
+            border-radius: 10px 0 0 10px;
+            text-align: justify;
+            background-color: var(--primary-light);
+        }
+
+        p {
+            margin: 30px;
+            padding: 10px;
+            border-left: 5px solid var(--primary-dark);
+            border-radius: 5px 0 0 10px;
+            background-color: var(--secondary);
+        }
+
+        .why-section {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+
+        }
+
+        .why {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(3, 1fr);
+        }
+
+        .faq {
+            padding: 40px;
+            background-color: var(--primary-light);
+        }
+
+        .faq div {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px;
+        }
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .footer {
+            padding: 32px;
+            background-color: rgb(0, 94, 153);
+            color: white;
+
+        }
+        .footer a{
+            color: white;
+        }
+
+        .footer-links {
+            display: grid;
+            align-items: center;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 25px;
+        }
+        @media(max-width:900px) {
+            .header {
+                position: static;
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+                font-size: 18px;
+            }/*COPY TO EVERY PAGE*/
+
+            .right-header img {
+                width: 60px;
+                height: 60px;
+            }/*COPY TO EVERY PAGE*/
+
+            #menuBtn {
+                position: sticky;
+                top: 0;
+                left: 0;
+                font-size: 30px;
+                z-index: 2;
+            }/*COPY TO EVERY PAGE*/
+
+            .ver-nav {
+                max-width: 150px;
+                height: 100vh;
+            }/*COPY TO EVERY PAGE*/
+
+            .ver-nav .bx {
+                font-size: 16px;
+            }/*COPY TO EVERY PAGE BUT LEAVE OUT THE CLASS search-input-section*/
+
+            .head-buttons {
+                display: flex;
+                gap: 10px;
+                text-align: center;
+
+            }/*COPY TO EVERY PAGE*/
+            .footer-links {
+                grid-template-columns: repeat(2, 1fr);
+            }/*COPY TO EVERY PAGE*/
+
+            .about,
+            .mission,
+            .vision {
+                margin: 16px;
+                padding: 20px;
+                border-left: 5px solid black;
+                border-radius: 10px 0 0 10px;
+                text-align: center;
+
+            }
+
+            p {
+                margin: 16px;
+                padding-left: 16px;
+            }
+
+            .why {
+                grid-template-columns: 1fr;
+            }
+
+            .faq {
+                padding: 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="right-header">
+            <button id="menuBtn"><i class="bx bx-menu"></i></button>
+            <div id="overlay"></div>
+            <div class="ver-nav" id="verNav">
+                <div>
+                    <ul>
+                        <li><a href="home.html">
+                                <i class="bx bx-home"></i> <span>Home</span>
+                            </a></li>
+                        <li>
+                            <a href="aboutus.html">
+                                <i class="bx bxs-graduation"></i> <span>About Us</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tutors.html">
+                                <i class="bx bx-book-open"></i> <span>Tutors</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="becomeatutor.html">
+                                <i class="bx bx-group"></i> <span>Become A Tutor</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="myprofile.html">
+                                <i class="bx bx-user"></i> <span>My Profile</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li>
+                            <a href="create-account.html">
+                                <i class="bx bx-edit"></i> <span>Sign Up</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="login.html">
+                                <i class="bx bx-user-circle"></i> <span>Log In</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="donate.html">
+                                <i class="bx bx-donate-heart"></i> <span>Donate</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <ul>
+                        <li>
+                            <a href="contact.html">
+                                <i class="bx bx-support"></i> <span>Contact Us</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="saftey.html">
+                                <i class="bx bx-shield-quarter"></i> <span>Safety</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="terms.html">
+                                <i class="bx bx-file"></i> <span>Terms Of Service</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="privacy.html">
+                                <i class="bx bx-lock-alt"></i> <span>Privacy Policy</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Online Tutorials Logo">
+            <h1 class="head">Abrehot Online Tutorials</h1>
+        </div>
+
+        <div class="head-buttons">
+            <a href="create-account.html"><button>Sign Up</button></a>
+            <a href="login.html"><button>Log In</button></a>
+            <a href="donate.html"><button>Donate</button></a>
+        </div>
+    </div>
+    <div id="google_translate_element"></div>
+    <h1>About Us</h1>
+    <div class="about">
+        <div>Abrehot Online Tutorials was inspired by a simple idea from Mr. Abraham, a high school Chemistry teacher at
+            Diamond Academy, CMC Branch in Addis Ababa, Ethiopia. Through his experience in the classroom, Mr. Abraham
+            recognized that many students need extra academic support outside of school. At the same time, he saw that
+            many qualified teachers have the knowledge, skills, and willingness to help students beyond the classroom
+            but often lack an easy way to connect with those who need them. With this in mind, he envisioned a platform
+            that would make tutoring more accessible for everyone. Rather than focusing on a single subject, he wanted
+            to create a place where parents and students could easily find qualified tutors for all subjects, from
+            Kindergarten (KG) to Grade 12. He also wanted tutors to have a trusted platform where they could share their
+            expertise, set their own schedules and prices, and reach more students. To ensure the platform can be used
+            by as many families as possible, Abrehot Online Tutorials is designed to support English, Amharic, Afaan
+            Oromo, and Tigrinya. Parents and students can search for tutors, compare their qualifications and rates, and
+            book online or in-person tutoring sessions with confidence. <strong>Our goal is simple: to make quality
+                tutoring more affordable, easier to access, and available to every family while creating meaningful
+                teaching opportunities for qualified educators. </strong> We believe that every student deserves the
+            chance to succeed with the right guidance, and every dedicated teacher deserves the opportunity to make a
+            difference beyond the classroom. Abrehot Online Tutorials is built on that vision—bringing students,
+            parents, and tutors together to support learning, build confidence, and help every student reach their full
+            potential.</div>
+    </div>
+    <h2>Our Mission</h2>
+    <div class="mission">
+        <div>Our mission at Abrehot Online Tutorials is to connect students and parents with qualified tutors who
+            provide accessible, affordable, and personalized learning support. We aim to make quality education easier
+            to access by creating a trusted platform where students can find the right guidance for their academic needs
+            and where educators can share their knowledge and skills with more learners.</div>
+    </div>
+    <h2>Our Vision</h2>
+    <div class="vision">
+        <div>Our vision is to become a leading tutoring platform in Ethiopia that helps every student access quality
+            education regardless of location, language, or subject. We aspire to create a learning community where
+            students achieve their academic goals, parents find reliable educational support, and tutors have meaningful
+            opportunities to make a positive impact.</div>
+    </div>
+    <div class="why-section">
+        <h2>Why Choose Us?</h2>
+        <div class="why">
+            <div>
+                <h3>Qualified Tutors</h3>
+                <p>We connect students with experienced and verified tutors who have the knowledge and skills to
+                    support their academic growth.</p>
+            </div>
+            <div>
+                <h3>Wide Range of Subjects</h3>
+                <p>From KG to Grade 12, students can find tutors for different subjects including Mathematics,
+                    Science, Languages, ICT, and more.</p>
+            </div>
+            <div>
+                <h3>Flexible Learning Options</h3>
+                <p>Choose between online or in-person tutoring sessions based on your schedule and learning
+                    preferences.</p>
+            </div>
+            <div>
+                <h3>Multiple Language Support</h3>
+                <p>Our platform supports English, Amharic, Afaan Oromo, and Tigrinya to make learning accessible for
+                    more families.</p>
+            </div>
+            <div>
+                <h3>Affordable and Transparent Pricing</h3>
+                <p>Compare tutors, view their prices, and choose a learning option that fits your budget.</p>
+            </div>
+            <div>
+                <h3>Personalized Learning</h3>
+                <p>Students receive support based on their grade level, subject needs, and individual learning goals.
+                </p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="faq">
+        <h2>Frequently Asked Questions (FAQs)</h2>
+        <ol>
+            <li>
+                <h3>Who can use Abrehot Online Tutorials?</h3>
+            </li>
+            <div>Parents and students from Kindergarten (KG) to Grade 12 can use our platform to find tutoring support.
+                Tutors can apply to become verified tutors on this platform where they can support students and make
+                money on the side.
+            </div>
+            <li>
+                <h3>What subjects are available?</h3>
+            </li>
+            <div>Students can find tutors for various subjects including Mathematics, English, Physics, Chemistry,
+                Biology,
+                ICT, and other unmentioned subjects.</div>
+            <li>
+                <h3>How do I find a tutor?</h3>
+            </li>
+            <div>You can look for tutors by subject, grade level, language, location, and teaching preference.</div>
+            <li>
+                <h3>Are tutors verified?</h3>
+            </li>
+            <div>Yes, tutors go through an application and review process before being approved on the platform.</div>
+            <li>
+                <h3>Can I choose online or in-person tutoring?</h3>
+            </li>
+            <div>Yes, students can select the learning method that works best for them.</div>
+            <li>
+                <h3>How can I become a tutor?</h3>
+            </li>
+            <div>Qualified educators can apply through the "Become a Tutor" page by submitting their information and
+                qualifications after creating an account.</div>
+        </ol>
+    </div>
+        <div class="footer">
+        <div class="footer-links">
+            <div>
+                <a href="home.html">
+                    <div>Home</div>
+                </a>
+                <a href="aboutus.html">
+                    <div>About Us</div>
+                </a>
+                <a href="tutors.html">
+                    <div>Tutors</div>
+                </a>
+                <!--CHECK IF USER HAS SIGNED UP OR LOGGED IN BEFORE THEY BOOK A SESSION OR BECOME A TUTOR-->
+                <a href="becomeatutor.html">
+                    <div>Become A Tutor</div>
+                </a>
+                <a href="contact.html">
+                    <div>Contact Us</div>
+                </a>
+
+            </div>
+            <div>
+                <a href="myprofile.html">
+                    <div>My Profile</div>
+                </a>
+                <a href="create-account.html">
+                    <div>Sign Up</div>
+                </a>
+                <a href="login.html">
+                    <div>Log In</div>
+                </a>
+                <a href="donate.html">
+                    <div>Donate</div>
+                </a>
+            </div>
+            <div>
+                <a href="https://t.me/" target="_blank">
+                    <div>Telegram</div>
+                </a>
+                <a href="https://www.facebook.com/" target="_blank">
+                    <div>Facebook</div>
+                </a>
+                <a href="https://twitter.com/" target="_blank">
+                    <div>Twitter</div>
+                </a>
+                <a href="https://www.instagram.com/" target="_blank">
+                    <div>Instagram</div>
+                </a>
+                <a href="https://www.linkedin.com/" target="_blank">
+                    <div>LinkedIn</div>
+                </a>
+            </div>
+            <div>
+                <a href="saftey.html">
+                    <div>Safety</div>
+                </a>
+                <a href="terms.html">
+                    <div>Terms Of Service</div>
+                </a>
+                <a href="privacy.html">
+                    <div>Privacy Policy</div>
+                </a>
+            </div>
+        </div>
+        <br>
+        <div style="text-align: center;">Copyright © 2026 Abrehot Online Tutorials. All rights reserved.</div>
+        
+    </div>
+    <script>
+        const menu = document.getElementById("menuBtn");
+        const nav = document.getElementById("verNav");
+        const overlay = document.getElementById("overlay");
+
+        menu.style.transition = 'opacity 2s ease';
+        menu.style.opacity = '1';
+
+        function hideMenu() {
+            menu.style.opacity = '0';
+            setTimeout(() => {
+                menu.style.visibility = 'hidden';
+            });
+        }
+
+        function showMenuSlowly() {
+            menu.style.visibility = 'visible';
+            menu.style.opacity = '0';
+            requestAnimationFrame(() => {
+                menu.style.opacity = '1';
+            });
+        }
+
+        menu.onclick = function () {
+            nav.classList.add("show");
+            overlay.classList.add("show");
+            hideMenu();
+        }
+
+        overlay.onclick = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        window.onscroll = function () {
+            nav.classList.remove("show");
+            overlay.classList.remove("show");
+            showMenuSlowly();
+        }
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") {
+                nav.classList.remove("show");
+                overlay.classList.remove("show");
+                showMenuSlowly();
+            }
+        });
+    </script>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en', // Default language of your website
+                includedLanguages: 'am,om,ti', // Languages to display (comma-separated)
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element'); // ID of the container div
+        }
+    </script>
+    <script src="js/api.js"></script>
+    <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+
+</html>
