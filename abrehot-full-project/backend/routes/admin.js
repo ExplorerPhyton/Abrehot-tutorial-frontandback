@@ -3,6 +3,7 @@ const TutorProfile = require('../models/TutorProfile');
 const Booking = require('../models/Booking');
 const ContactMessage = require('../models/ContactMessage');
 const { requireAdmin } = require('../middleware/adminAuth');
+const { notify } = require('../utils/notifications');
 
 // Every route below requires the x-admin-secret header to match ADMIN_SECRET
 router.use(requireAdmin);
@@ -19,6 +20,7 @@ router.get('/tutors', async (req, res) => {
 router.post('/tutors/:id/approve', async (req, res) => {
   const tutor = await TutorProfile.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
   if (!tutor) return res.status(404).json({ message: 'Not found' });
+  notify(tutor.user, "Great news — your tutor application has been approved! You're now listed on the Find a Tutor page.", '../dashboards/tutor-dash.html');
   res.json(tutor);
 });
 
@@ -26,6 +28,7 @@ router.post('/tutors/:id/approve', async (req, res) => {
 router.post('/tutors/:id/reject', async (req, res) => {
   const tutor = await TutorProfile.findByIdAndUpdate(req.params.id, { status: 'rejected' }, { new: true });
   if (!tutor) return res.status(404).json({ message: 'Not found' });
+  notify(tutor.user, 'Your tutor application was not approved this time. Contact support if you have questions.', '../contact.html');
   res.json(tutor);
 });
 

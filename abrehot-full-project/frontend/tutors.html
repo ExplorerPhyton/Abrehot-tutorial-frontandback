@@ -380,6 +380,20 @@
                 display: none;
             }
         }
+        .star {
+            font-size: 24px;
+            color: #ccc;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .star.active {
+            color: gold;
+        }
+
+        .star:hover {
+            color: gold;
+        }
     </style>
 </head>
 
@@ -462,8 +476,10 @@
                     </ul>
                 </div>
             </div>
-            <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Online Tutorials Logo">
-            <h1 class="head">Abrehot Online Tutorials</h1>
+            <a href="home.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
+                <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Online Tutorials Logo">
+                <h1 class="head">Abrehot Online Tutorials</h1>
+            </a>
         </div>
 
         <div class="head-buttons">
@@ -847,15 +863,24 @@
                     return;
                 }
                 resultsEl.innerHTML = tutors.map(function (t) {
-                    return '<div style="background:#fff;border-radius:8px;padding:16px;margin:12px;box-shadow:0 1px 4px rgba(0,0,0,0.15);width:280px;">'
+                    return '<div class="tutor-card" style="background:#fff;border-radius:8px;padding:16px;margin:12px;box-shadow:0 1px 4px rgba(0,0,0,0.15);width:280px;">'
                         + '<h3 style="margin:0 0 8px;">' + escapeHtml(t.fullname) + '</h3>'
                         + '<p><strong>Subjects:</strong> ' + escapeHtml((t.subjects || []).join(', ') || '-') + '</p>'
                         + '<p><strong>Grades:</strong> ' + escapeHtml((t.grades || []).join(', ') || '-') + '</p>'
                         + '<p><strong>Languages:</strong> ' + escapeHtml((t.languages || []).join(', ') || '-') + '</p>'
                         + '<p><strong>Mode:</strong> ' + escapeHtml(t.mode || '-') + ' &nbsp; <strong>City:</strong> ' + escapeHtml(t.city || '-') + '</p>'
+                        + '<p><strong>Rating:</strong> <span class="tutor-rating-summary">' + (t.ratingCount ? ('\u2b50 ' + t.averageRating + ' (' + t.ratingCount + ' rating' + (t.ratingCount === 1 ? '' : 's') + ')') : 'No ratings yet') + '</span></p>'
                         + (t.price ? '<p><strong>Rate:</strong> ' + escapeHtml(t.price) + ' ETB/hour</p>' : '')
                         + (t.bio ? '<p>' + escapeHtml(t.bio) + '</p>' : '')
                         + '<a href="book.html?tutorId=' + encodeURIComponent(t._id) + '&tutorName=' + encodeURIComponent(t.fullname) + '"><button>Book This Tutor</button></a>'
+                        + '<br><br>'
+                        + '<div style="font-weight:500;">Rate this Tutor</div>'
+                        + '<div class="rating">'
+                        + [1, 2, 3, 4, 5].map(function (n) {
+                            return '<span class="star" onclick="submitRating(\'' + t._id + '\', ' + n + ', this.parentElement)">\u2605</span>';
+                        }).join('')
+                        + '<div class="ratingText" style="font-size:13px;color:#555;">No rating yet.</div>'
+                        + '</div>'
                         + '</div>';
                 }).join('');
             }

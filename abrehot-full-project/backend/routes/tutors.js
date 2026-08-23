@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const TutorProfile = require('../models/TutorProfile');
+const Rating = require('../models/Rating');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
+const { notifyAdmin } = require('../utils/mailer');
 
 // Helper: HTML checkboxes with the same `name` submit as a single value when only
 // one is checked, and as an array when several are checked. Normalize to an array.
@@ -35,6 +37,15 @@ router.post('/apply', attachUserIfPresent, async (req, res) => {
       price: price ? Number(price) : undefined,
       availability, bio,
     });
+
+    notifyAdmin(
+      `New tutor application: ${fullname}`,
+      `${fullname} (${email}, ${phone}) just applied to become a tutor.\n\n` +
+        `Subjects: ${(profile.subjects || []).join(', ') || '-'}\n` +
+        `Grades: ${(profile.grades || []).join(', ') || '-'}\n` +
+        `City: ${city || '-'}\n\n` +
+        `Review and approve it on your admin page.`
+    );
 
     res.status(201).json({
       message: 'Application submitted. It will be reviewed before appearing in search.',
@@ -88,6 +99,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/tutors/recommended — top-rated approved tutors (a simple, honest
+// "recommendation": highest average rating first, then most ratings, then
+// newest — not personalized, just the best-reviewed tutors on the platform).
+// Must come BEFORE /:id or Express will treat "recommended" as an id.
+router.get('/recommended', async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 4, 10);
+  const tutors = await TutorProfile.find({ status: 'approved' })
+    .sort({ averageRating: -1, ratingCount: -1, createdAt: -1 })
+    .limit(limit);
+  res.json(tutors);
+});
+
 // GET /api/tutors/:id — a single tutor's public profile
 router.get('/:id', async (req, res) => {
   try {
@@ -97,6 +120,45 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: 'Invalid tutor id' });
   }
+});
+
+// POST /api/tutors/:id/rate — rate a tutor (or update your existing rating of them)
+router.post('/:id/rate', requireAuth, async (req, res) => {
+  try {
+    const value = Number(req.body.rating);
+    if (!value || value < 1 || value > 5) {
+      return res.status(400).json({ message: 'Rating must be a number from 1 to 5' });
+    }
+    const tutor = await TutorProfile.findById(req.params.id);
+    if (!tutor) return res.status(404).json({ message: 'Tutor not found' });
+
+    await Rating.findOneAndUpdate(
+      { tutor: tutor._id, user: req.user.id },
+      { rating: value, comment: req.body.comment },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    const stats = await Rating.aggregate([
+      { $match: { tutor: tutor._id } },
+      { $group: { _id: null, avg: { $avg: '$rating' }, count: { $sum: 1 } } },
+    ]);
+    const avg = stats.length ? stats[0].avg : 0;
+    const count = stats.length ? stats[0].count : 0;
+
+    tutor.averageRating = Math.round(avg * 10) / 10;
+    tutor.ratingCount = count;
+    await tutor.save();
+
+    res.json({ averageRating: tutor.averageRating, ratingCount: tutor.ratingCount, yourRating: value });
+  } catch (err) {
+    res.status(500).json({ message: 'Could not submit rating', error: err.message });
+  }
+});
+
+// GET /api/tutors/:id/rate — the logged-in user's existing rating for this tutor, if any
+router.get('/:id/rate', requireAuth, async (req, res) => {
+  const existing = await Rating.findOne({ tutor: req.params.id, user: req.user.id });
+  res.json({ yourRating: existing ? existing.rating : null });
 });
 
 module.exports = router;

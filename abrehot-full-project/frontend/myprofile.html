@@ -5,79 +5,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | Abrehot Online Tutorials</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: #f4f6f8;
+            color: #333;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
-    <!--AFTER THE USER SIGNS UP OR LOGS IN THEY ARE AUTOMATICALLY TAKEN TO EITHER ONE 
-    OF THESE PAGES TO CREATE THEIR PROFILE (AUTOMATICALLY ENTER USER INFORMATION TO 
-    CREATE THEIR PROFILE AND PROVIDE A FORM FOR THEM TO UPDATE THEIR PROFILE. FOR EXAMPLE: 
-    GARDE, SCHOOL, HOMEWORK AND NOTES FORM FOR STUDENTS... ) TO BE DONE WITH BACKEND 
-    AND DATABASE-->
-    <!--ADMIN DASHBOARD MAY NEEDED TO BE DONE WITH DATABASE AND BACKEND -->
-    <a href="./dashboards/tutor-dash.html">Tutor Dashboard</a>
-    <a href="./dashboards/parent-dash.html">Parent Dashboard</a>
-    <a href="./dashboards/student-dash.html">Student Dashboard</a>
+    <!--
+        This page used to just show links to all three dashboards and make
+        the person pick one manually. Now it looks at who's actually logged
+        in and sends them straight to their own dashboard automatically.
+    -->
+    <p id="redirectMessage">Loading your profile...</p>
 
+    <script src="js/api.js"></script>
     <script>
-        const menu = document.getElementById("menuBtn");
-        const nav = document.getElementById("verNav");
-        const overlay = document.getElementById("overlay");
+        var user = getUser();
+        var token = getToken();
+        var msg = document.getElementById('redirectMessage');
 
-        menu.style.transition = 'opacity 2s ease';
-        menu.style.opacity = '1';
-
-        function hideMenu() {
-            menu.style.opacity = '0';
-            setTimeout(() => {
-                menu.style.visibility = 'hidden';
-            });
-        }
-
-        function showMenuSlowly() {
-            menu.style.visibility = 'visible';
-            menu.style.opacity = '0';
-            requestAnimationFrame(() => {
-                menu.style.opacity = '1';
-            });
-        }
-
-        menu.onclick = function () {
-            nav.classList.add("show");
-            overlay.classList.add("show");
-            hideMenu();
-        }
-
-        overlay.onclick = function () {
-            nav.classList.remove("show");
-            overlay.classList.remove("show");
-            showMenuSlowly();
-        }
-
-        window.onscroll = function () {
-            nav.classList.remove("show");
-            overlay.classList.remove("show");
-            showMenuSlowly();
-        }
-
-        document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape") {
-                nav.classList.remove("show");
-                overlay.classList.remove("show");
-                showMenuSlowly();
-            }
-        });
-    </script>
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'en', // Default language of your website
-                includedLanguages: 'am,om,ti', // Languages to display (comma-separated)
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element'); // ID of the container div
+        if (!user || !token) {
+            msg.textContent = 'Please log in to view your profile. Redirecting...';
+            setTimeout(function () {
+                window.location.href = 'login.html';
+            }, 1200);
+        } else {
+            msg.textContent = 'Taking you to your dashboard...';
+            window.location.href = dashboardPathForRole(user.role);
         }
     </script>
-    <script type="text/javascript"
-        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 
 </html>

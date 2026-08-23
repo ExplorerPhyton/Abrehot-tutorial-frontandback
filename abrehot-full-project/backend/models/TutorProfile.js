@@ -31,6 +31,11 @@ const tutorProfileSchema = new mongoose.Schema(
 
     // Every application starts pending so you (the admin) can review before it appears in search
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+
+    // Denormalized rating summary, kept in sync by routes/tutors.js whenever a
+    // rating is submitted — avoids recalculating an average on every page load.
+    averageRating: { type: Number, default: 0 },
+    ratingCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

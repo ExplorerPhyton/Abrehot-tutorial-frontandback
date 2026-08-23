@@ -2,6 +2,7 @@ const router = require('express').Router();
 const ContactMessage = require('../models/ContactMessage');
 const { attachUserIfPresent } = require('../middleware/auth');
 const User = require('../models/User');
+const { notifyAdmin } = require('../utils/mailer');
 
 // POST /api/contact — matches contact.html
 router.post('/', attachUserIfPresent, async (req, res) => {
@@ -19,6 +20,15 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     }
 
     const entry = await ContactMessage.create({ name, email, subject, message, rating, feedback });
+
+    notifyAdmin(
+      `New contact message: ${subject || 'General Inquiry'}`,
+      `From: ${name || 'Guest'} (${email || 'no email given'})\n\n${message}` +
+        (rating ? `\n\nSatisfaction rating: ${rating}` : '') +
+        (feedback ? `\nFeedback: ${feedback}` : '') +
+        `\n\nView it on your admin page.`
+    );
+
     res.status(201).json({ message: 'Thanks — we received your message.', entry });
   } catch (err) {
     res.status(500).json({ message: 'Could not send message', error: err.message });

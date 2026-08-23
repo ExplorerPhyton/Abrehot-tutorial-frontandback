@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     // Matches the "account" radio in create-account.html (Parent / Student / Tutor)
     role: { type: String, enum: ['Parent', 'Student', 'Tutor'], required: true },
     city: { type: String, trim: true },
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TutorProfile' }],
   },
   { timestamps: true }
 );

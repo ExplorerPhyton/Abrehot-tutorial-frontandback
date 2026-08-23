@@ -2,6 +2,8 @@ const router = require('express').Router();
 const Booking = require('../models/Booking');
 const TutorProfile = require('../models/TutorProfile');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
+const { notifyAdmin } = require('../utils/mailer');
+const { notify } = require('../utils/notifications');
 
 function toArray(value) {
   if (value === undefined || value === null || value === '') return [];
@@ -41,6 +43,24 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     });
 
     res.status(201).json({ message: 'Booking request submitted', booking });
+
+    notifyAdmin(
+      `New booking request (${grade})`,
+      `Subject(s): ${(booking.subject || []).join(', ') || other || '-'}\n` +
+        `Session: ${session || '-'} via ${platform || '-'}\n` +
+        `City: ${city || '-'}\n` +
+        `Date/time: ${date || '-'} ${time || ''}\n` +
+        (notes ? `Notes: ${notes}\n` : '') +
+        `\nView it on your admin page.`
+    );
+
+    if (tutorId) {
+      TutorProfile.findById(tutorId).then((tutor) => {
+        if (tutor && tutor.user) {
+          notify(tutor.user, `New booking request for ${(booking.subject || []).join(', ') || 'a session'} (${grade}).`, '../dashboards/tutor-dash.html');
+        }
+      });
+    }
   } catch (err) {
     res.status(500).json({ message: 'Could not submit booking', error: err.message });
   }
@@ -73,10 +93,11 @@ router.patch('/:id/cancel', requireAuth, async (req, res) => {
   if (!booking) return res.status(404).json({ message: 'Booking not found' });
 
   const isRequester = booking.requestedBy && booking.requestedBy.toString() === req.user.id;
+  let tutorProfile = null;
   let isAssignedTutor = false;
   if (booking.tutor) {
-    const profile = await TutorProfile.findOne({ user: req.user.id });
-    isAssignedTutor = profile && booking.tutor.toString() === profile._id.toString();
+    tutorProfile = await TutorProfile.findOne({ user: req.user.id });
+    isAssignedTutor = tutorProfile && booking.tutor.toString() === tutorProfile._id.toString();
   }
   if (!isRequester && !isAssignedTutor) {
     return res.status(403).json({ message: 'Not allowed to cancel this booking' });
@@ -84,6 +105,18 @@ router.patch('/:id/cancel', requireAuth, async (req, res) => {
 
   booking.status = 'cancelled';
   await booking.save();
+
+  // Let the other side know — whoever didn't do the cancelling.
+  if (isRequester && booking.tutor) {
+    TutorProfile.findById(booking.tutor).then((tutor) => {
+      if (tutor && tutor.user) {
+        notify(tutor.user, 'A booking request was cancelled by the requester.', '../dashboards/tutor-dash.html');
+      }
+    });
+  } else if (isAssignedTutor && booking.requestedBy) {
+    notify(booking.requestedBy, 'Your booking request was declined or cancelled by the tutor.', '../dashboards/parent-dash.html');
+  }
+
   res.json(booking);
 });
 

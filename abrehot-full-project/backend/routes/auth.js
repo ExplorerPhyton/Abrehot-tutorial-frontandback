@@ -99,4 +99,30 @@ router.patch('/me', requireAuth, async (req, res) => {
   res.json(user);
 });
 
+// POST /api/auth/favorites/:tutorId/toggle — used by the heart icon on tutor cards
+router.post('/favorites/:tutorId/toggle', requireAuth, async (req, res) => {
+  const user = await User.findById(req.user.id);
+  if (!user) return res.status(404).json({ message: 'User not found' });
+
+  const tutorId = req.params.tutorId;
+  const idx = user.favorites.findIndex((f) => f.toString() === tutorId);
+  let isFavorite;
+  if (idx === -1) {
+    user.favorites.push(tutorId);
+    isFavorite = true;
+  } else {
+    user.favorites.splice(idx, 1);
+    isFavorite = false;
+  }
+  await user.save();
+  res.json({ isFavorite, favorites: user.favorites });
+});
+
+// GET /api/auth/favorites — the logged-in user's favorited tutors (for dashboards)
+router.get('/favorites', requireAuth, async (req, res) => {
+  const user = await User.findById(req.user.id).populate('favorites');
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  res.json(user.favorites);
+});
+
 module.exports = router;

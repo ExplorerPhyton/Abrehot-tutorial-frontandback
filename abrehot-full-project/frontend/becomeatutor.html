@@ -499,8 +499,10 @@
                     </ul>
                 </div>
             </div>
-            <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Online Tutorials Logo">
-            <h1 class="head">Abrehot Online Tutorials</h1>
+            <a href="home.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;">
+                <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Online Tutorials Logo">
+                <h1 class="head">Abrehot Online Tutorials</h1>
+            </a>
         </div>
 
         <div class="head-buttons">
@@ -653,10 +655,10 @@
                 <div>
                     <p><strong>Application Status</strong></p>
                 </div>
-                <p><strong>Status:</strong> <span id="applicationStatus">Pending</span></p>
+                <p><strong>Status:</strong> <span id="applicationStatus" style="color:#666;">Not Submitted</span></p>
                 <p id="statusMessage">
-                    Your tutor application has been submitted successfully and is currently under review. You will be
-                    notified once a decision has been made.
+                    You haven't submitted a tutor application yet. Fill out the form above and click "Submit
+                    Application" to get started.
                 </p>
             </div>
 
@@ -765,7 +767,11 @@
             let statusText = document.getElementById("applicationStatus");
             let message = document.getElementById("statusMessage");
             statusText.innerHTML = status;
-            if (status == "Pending") {
+            if (status == "Not Submitted") {
+                statusText.style.color = "#666";
+                message.innerHTML = "You haven't submitted a tutor application yet. Fill out the form above and click \"Submit Application\" to get started.";
+            }
+            else if (status == "Pending") {
                 statusText.style.color = "#d97706";
                 message.innerHTML = "Your tutor application has been submitted successfully and is currently under review. Please wait for our team to evaluate your application.";
             }
@@ -878,8 +884,13 @@
                         body: payload,
                         auth: !!getToken(),
                     });
-                    showFormMessage(form, data.message || 'Application submitted! We will review it shortly.', false);
+                    updateStatus('Pending');
+                    showFormMessage(form, data.message || 'Application submitted! We will review it shortly. Redirecting you home...', false);
                     form.reset();
+                    form.querySelector('.api-message').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(function () {
+                        window.location.href = 'home.html';
+                    }, 1800);
                 } catch (err) {
                     showFormMessage(form, err.message, true);
                 }

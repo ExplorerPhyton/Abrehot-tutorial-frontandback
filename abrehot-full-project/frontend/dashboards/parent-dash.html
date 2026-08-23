@@ -422,9 +422,9 @@
             <a href="../home.html"><button style="margin-right:12px;">Home</button></a>
             <div class="notification">
                 <button id="notificationBtn">
-                    <i class="bx bxs-bell noti-icon"></i><span class="notification-count">4</span>
+                    <i class="bx bxs-bell noti-icon"></i><span class="notification-count" id="notificationCount">4</span>
                 </button>
-                <div class="notification-menu">
+                <div class="notification-menu" id="notificationMenu">
                     <h3>Notifications</h3>
                     <div class="notification-item">
                         Your tutoring session with Sarah Tadesse starts tomorrow at 3:00 PM.
@@ -686,7 +686,7 @@
         <div class="cards">
             <div class="card">
                 <h3>Favorite Tutors</h3>
-                <ul>
+                <ul id="favoriteTutorsList">
                     <li><i class="bx bx-clipboard"></i> Abraham - Chemistry</li>
                     <li><i class="bx bx-clipboard"></i> Sarah Tadesse - Mathematics</li>
                     <li><i class="bx bx-clipboard"></i> Abel Teshome - Physics</li>
@@ -695,7 +695,7 @@
             </div>
             <div class="card">
                 <h3>Recommended Tutors</h3>
-                <ul>
+                <ul id="recommendedTutorsList">
                     <li><i class="bx bx-like"></i> Abel Berhane</li>
                     <li><i class="bx bx-like"></i> Grima H/Eyesus</li>
                     <li><i class="bx bx-like"></i> Abraham</li>
@@ -704,7 +704,7 @@
             </div>
             <div class="card">
                 <h3>Notifications</h3>
-                <ul>
+                <ul id="notificationsCardList">
                     <li><i class="bx bx-detail"></i> Session reminder for tomorrow.</li>
                     <li><i class="bx bx-detail"></i> New tutor available.</li>
                     <li><i class="bx bx-detail"></i> Profile updated successfully.</li>

@@ -14,7 +14,10 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || '')
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (e.g. opening the HTML file directly, curl, Postman)
+      // allow requests with no origin (curl, Postman) AND the literal string
+      // "null", which is what browsers send as Origin when a page is opened
+      // via file:// (e.g. double-clicking admin.html instead of using a
+      // local dev server).
       if (!origin || origin === 'null' || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -31,6 +34,7 @@ app.use('/api/tutors', require('./routes/tutors'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
