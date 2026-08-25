@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="../js/theme.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Dashboard | Abrehot Online Tutorials</title>
@@ -37,6 +38,67 @@
             --radius: 10px;
             --transition: .3s ease;
 
+        }
+
+        /* Dark mode — toggled via data-theme="dark" on <html> by js/theme.js */
+        [data-theme="dark"] {
+            --background: #16130F;
+            --surface: #1E1A15;
+            --text: #EDE6DC;
+            --text-secondary: #B3A696;
+            --border: #40372C;
+            --shadow: 0 4px 12px rgba(0, 0, 0, .4);
+            color-scheme: dark;
+        }
+
+        [data-theme="dark"] body {
+            background: var(--background);
+            color: var(--text);
+        }
+
+        [data-theme="dark"] .notification-menu,
+        [data-theme="dark"] .logout,
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .stat,
+        [data-theme="dark"] .modal-content,
+        [data-theme="dark"] .section {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+        }
+
+        [data-theme="dark"] table td {
+            border-color: var(--border) !important;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+
+        .theme-toggle-fab {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 9999;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid var(--border, #D6EAF8);
+            background: var(--surface, #FFFFFF);
+            box-shadow: var(--shadow, 0 8px 20px rgba(0,0,0,.15));
+            font-size: 20px;
+            line-height: 1;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform .2s ease;
+        }
+
+        .theme-toggle-fab:hover {
+            transform: translateY(-2px) scale(1.05);
         }
 
         body {
@@ -450,10 +512,7 @@
                     <img src="../images/pfp.webp" alt="Parent">
                     <div>
                         <br>
-                        <input type="file" id="uploadPhoto" accept="image/*" hidden>
-                        <button type="button" onclick="document.getElementById('uploadPhoto').click()">
-                            Upload New Photo
-                        </button>
+                        <div class="avatar-picker" id="avatarPicker"></div>
                         <br><br>
                     </div>
                 </div>
@@ -493,14 +552,10 @@
                         <th>Grade</th>
                         <th>School</th>
                         <th>Status</th>
-                    </tr>
-                    <tr>
-                        <td colspan="4" style="text-align:center; font-style: italic; color: #666;">
-                            Linking specific children to your account isn't built yet — bookings you make are
-                            tracked under your account directly. Ask your developer to add this if you need it.
-                        </td>
+                        <th>Actions</th>
                     </tr>
                 </table>
+                <div style="text-align: center; margin-top: 20px;"><button id="addChildBtn">Add + </button></div>
             </div>
         </div>
         <div class="section">
@@ -991,8 +1046,9 @@
 
             function bookingArgs(b) {
                 var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not yet assigned';
+                var studentName = b.child && b.child.name ? b.child.name : (b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-');
                 return [
-                    b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-',
+                    studentName,
                     tutorName,
                     (b.subject || []).join(', ') || b.otherSubject || '-',
                     b.topic || '-',
@@ -1057,7 +1113,7 @@
                         var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not yet assigned';
                         upcomingTable.insertAdjacentHTML('beforeend',
                             '<tr>'
-                            + '<td>' + escapeHtml(b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-') + '</td>'
+                            + '<td>' + escapeHtml(b.child && b.child.name ? b.child.name : (b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-')) + '</td>'
                             + '<td>' + escapeHtml(tutorName) + '</td>'
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                             + '<td>' + escapeHtml(fmtDate(b.date)) + '</td>'
@@ -1081,7 +1137,7 @@
                         historyTable.insertAdjacentHTML('beforeend',
                             '<tr>'
                             + '<td>' + escapeHtml(fmtDate(b.date)) + '</td>'
-                            + '<td>' + escapeHtml(b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-') + '</td>'
+                            + '<td>' + escapeHtml(b.child && b.child.name ? b.child.name : (b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-')) + '</td>'
                             + '<td>' + escapeHtml(tutorName) + '</td>'
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                             + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
@@ -1089,7 +1145,75 @@
                             + '</tr>');
                     });
                 }
+
+                await loadChildren();
             }
+
+            async function loadChildren() {
+                var children = [];
+                try {
+                    children = await apiRequest('/children/mine', { auth: true });
+                } catch (err) {
+                    console.error('Could not load children', err);
+                }
+
+                document.getElementById('statChildren').textContent = children.length;
+
+                var table = document.getElementById('childrenTable');
+                var rows = table.querySelectorAll('tr');
+                for (var i = 1; i < rows.length; i++) rows[i].remove();
+
+                if (!children.length) {
+                    table.insertAdjacentHTML('beforeend', '<tr><td colspan="5" style="text-align:center;color:#666;">No children added yet. Click "Add +" below.</td></tr>');
+                } else {
+                    children.forEach(function (c) {
+                        table.insertAdjacentHTML('beforeend',
+                            '<tr>'
+                            + '<td>' + escapeHtml(c.name) + '</td>'
+                            + '<td>' + escapeHtml(c.grade || '-') + '</td>'
+                            + '<td>' + escapeHtml(c.school || '-') + '</td>'
+                            + '<td>' + escapeHtml(c.status) + '</td>'
+                            + '<td><button onclick="editChild(\'' + c._id + '\')">Edit</button> <button onclick="removeChild(\'' + c._id + '\')">Remove</button></td>'
+                            + '</tr>');
+                    });
+                }
+            }
+
+            document.getElementById('addChildBtn').addEventListener('click', async function () {
+                var name = prompt('Child\'s name');
+                if (!name) return;
+                var grade = prompt('Grade (e.g. Grade 9)', '');
+                var school = prompt('School', '');
+                try {
+                    await apiRequest('/children', { method: 'POST', auth: true, body: { name: name, grade: grade, school: school } });
+                    loadChildren();
+                } catch (err) {
+                    alert('Could not add child: ' + err.message);
+                }
+            });
+
+            window.editChild = async function (id) {
+                var name = prompt('Child\'s name');
+                if (name === null) return;
+                var grade = prompt('Grade', '');
+                var school = prompt('School', '');
+                try {
+                    await apiRequest('/children/' + id, { method: 'PATCH', auth: true, body: { name: name, grade: grade, school: school } });
+                    loadChildren();
+                } catch (err) {
+                    alert('Could not update child: ' + err.message);
+                }
+            };
+
+            window.removeChild = async function (id) {
+                if (!confirm('Remove this child?')) return;
+                try {
+                    await apiRequest('/children/' + id, { method: 'DELETE', auth: true });
+                    loadChildren();
+                } catch (err) {
+                    alert('Could not remove child: ' + err.message);
+                }
+            };
 
             loadDashboard();
         })();

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="../js/theme.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | Abrehot Online Tutorials</title>
@@ -37,6 +38,67 @@
             --radius: 10px;
             --transition: .3s ease;
 
+        }
+
+        /* Dark mode — toggled via data-theme="dark" on <html> by js/theme.js */
+        [data-theme="dark"] {
+            --background: #16130F;
+            --surface: #1E1A15;
+            --text: #EDE6DC;
+            --text-secondary: #B3A696;
+            --border: #40372C;
+            --shadow: 0 4px 12px rgba(0, 0, 0, .4);
+            color-scheme: dark;
+        }
+
+        [data-theme="dark"] body {
+            background: var(--background);
+            color: var(--text);
+        }
+
+        [data-theme="dark"] .notification-menu,
+        [data-theme="dark"] .logout,
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .stat,
+        [data-theme="dark"] .modal-content,
+        [data-theme="dark"] .section {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+        }
+
+        [data-theme="dark"] table td {
+            border-color: var(--border) !important;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+
+        .theme-toggle-fab {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 9999;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid var(--border, #D6EAF8);
+            background: var(--surface, #FFFFFF);
+            box-shadow: var(--shadow, 0 8px 20px rgba(0,0,0,.15));
+            font-size: 20px;
+            line-height: 1;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform .2s ease;
+        }
+
+        .theme-toggle-fab:hover {
+            transform: translateY(-2px) scale(1.05);
         }
 
         body {
@@ -451,10 +513,7 @@
                     <img src="../images/pfp.webp" alt="Parent">
                     <br>
                     <div>
-                        <input type="file" id="uploadPhoto" accept="image/*" hidden>
-                        <button type="button" onclick="document.getElementById('uploadPhoto').click()">
-                            Upload New Photo
-                        </button>
+                        <div class="avatar-picker" id="avatarPicker"></div>
                         <br><br>
                     </div>
                 </div>
@@ -479,12 +538,12 @@
                 <p>Upcoming Lessons</p>
             </div>
             <div class="stat">
-                <h2 id="statTutors">4</h2>
+                <h2 id="statTutors">-</h2>
                 <p>Booked Tutors</p>
             </div>
             <div class="stat">
-                <h2>92%</h2>
-                <p>Attendance</p>
+                <h2 id="statAttendance">-</h2>
+                <p>Attendance<br><span id="attendanceStreak" style="font-size:11px;font-weight:600;color:var(--secondary, #2980B9);"></span></p>
             </div>
         </div>
         <div class="section">
@@ -980,6 +1039,33 @@
                 document.getElementById('statUpcoming').textContent = upcoming.length;
                 document.getElementById('statCompleted').textContent = completed.length;
                 document.getElementById('statTutors').textContent = Object.keys(distinctTutors).length;
+
+                // Attendance: only counts sessions the tutor has actually marked as
+                // attended/no-show — pending/confirmed sessions haven't happened yet,
+                // so they don't count either way. Sorted most-recent-first so we can
+                // also surface a "streak" of consecutive attended sessions as a bit
+                // of positive reinforcement, not just a bare percentage.
+                var tracked = bookings
+                    .filter(function (b) { return b.attended === true || b.attended === false; })
+                    .sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+                var attendedCount = tracked.filter(function (b) { return b.attended === true; }).length;
+                document.getElementById('statAttendance').textContent = tracked.length
+                    ? Math.round((attendedCount / tracked.length) * 100) + '%'
+                    : '-';
+
+                var streak = 0;
+                for (var s = 0; s < tracked.length; s++) {
+                    if (tracked[s].attended === true) streak++;
+                    else break;
+                }
+                var badge = '';
+                if (tracked.length) {
+                    if (streak >= 5) badge = '🔥 ' + streak + '-session streak';
+                    else if (streak >= 2) badge = '⭐ ' + streak + ' in a row';
+                    else if (attendedCount / tracked.length >= 0.9) badge = '🌟 Great attendance';
+                    else if (attendedCount / tracked.length < 0.6) badge = '🌱 Keep showing up';
+                }
+                document.getElementById('attendanceStreak').textContent = badge;
 
                 var upcomingTable = document.getElementById('upcomingLessonsTable');
                 var upcomingRows = upcomingTable.querySelectorAll('tr');

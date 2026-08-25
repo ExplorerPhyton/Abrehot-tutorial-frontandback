@@ -12,7 +12,9 @@ function toArray(value) {
 }
 
 // POST /api/tutors/apply — matches becomeatutor.html
-router.post('/apply', attachUserIfPresent, async (req, res) => {
+// Login is required: approval promotes this account's role to "Tutor", so
+// there has to be an account to promote in the first place.
+router.post('/apply', requireAuth, async (req, res) => {
   try {
     const {
       fullname, gender, dob, phone, email,
@@ -26,7 +28,7 @@ router.post('/apply', attachUserIfPresent, async (req, res) => {
     }
 
     const profile = await TutorProfile.create({
-      user: req.user ? req.user.id : undefined,
+      user: req.user.id,
       fullname, gender, dob, phone, email,
       education, institution, experience, certificateUrl,
       subjects: toArray(subject),
@@ -159,6 +161,28 @@ router.post('/:id/rate', requireAuth, async (req, res) => {
 router.get('/:id/rate', requireAuth, async (req, res) => {
   const existing = await Rating.findOne({ tutor: req.params.id, user: req.user.id });
   res.json({ yourRating: existing ? existing.rating : null });
+});
+
+// GET /api/tutors/:id/reviews — most recent ratings/comments for a tutor, with the
+// reviewer's name (public — used on the tutor's own dashboard).
+router.get('/:id/reviews', async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 10, 50);
+  try {
+    const reviews = await Rating.find({ tutor: req.params.id })
+      .populate('user', 'fullname')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+    res.json(reviews.map(function (r) {
+      return {
+        reviewer: r.user ? r.user.fullname : 'Anonymous',
+        rating: r.rating,
+        comment: r.comment || '',
+        createdAt: r.createdAt,
+      };
+    }));
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid tutor id' });
+  }
 });
 
 module.exports = router;

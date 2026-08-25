@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="../js/theme.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile | Abrehot Online Tutorials</title>
@@ -42,6 +43,67 @@
             --radius: 10px;
             --transition: .3s ease;
 
+        }
+
+        /* Dark mode — toggled via data-theme="dark" on <html> by js/theme.js */
+        [data-theme="dark"] {
+            --background: #16130F;
+            --surface: #1E1A15;
+            --text: #EDE6DC;
+            --text-secondary: #B3A696;
+            --border: #40372C;
+            --shadow: 0 4px 12px rgba(0, 0, 0, .4);
+            color-scheme: dark;
+        }
+
+        [data-theme="dark"] body {
+            background: var(--background);
+            color: var(--text);
+        }
+
+        [data-theme="dark"] .notification-menu,
+        [data-theme="dark"] .logout,
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .stat,
+        [data-theme="dark"] .modal-content,
+        [data-theme="dark"] .section {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+        }
+
+        [data-theme="dark"] table td {
+            border-color: var(--border) !important;
+        }
+
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background: var(--surface) !important;
+            color: var(--text) !important;
+            border-color: var(--border) !important;
+        }
+
+        .theme-toggle-fab {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            z-index: 9999;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 1px solid var(--border, #D6EAF8);
+            background: var(--surface, #FFFFFF);
+            box-shadow: var(--shadow, 0 8px 20px rgba(0,0,0,.15));
+            font-size: 20px;
+            line-height: 1;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform .2s ease;
+        }
+
+        .theme-toggle-fab:hover {
+            transform: translateY(-2px) scale(1.05);
         }
 
         header {
@@ -417,29 +479,18 @@
     <header>
         <div class="header-text">
             <h1> My Dashboard</h1>
-            <p>Welcome back, Mr. Abraham.</p>
+            <p>Welcome back!</p>
         </div>
         <div class="head">
             <a href="../home.html"><button style="margin-right:12px;">Home</button></a>
             <div class="notification">
                 <button id="notificationBtn">
-                    <i class="bx bxs-bell noti-icon"></i><span class="notification-count" id="notificationCount">4</span>
+                    <i class="bx bxs-bell noti-icon"></i><span class="notification-count" id="notificationCount" style="display:none;">0</span>
                 </button>
                 <div class="notification-menu" id="notificationMenu">
                     <h3>Notifications</h3>
-                    <div class="notification-item">
-                        Your tutoring session starts in 30 minutes.
+                    <div class="notification-item">Loading notifications…</div>
                     </div>
-                    <div class="notification-item">
-                        You received a new booking request.
-                    </div>
-                    <div class="notification-item">
-                        Your tutoring session with John Doe starts tomorrow at 3:00 PM.
-                    </div>
-                    <div class="notification-item">
-                        Your profile information was updated successfully.
-                    </div>
-                </div>
             </div>
             <button class="logout" id="logoutBtn">Log Out</button>
         </div>
@@ -451,18 +502,15 @@
                     <img src="../images/photo_2026-07-08_08-44-00.jpg" alt="Tutor">
                     <div>
                         <br>
-                        <input type="file" id="uploadPhoto" accept="image/*" hidden>
-                        <button type="button" onclick="document.getElementById('uploadPhoto').click()">
-                            Upload New Photo
-                        </button>
+                        <div class="avatar-picker" id="avatarPicker"></div>
                         <br><br>
                     </div>
                 </div>
                 <div>
-                    <h2 id="profileName">Mr. Abraham</h2>
-                    <p id="profileTitle">High School Chemistry Tutor</p>
-                    <p id="profileStatus">⭐⭐⭐⭐⭐ 5/5</p>
-                    <p><i class="bx bx-pin"></i> <span class="info">City:</span> <span id="profileCity">Addis Ababa</span></p>
+                    <h2 id="profileName">Loading…</h2>
+                    <p id="profileTitle">-</p>
+                    <p id="profileStatus">-</p>
+                    <p><i class="bx bx-pin"></i> <span class="info">City:</span> <span id="profileCity">-</span></p>
                     <button id="editProfileBtn">Edit Profile</button>
                 </div>
             </div>
@@ -471,21 +519,21 @@
         <div class="dashboard">
             <div class="card">
                 <h3>Subjects</h3>
-                <p id="displaySubjects">Chemistry</p>
+                <p id="displaySubjects">-</p>
                 <br>
                 <button class="edit" id="updateSubjectsBtn">Update Subjects</button>
                 <br><br>
                 <h3>Grade Levels</h3>
-                <p id="displayGrades">Grade 9, Grade 10</p>
+                <p id="displayGrades">-</p>
                 <br>
                 <button class="edit" id="updateGradesBtn">Update Grades</button>
             </div>
             <div class="card">
                 <h3>Teaching Information</h3>
-                <p><strong>Experience:</strong> <span id="displayExperience">9 Years</span></p>
-                <p><strong>Languages:</strong> <span id="displayLanguages">English, Amharic</span></p>
-                <p><strong>Mode:</strong> <span id="displayMode">Online & In-Person</span></p>
-                <p><strong>Hourly Rate:</strong> <span id="displayPrice">700</span> ETB</p>
+                <p><strong>Experience:</strong> <span id="displayExperience">-</span></p>
+                <p><strong>Languages:</strong> <span id="displayLanguages">-</span></p>
+                <p><strong>Mode:</strong> <span id="displayMode">-</span></p>
+                <p><strong>Hourly Rate:</strong> <span id="displayPrice">-</span> ETB</p>
                 <br>
                 <button class="edit" id="updateTeachingBtn">Update Teaching Info</button>
             </div>
@@ -493,15 +541,15 @@
         <br>
         <div class="stats">
             <div class="stat">
-                <h2 id="statStudents">52</h2>
+                <h2 id="statStudents">-</h2>
                 <p>Total Students</p>
             </div>
             <div class="stat">
-                <h2 id="statCompleted">126</h2>
+                <h2 id="statCompleted">-</h2>
                 <p>Completed Sessions</p>
             </div>
             <div class="stat">
-                <h2 id="statUpcoming">14</h2>
+                <h2 id="statUpcoming">-</h2>
                 <p>Upcoming Sessions</p>
             </div>
         </div>
@@ -516,88 +564,7 @@
                         <th>Subject</th>
                         <th>Mode</th>
                         <th>Full Information</th>
-                        <th>Cancel Booking</th>
-                    </tr>
-                    <tr>
-                        <td>Kalkidan Bekele</td>
-                        <td>18 Jul 2026</td>
-                        <td>9:00 AM</td>
-                        <td>Chemistry</td>
-                        <td>Online</td>
-                        <td><button onclick="openBooking(
-'Kalkidan Bekele',
-'Grade 10',
-'Chemistry',
-'Organic Chemistry',
-'Exam Preparation',
-'Online',
-'Google Meet',
-'-',
-'-',
-'English',
-'18 Jul 2026',
-'9:00 AM',
-'2 Hours',
-'-',
-'+251911111111',
-'kal@gmail.com',
-'Needs help preparing for the final examination.',
-)">View More</button></td>
-                        <td><button>Cancel</button></td>
-                    </tr>
-                    <tr>
-                        <td>Abel Tadesse</td>
-                        <td>18 Jul 2026</td>
-                        <td>2:00 PM</td>
-                        <td>Chemistry</td>
-                        <td>In-Person</td>
-                        <td> <button onclick="openBooking(
-'Abel Tadesse',
-'Grade 10',
-'Chemistry',
-'Unit-3 : Solution',
-'Concept Revision, Homework Help',
-'In-Person',
-'-',
-'Addis Ababa',
-'Tsehay Real Estate',
-'English',
-'18 Jul 2026',
-'2:00 PM',
-'2+ Hour',
-'Addisalem',
-'+251922222222 ',
-'addisalem@gmail.com',
-'-',
-)">View More</button></td>
-                        <td><button>Cancel</button></td>
-                    </tr>
-                    <tr>
-                        <td>Ruth Solomon</td>
-                        <td>19 Jul 2026</td>
-                        <td>11:00 AM</td>
-                        <td>Chemistry</td>
-                        <td>Online</td>
-                        <td><button onclick="openBooking(
-'Ruth Solomon',
-'Grade 9',
-'Chemistry',
-'Chemical Bonds',
-'Regular Weekly Tutoring',
-'Online',
-'Microsoft Teams',
-'-',
-'-',
-'English',
-'19 Jul 2026',
-'11:00 AM',
-'2+ Hours',
-'Solomon',
-'+251933333333',
-'solomon@gmail.com',
-'-',
-)">View More</button></td>
-                        <td><button>Cancel</button></td>
+                        <th>Actions</th>
                     </tr>
                 </table>
             </div>
@@ -609,69 +576,12 @@
                 <table id="newRequestsTable">
                     <tr>
                         <th>Student</th>
-                        <th>Grade</th>
-                        <th>Subject</th>
                         <th>Date</th>
+                        <th>Time</th>
+                        <th>Subject</th>
+                        <th>Mode</th>
                         <th>Full Information</th>
                         <th>Action</th>
-                    </tr>
-                    <tr>
-                        <td>Samuel Tesfaye</td>
-                        <td>Grade 9</td>
-                        <td>Chemistry</td>
-                        <td>20 Jul 2026</td>
-                        <td><button onclick="openBooking(
-'Samuel Tesfaye',
-'Grade 9',
-'Chemistry',
-'Significant Figures',
-'Exam Preparation',
-'Online',
-'Google Meet',
-'-',
-'-',
-'English',
-'20 Jul 2026',
-'9:00 AM',
-'2 Hours',
-'-',
-'+251944444444',
-'sami@gmail.com',
-'Needs help understanding concept.',
-)">View More</button></td>
-                        <td>
-                            <button class="accept">Accept</button>
-                            <button class="decline">Decline</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Meron Alemu</td>
-                        <td>Grade 10</td>
-                        <td>Chemistry</td>
-                        <td>21 Jul 2026</td>
-                        <td><button onclick="openBooking(
-'Meron Alemu',
-'Grade 10',
-'Chemistry',
-'Organic Chemistry',
-'Concept Revision',
-'Online',
-'Zoom',
-'-',
-'-',
-'English',
-'21 Feb 2026',
-'10:00 PM',
-'2 Hours',
-'-',
-'+251911111890',
-'meron@gmail.com',
-'-',
-)">View More</button></td>
-                        <td>
-                            <button class="accept">Accept</button>
-                            <button class="decline">Decline</button>
-                        </td>
                     </tr>
                 </table>
             </div>
@@ -680,44 +590,30 @@
         <div class="stats">
             <div class="card">
                 <h3>Availability</h3>
-                <p><i class="bx bx-time"></i> Monday : 9:00 AM - 5:00 PM</p>
-                <p><i class="bx bx-time"></i> Tuesday : 9:00 AM - 5:00 PM</p>
-                <p><i class="bx bx-time"></i> Wednesday : 9:00 AM - 3:00 PM</p>
-                <p><i class="bx bx-time"></i> Thursday : 10:00 AM - 6:00 PM</p>
-                <p><i class="bx bx-time"></i> Friday : 9:00 AM - 2:00 PM</p>
-                <p><i class="bx bx-time"></i> Saturday : Available Upon Request</p>
-                <p> <i class="bx bx-time"></i> Sunday : Not Available</p>
+                <p id="displayAvailability"><i class="bx bx-time"></i> -</p>
                 <br>
-                <button class="edit">Update Availability</button>
+                <button class="edit" id="updateAvailabilityBtn">Update Availability</button>
             </div>
             <div class="card">
                 <h3>Qualifications</h3>
-                <p><i class="bx bx-check-circle"></i> B.Sc. in Chemistry</p>
-                <p><i class="bx bx-check-circle"></i> Teaching License</p>
-                <p><i class="bx bx-check-circle"></i> 9 Years Teaching Experience</p>
-                <p><i class="bx bx-check-circle"></i> High School Chemistry Teacher</p>
-                <p><i class="bx bx-check-circle"></i> Diamond Academy CMC Branch</p>
+                <p><i class="bx bx-check-circle"></i> <span id="displayEducation">-</span></p>
+                <p><i class="bx bx-check-circle"></i> <span id="displayInstitution">-</span></p>
+                <p><i class="bx bx-check-circle"></i> <span id="displayExperienceQual">-</span></p>
                 <br>
-                <button class="edit">Update Qualifications</button>
+                <button class="edit" id="updateQualificationsBtn">Update Qualifications</button>
             </div>
             <div class="card">
                 <h3>Performance</h3>
-                <p><i class="bx bx-line-chart"></i> <strong>Average Rating:</strong> ⭐⭐⭐⭐⭐ 5</p>
-                <p><i class="bx bx-line-chart"></i> <strong>Total Reviews:</strong> 48</p>
-                <p><i class="bx bx-line-chart"></i> <strong>Response Time:</strong> Within 2 Hours</p>
+                <p><i class="bx bx-line-chart"></i> <strong>Average Rating:</strong> <span id="displayAvgRating">-</span></p>
+                <p><i class="bx bx-line-chart"></i> <strong>Total Reviews:</strong> <span id="displayReviewCount">0</span></p>
             </div>
         </div>
         <br>
         <div class="card">
             <h3>Student Reviews</h3>
-            <p><strong><i class="bx bx-star"></i><i class="bx bx-star"></i><i class="bx bx-star"></i><i
-                        class="bx bx-star"></i><i class="bx bx-star"></i> Samuel Tesfaye</strong></p>
-            <br>
-            <p><strong><i class="bx bx-star"></i><i class="bx bx-star"></i><i class="bx bx-star"></i><i
-                        class="bx bx-star"></i><i class="bx bx-star"></i> Ruth Solomon</strong></p>
-            <br>
-            <p><strong><i class="bx bx-star"></i><i class="bx bx-star"></i><i class="bx bx-star"></i><i
-                        class="bx bx-star"></i><i class="bx bx-star"></i> Abel Tadesse</strong></p>
+            <div id="reviewsList">
+                <p style="color:#666;">No reviews yet.</p>
+            </div>
         </div>
         <br><br>
         <div class="section">
@@ -1030,6 +926,32 @@
                 }
             });
 
+            document.getElementById('updateAvailabilityBtn').addEventListener('click', async function () {
+                if (!currentProfile) { alert('No tutor application on file yet.'); return; }
+                var availability = prompt('Availability (e.g. "Monday-Friday, 4-8 PM")', currentProfile.availability || '');
+                if (availability === null) return;
+                try {
+                    currentProfile = await apiRequest('/tutors/me', { method: 'PATCH', auth: true, body: { availability: availability } });
+                    applyTutorProfile(currentProfile);
+                } catch (err) {
+                    alert('Could not update availability: ' + err.message);
+                }
+            });
+
+            document.getElementById('updateQualificationsBtn').addEventListener('click', async function () {
+                if (!currentProfile) { alert('No tutor application on file yet.'); return; }
+                var education = prompt('Education (e.g. "BSc in Chemistry")', currentProfile.education || '');
+                if (education === null) return;
+                var institution = prompt('Institution (e.g. "Addis Ababa University")', currentProfile.institution || '');
+                if (institution === null) return;
+                try {
+                    currentProfile = await apiRequest('/tutors/me', { method: 'PATCH', auth: true, body: { education: education, institution: institution } });
+                    applyTutorProfile(currentProfile);
+                } catch (err) {
+                    alert('Could not update qualifications: ' + err.message);
+                }
+            });
+
             function applyTutorProfile(profile) {
                 document.getElementById('displaySubjects').textContent = (profile.subjects || []).join(', ') || '-';
                 document.getElementById('displayGrades').textContent = (profile.grades || []).join(', ') || '-';
@@ -1039,6 +961,31 @@
                 document.getElementById('displayPrice').textContent = profile.price != null ? profile.price : '-';
                 document.getElementById('profileTitle').textContent = (profile.subjects || []).join(', ') + ' Tutor';
                 document.getElementById('profileStatus').textContent = profile.status === 'approved' ? 'Approved & Listed' : (profile.status === 'pending' ? 'Pending Review' : 'Not Approved');
+                document.getElementById('displayAvailability').innerHTML = '<i class="bx bx-time"></i> ' + escapeHtml(profile.availability || 'Not set yet');
+                document.getElementById('displayEducation').textContent = profile.education || 'Not set yet';
+                document.getElementById('displayInstitution').textContent = profile.institution || '-';
+                document.getElementById('displayExperienceQual').textContent = profile.experience ? (profile.experience + ' teaching experience') : '-';
+                document.getElementById('displayAvgRating').textContent = profile.ratingCount ? (profile.averageRating + ' / 5') : 'No ratings yet';
+                document.getElementById('displayReviewCount').textContent = profile.ratingCount || 0;
+                loadReviews(profile._id);
+            }
+
+            async function loadReviews(tutorProfileId) {
+                var listEl = document.getElementById('reviewsList');
+                try {
+                    var reviews = await apiRequest('/tutors/' + tutorProfileId + '/reviews?limit=10');
+                    if (!reviews.length) {
+                        listEl.innerHTML = '<p style="color:#666;">No reviews yet.</p>';
+                        return;
+                    }
+                    listEl.innerHTML = reviews.map(function (r) {
+                        var stars = '<i class="bx bxs-star"></i>'.repeat(r.rating) + '<i class="bx bx-star"></i>'.repeat(5 - r.rating);
+                        return '<p><strong>' + stars + ' ' + escapeHtml(r.reviewer) + '</strong></p>'
+                            + (r.comment ? '<p style="margin:4px 0 12px;color:#5F6B7A;">' + escapeHtml(r.comment) + '</p>' : '<br>');
+                    }).join('');
+                } catch (err) {
+                    listEl.innerHTML = '<p style="color:#666;">Could not load reviews.</p>';
+                }
             }
 
             function fmtDate(d) {
@@ -1049,7 +996,8 @@
             }
 
             function bookingArgs(b) {
-                var studentName = (b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest';
+                var accountName = (b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest';
+                var studentName = (b.child && b.child.name) ? b.child.name : accountName;
                 var phone = (b.requestedBy && b.requestedBy.phone) ? b.requestedBy.phone : '-';
                 var email = (b.requestedBy && b.requestedBy.email) ? b.requestedBy.email : '-';
                 return [
@@ -1066,7 +1014,7 @@
                     fmtDate(b.date),
                     b.time || '-',
                     b.duration || '-',
-                    studentName,
+                    accountName,
                     phone,
                     email,
                     b.notes || '-',
@@ -1084,10 +1032,40 @@
             }
             window.cancelBooking = cancelBooking;
 
+            async function confirmBooking(id) {
+                try {
+                    await apiRequest('/bookings/' + id + '/confirm', { method: 'PATCH', auth: true });
+                    loadDashboard();
+                } catch (err) {
+                    alert('Could not accept: ' + err.message);
+                }
+            }
+            window.confirmBooking = confirmBooking;
+
+            async function completeBooking(id) {
+                var attended = confirm('Did the student attend this session?\n\nOK = Attended, Cancel = No-show');
+                try {
+                    await apiRequest('/bookings/' + id + '/complete', { method: 'PATCH', auth: true, body: { attended: attended } });
+                    loadDashboard();
+                } catch (err) {
+                    alert('Could not mark completed: ' + err.message);
+                }
+            }
+            window.completeBooking = completeBooking;
+
             async function loadDashboard() {
                 try {
                     var user = await apiRequest('/auth/me', { auth: true });
                     setUser(user);
+
+                    // Only approved tutors (role becomes "Tutor" on approval — see
+                    // the admin approve route) get to see the tutor dashboard.
+                    // Everyone else gets sent to apply instead.
+                    if (user.role !== 'Tutor') {
+                        window.location.href = '../becomeatutor.html';
+                        return;
+                    }
+
                     document.getElementById('profileName').textContent = user.fullname;
                     document.getElementById('profileCity').textContent = user.city || '-';
                     var welcome = document.querySelector('.header-text p');
@@ -1131,7 +1109,7 @@
                         newTable.insertAdjacentHTML('beforeend', '<tr><td colspan="10" style="text-align:center;color:#666;">No new booking requests.</td></tr>');
                     } else {
                         newRequests.forEach(function (b) {
-                            var studentName = (b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest';
+                            var studentName = (b.child && b.child.name) ? b.child.name : ((b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest');
                             newTable.insertAdjacentHTML('beforeend',
                                 '<tr>'
                                 + '<td>' + escapeHtml(studentName) + '</td>'
@@ -1140,7 +1118,8 @@
                                 + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                                 + '<td>' + escapeHtml(b.session || '-') + '</td>'
                                 + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
-                                + '<td><button onclick="cancelBooking(\'' + b._id + '\')">Decline</button></td>'
+                                + '<td><button onclick="confirmBooking(\'' + b._id + '\')">Accept</button> '
+                                + '<button onclick="cancelBooking(\'' + b._id + '\')">Decline</button></td>'
                                 + '</tr>');
                         });
                     }
@@ -1153,7 +1132,7 @@
                     upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="7" style="text-align:center;color:#666;">No upcoming sessions yet.</td></tr>');
                 } else {
                     upcoming.forEach(function (b) {
-                        var studentName = (b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest';
+                        var studentName = (b.child && b.child.name) ? b.child.name : ((b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest');
                         upcomingTable.insertAdjacentHTML('beforeend',
                             '<tr>'
                             + '<td>' + escapeHtml(studentName) + '</td>'
@@ -1162,7 +1141,8 @@
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                             + '<td>' + escapeHtml(b.session || '-') + '</td>'
                             + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
-                            + '<td><button onclick="cancelBooking(\'' + b._id + '\')">Cancel</button></td>'
+                            + '<td><button onclick="completeBooking(\'' + b._id + '\')">Mark Completed</button> '
+                            + '<button onclick="cancelBooking(\'' + b._id + '\')">Cancel</button></td>'
                             + '</tr>');
                     });
                 }

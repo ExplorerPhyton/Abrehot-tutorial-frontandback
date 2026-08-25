@@ -25,8 +25,8 @@ app.use(
     },
   })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // supports plain HTML form posts too
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' })); // supports plain HTML form posts too
 
 // --- Routes ---
 app.use('/api/auth', require('./routes/auth'));
@@ -35,6 +35,7 @@ app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/children', require('./routes/children'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="js/theme.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -364,6 +365,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="css/abrehot-theme.css">
 </head>
 
 <body>
@@ -466,6 +468,16 @@
             <!-- Student Information -->
             <fieldset>
                 <legend><strong>Student Information</strong></legend>
+                <div id="childSelectorWrapper" style="display:none; margin-bottom:16px;">
+                    <div class="main-label"><label for="childSelect">Which child is this session for?</label></div><br>
+                    <select id="childSelect" name="childId">
+                        <option value="">Select a child</option>
+                    </select>
+                    <p id="noChildrenNote" style="display:none; color:#c0392b; font-size:14px;">
+                        You haven't added any children yet. <a href="dashboards/parent-dash.html">Add one on your
+                            dashboard</a> before booking, so we know who the session is for.
+                    </p>
+                </div>
                 <div class="main-label"><label for="grade">Student Grade</label></div><br>
                 <select id="grade" name="grade" required>
                     <option value="">Select Grade</option>
@@ -518,26 +530,30 @@
                         <input type="radio" name="session" value="in-person"> In-Person</label>
                 </div>
                 <br>
-                <div class="main-label"><label>Online Meeting Platform (For Online Tutoring)</label></div>
-                <label>
-                    <input type="radio" name="platform" value="googleMeet" required>Google Meet
-                </label><br>
-                <label>
-                    <input type="radio" name="platform" value="zoom">Zoom
-                </label><br>
-                <label>
-                    <input type="radio" name="platform" value="microsoftTeams">Microsoft Teams
-                </label><br>
-                <label>
-                    <input type="radio" name="platform" value="telegram">Telegram
-                </label><br><br>
+                <div id="platformSection" style="display:none;">
+                    <div class="main-label" id="platformLabel">Online Meeting Platform</div>
+                    <label>
+                        <input type="radio" name="platform" value="googleMeet">Google Meet
+                    </label><br>
+                    <label>
+                        <input type="radio" name="platform" value="zoom">Zoom
+                    </label><br>
+                    <label>
+                        <input type="radio" name="platform" value="microsoftTeams">Microsoft Teams
+                    </label><br>
+                    <label>
+                        <input type="radio" name="platform" value="telegram">Telegram
+                    </label><br><br>
+                </div>
                 <!-- Location -->
+                <div id="locationSection" style="display:none;">
                 <div class="main-label"><label>Location (For In-Person Sessions):</label></div>
                 <div class="main-label"><label for="city">City/SubCity</label></div>
                 <input type="text" id="city" name="city" placeholder="eg. Addis Ababa, Lemi Kura"><br>
                 <div class="main-label"><label for="address">Address</label></div>
                 <input type="text" id="address" name="address" placeholder="Enter Address"><br>
                 <br>
+                </div>
                 <div class="main-label"><label for="language">Preferred Language(Optional)</label></div>
                 <select id="language" name="language">
                     <option>English</option>
@@ -783,13 +799,51 @@
     </script>
     <script src="js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async function () {
             var form = document.querySelector('form');
+
+            // Tutors book out their own time — they don't book sessions with other
+            // tutors. Check this before anything else on the page.
+            if (getToken()) {
+                try {
+                    var currentUser = await apiRequest('/auth/me', { auth: true });
+                    if (currentUser.role === 'Tutor') {
+                        form.style.display = 'none';
+                        var tutorGate = document.createElement('div');
+                        tutorGate.className = 'booking-summary';
+                        tutorGate.innerHTML =
+                            '<p><strong>Tutor accounts can\'t book sessions</strong></p>' +
+                            '<p style="margin:10px 0 16px;">You\'re signed in as a tutor, so this form isn\'t available on your account. Head back to your dashboard to manage your own sessions.</p>' +
+                            '<a href="dashboards/tutor-dash.html"><button type="button">Go to My Dashboard</button></a>';
+                        form.parentNode.insertBefore(tutorGate, form);
+                        return;
+                    }
+                } catch (err) {
+                    // token invalid/expired — fall through, the rest of the page will
+                    // handle unauthenticated users normally
+                }
+            }
 
             var urlParams = new URLSearchParams(window.location.search);
             var tutorId = urlParams.get('tutorId');
             var tutorName = urlParams.get('tutorName');
-            if (tutorId && tutorName) {
+
+            // A booking with no tutor attached has nobody to accept it — it just sits
+            // there. Require picking a tutor on tutors.html first; block the form here
+            // otherwise instead of letting it be submitted "unassigned".
+            if (!tutorId) {
+                form.style.display = 'none';
+                var gate = document.createElement('div');
+                gate.className = 'booking-summary';
+                gate.innerHTML =
+                    '<p><strong>Choose a tutor first</strong></p>' +
+                    '<p style="margin:10px 0 16px;">Booking requests go straight to a specific tutor, so pick one from our tutors page before filling out this form.</p>' +
+                    '<a href="tutors.html"><button type="button">Browse Tutors</button></a>';
+                form.parentNode.insertBefore(gate, form);
+                return;
+            }
+
+            if (tutorName) {
                 var banner = document.createElement('p');
                 banner.style.fontWeight = 'bold';
                 banner.style.color = '#1a3c6e';
@@ -797,13 +851,81 @@
                 form.prepend(banner);
             }
 
+            // The online-meeting-platform choice only makes sense for online
+            // sessions — keep it hidden (and never required) for in-person ones,
+            // and only show the location fields when they're actually relevant.
+            var sessionRadios = form.querySelectorAll('input[name="session"]');
+            var platformSection = document.getElementById('platformSection');
+            var locationSection = document.getElementById('locationSection');
+            function syncSessionTypeSections() {
+                var checked = form.querySelector('input[name="session"]:checked');
+                var isOnline = checked && checked.value === 'online';
+                var isInPerson = checked && checked.value === 'in-person';
+                platformSection.style.display = isOnline ? 'block' : 'none';
+                locationSection.style.display = isInPerson ? 'block' : 'none';
+                if (!isOnline) {
+                    var platformChecked = form.querySelector('input[name="platform"]:checked');
+                    if (platformChecked) platformChecked.checked = false;
+                }
+            }
+            sessionRadios.forEach(function (r) { r.addEventListener('change', syncSessionTypeSections); });
+            syncSessionTypeSections();
+
+            // Parents book "for" a specific child, since they won't be the one
+            // attending the session. Students/tutors/guests don't see this.
+            var user = getUser();
+            var isParent = user && user.role === 'Parent' && !!getToken();
+            var childSelectorWrapper = document.getElementById('childSelectorWrapper');
+            var childSelect = document.getElementById('childSelect');
+            var noChildrenNote = document.getElementById('noChildrenNote');
+            var childrenLoaded = [];
+
+            if (isParent) {
+                childSelectorWrapper.style.display = 'block';
+                try {
+                    childrenLoaded = await apiRequest('/children/mine', { auth: true });
+                } catch (err) {
+                    childrenLoaded = [];
+                }
+                if (!childrenLoaded.length) {
+                    childSelect.style.display = 'none';
+                    noChildrenNote.style.display = 'block';
+                } else {
+                    childrenLoaded.forEach(function (c) {
+                        var opt = document.createElement('option');
+                        opt.value = c._id;
+                        opt.textContent = c.name + (c.grade ? ' (' + c.grade + ')' : '');
+                        childSelect.appendChild(opt);
+                    });
+                    childSelect.required = true;
+                }
+            }
+
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
-                var subjects = Array.from(form.querySelectorAll('input[name="subject"]:checked')).map(function (el) { return el.value; });
-                var goals = Array.from(form.querySelectorAll('input[name="goal"]:checked')).map(function (el) { return el.value; });
+                if (isParent && childrenLoaded.length && !childSelect.value) {
+                    showFormMessage(form, 'Please select which child this session is for.', true);
+                    childSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+                if (isParent && !childrenLoaded.length) {
+                    showFormMessage(form, 'Please add a child on your dashboard before booking a session.', true);
+                    return;
+                }
+
                 var sessionInput = form.querySelector('input[name="session"]:checked');
                 var platformInput = form.querySelector('input[name="platform"]:checked');
+
+                // Only online sessions need a meeting platform — in-person ones don't.
+                if (sessionInput && sessionInput.value === 'online' && !platformInput) {
+                    showFormMessage(form, 'Please choose an online meeting platform.', true);
+                    platformSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+
+                var subjects = Array.from(form.querySelectorAll('input[name="subject"]:checked')).map(function (el) { return el.value; });
+                var goals = Array.from(form.querySelectorAll('input[name="goal"]:checked')).map(function (el) { return el.value; });
                 var otherEl = document.getElementById('other');
 
                 var payload = {
@@ -822,6 +944,7 @@
                     duration: document.getElementById('duration').value,
                     notes: document.getElementById('notes').value,
                     tutorId: tutorId || undefined,
+                    childId: isParent ? childSelect.value : undefined,
                 };
 
                 try {
@@ -832,6 +955,7 @@
                     });
                     showFormMessage(form, data.message || 'Booking request submitted!', false);
                     form.reset();
+                    if (isParent && childrenLoaded.length) childSelect.required = true;
                 } catch (err) {
                     showFormMessage(form, err.message, true);
                 }
@@ -840,6 +964,7 @@
     </script>
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="js/site-shell.js"></script>
 </body>
 
 </html>

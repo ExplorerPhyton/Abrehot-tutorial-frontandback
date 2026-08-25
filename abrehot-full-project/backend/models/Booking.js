@@ -5,6 +5,7 @@ const bookingSchema = new mongoose.Schema(
   {
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // optional, if logged in
     tutor: { type: mongoose.Schema.Types.ObjectId, ref: 'TutorProfile' }, // optional, if booking a specific tutor
+    child: { type: mongoose.Schema.Types.ObjectId, ref: 'Child' }, // who the session is actually for, when requestedBy is a Parent
 
     grade: { type: String, required: true }, // Kindergarten (KG) ... Grade 12
     subject: [String], // mathematics, english, physics, chemistry, biology, iCT, history, geography, other
@@ -25,6 +26,10 @@ const bookingSchema = new mongoose.Schema(
     notes: String,
 
     status: { type: String, enum: ['pending', 'confirmed', 'cancelled', 'completed'], default: 'pending' },
+    // Set only once a session is marked completed by the tutor: true = the
+    // student showed up, false = no-show. Null for everything else, which is
+    // what lets attendance % only count sessions that actually happened.
+    attended: { type: Boolean, default: null },
   },
   { timestamps: true }
 );

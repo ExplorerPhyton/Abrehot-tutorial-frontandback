@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="js/theme.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -388,13 +389,14 @@
         }
 
         .star.active {
-            color: gold;
+            color: var(--gold-leaf);
         }
 
         .star:hover {
-            color: gold;
+            color: var(--gold-leaf);
         }
     </style>
+    <link rel="stylesheet" href="css/abrehot-theme.css">
 </head>
 
 <body>
@@ -611,7 +613,7 @@
         <button id="applyFilters">Apply Filters</button>
         <button id="clearFilters">Clear Filters</button>
     </div>
-    <div id="tutorResults" style="background-color: #AED6F1; display: flex; flex-wrap: wrap; padding: 12px;">
+    <div id="tutorResults" style="background-color: var(--sand-50); display: flex; flex-wrap: wrap; padding: 12px; gap: 4px;">
         <!--Tutor cards are rendered here by js/tutors-search.js-->
     </div>
     <!--TO BE DONE WITH JAVASCRIPT! BUT NEEDS BACKEND AND DATABASE INTEGRATION.-->
@@ -776,6 +778,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var resultsEl = document.getElementById('tutorResults');
+            var viewerIsTutor = false;
+            if (getToken()) {
+                apiRequest('/auth/me', { auth: true }).then(function (u) {
+                    viewerIsTutor = u.role === 'Tutor';
+                    if (viewerIsTutor) {
+                        // Re-render with the already-loaded results now that we know
+                        // the viewer is a tutor, so the Book button gets stripped out.
+                        renderTutors(lastRenderedTutors);
+                    }
+                }).catch(function () { /* not logged in / expired token — ignore */ });
+            }
+            var lastRenderedTutors = [];
             var searchEl = document.getElementById('search');
             var gradeEl = document.getElementById('grade');
             var subjectEl = document.getElementById('subject');
@@ -858,6 +872,7 @@
             }
 
             function renderTutors(tutors) {
+                lastRenderedTutors = tutors;
                 if (!tutors.length) {
                     resultsEl.innerHTML = '<p style="padding:16px;">No tutors match your filters yet. Try adjusting them, or check back soon.</p>';
                     return;
@@ -872,7 +887,7 @@
                         + '<p><strong>Rating:</strong> <span class="tutor-rating-summary">' + (t.ratingCount ? ('\u2b50 ' + t.averageRating + ' (' + t.ratingCount + ' rating' + (t.ratingCount === 1 ? '' : 's') + ')') : 'No ratings yet') + '</span></p>'
                         + (t.price ? '<p><strong>Rate:</strong> ' + escapeHtml(t.price) + ' ETB/hour</p>' : '')
                         + (t.bio ? '<p>' + escapeHtml(t.bio) + '</p>' : '')
-                        + '<a href="book.html?tutorId=' + encodeURIComponent(t._id) + '&tutorName=' + encodeURIComponent(t.fullname) + '"><button>Book This Tutor</button></a>'
+                        + (viewerIsTutor ? '' : '<a href="book.html?tutorId=' + encodeURIComponent(t._id) + '&tutorName=' + encodeURIComponent(t.fullname) + '"><button>Book This Tutor</button></a>')
                         + '<br><br>'
                         + '<div style="font-weight:500;">Rate this Tutor</div>'
                         + '<div class="rating">'
@@ -889,6 +904,7 @@
         });
     </script>
 
+    <script src="js/site-shell.js"></script>
 </body>
 
 </html>

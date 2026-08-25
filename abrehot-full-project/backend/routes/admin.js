@@ -2,6 +2,7 @@ const router = require('express').Router();
 const TutorProfile = require('../models/TutorProfile');
 const Booking = require('../models/Booking');
 const ContactMessage = require('../models/ContactMessage');
+const User = require('../models/User');
 const { requireAdmin } = require('../middleware/adminAuth');
 const { notify } = require('../utils/notifications');
 
@@ -20,6 +21,13 @@ router.get('/tutors', async (req, res) => {
 router.post('/tutors/:id/approve', async (req, res) => {
   const tutor = await TutorProfile.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
   if (!tutor) return res.status(404).json({ message: 'Not found' });
+
+  // This is the ONLY place a user's role becomes "Tutor" — approval is what
+  // actually grants tutor-dashboard access, not the signup form.
+  if (tutor.user) {
+    await User.findByIdAndUpdate(tutor.user, { role: 'Tutor' });
+  }
+
   notify(tutor.user, "Great news — your tutor application has been approved! You're now listed on the Find a Tutor page.", '../dashboards/tutor-dash.html');
   res.json(tutor);
 });

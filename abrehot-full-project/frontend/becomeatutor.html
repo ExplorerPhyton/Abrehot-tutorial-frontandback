@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="js/theme.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -418,6 +419,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="css/abrehot-theme.css">
 </head>
 
 <body>
@@ -847,6 +849,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var form = document.querySelector('form');
+
+            // Applications require an account: approval promotes that account's
+            // role to Tutor, so there has to be one to promote.
+            if (!getToken()) {
+                form.style.display = 'none';
+                var gate = document.createElement('div');
+                gate.className = 'booking-summary';
+                gate.innerHTML =
+                    '<p><strong>Sign in to apply</strong></p>' +
+                    '<p style="margin:10px 0 16px;">Create a free account (or sign in) first — once your application is approved, that account becomes your tutor account.</p>' +
+                    '<a href="login.html"><button type="button">Log In</button></a> ' +
+                    '<a href="create-account.html"><button type="button">Create Account</button></a>';
+                form.parentNode.insertBefore(gate, form);
+                return;
+            }
+
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
@@ -882,15 +900,10 @@
                     var data = await apiRequest('/tutors/apply', {
                         method: 'POST',
                         body: payload,
-                        auth: !!getToken(),
+                        auth: true,
                     });
-                    updateStatus('Pending');
-                    showFormMessage(form, data.message || 'Application submitted! We will review it shortly. Redirecting you home...', false);
+                    showFormMessage(form, data.message || 'Application submitted! We will review it shortly.', false);
                     form.reset();
-                    form.querySelector('.api-message').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    setTimeout(function () {
-                        window.location.href = 'home.html';
-                    }, 1800);
                 } catch (err) {
                     showFormMessage(form, err.message, true);
                 }
@@ -899,6 +912,7 @@
     </script>
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="js/site-shell.js"></script>
 </body>
 
 </html>

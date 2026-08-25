@@ -3,12 +3,37 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+const PRESET_AVATARS = new Set([
+  'avatar-sky',
+  'avatar-rose',
+  'avatar-sage',
+  'avatar-gold',
+  'avatar-violet',
+  'avatar-teal',
+]);
+
 function signToken(user) {
   return jwt.sign(
     { id: user._id, role: user.role, fullname: user.fullname },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   );
+}
+
+function publicUser(user) {
+  return {
+    id: user._id,
+    fullname: user.fullname,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    city: user.city,
+    avatar: user.avatar || 'avatar-sky',
+  };
+}
+
+function isValidAvatar(value) {
+  return value === '' || value === null || (typeof value === 'string' && PRESET_AVATARS.has(value));
 }
 
 // POST /api/auth/register  — matches create-account.html
@@ -18,6 +43,17 @@ router.post('/register', async (req, res) => {
 
     if (!fullname || !email || !password || !account) {
       return res.status(400).json({ message: 'Missing required fields' });
+    }
+    // "Tutor" is never a self-selectable signup role — becoming a tutor requires
+    // submitting an application (becomeatutor.html) that an admin reviews and
+    // approves. Only after approval does an account's role become "Tutor" (see
+    // the admin approve route). This blocks anyone from just picking "Tutor" at
+    // signup and skipping that process — including a direct API call that
+    // bypasses the create-account.html form entirely.
+    if (account !== 'Parent' && account !== 'Student') {
+      return res.status(400).json({
+        message: 'Tutor accounts are created after your tutor application is approved. Please register as a Student or Parent, then apply on the Become a Tutor page.',
+      });
     }
     if (confirmPassword !== undefined && password !== confirmPassword) {
       return res.status(400).json({ message: 'Passwords do not match' });
@@ -41,7 +77,7 @@ router.post('/register', async (req, res) => {
     const token = signToken(user);
     res.status(201).json({
       token,
-      user: { id: user._id, fullname: user.fullname, email: user.email, role: user.role },
+      user: publicUser(user),
     });
   } catch (err) {
     res.status(500).json({ message: 'Registration failed', error: err.message });
@@ -72,7 +108,7 @@ router.post('/login', async (req, res) => {
     const token = signToken(user);
     res.json({
       token,
-      user: { id: user._id, fullname: user.fullname, email: user.email, role: user.role },
+      user: publicUser(user),
     });
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: err.message });
@@ -89,7 +125,11 @@ router.get('/me', requireAuth, async (req, res) => {
 
 // PATCH /api/auth/me — used by the "Edit Profile" buttons on dashboards
 router.patch('/me', requireAuth, async (req, res) => {
-  const editable = ['fullname', 'phone', 'city'];
+  if (req.body.avatar !== undefined && !isValidAvatar(req.body.avatar)) {
+    return res.status(400).json({ message: 'Please choose one of the preset avatars.' });
+  }
+
+  const editable = ['fullname', 'phone', 'city', 'avatar'];
   const updates = {};
   editable.forEach((field) => {
     if (req.body[field] !== undefined) updates[field] = req.body[field];
