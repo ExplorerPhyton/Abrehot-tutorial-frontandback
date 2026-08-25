@@ -25,6 +25,16 @@
         .reject-btn:hover { background: #a93226 !important; }
         #message { color: #c0392b; margin-top: 8px; }
         .empty { color: #666; font-style: italic; }
+        .ad-form { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .ad-form h3 { margin: 0 0 12px; color: #1a3c6e; }
+        .ad-form label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+        .ad-form input, .ad-form textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+        .ad-form textarea { min-height: 60px; resize: vertical; }
+        .ad-form button { margin-top: 14px; }
+        .ad-card { display: flex; gap: 14px; }
+        .ad-card img { width: 90px; height: 120px; object-fit: cover; border-radius: 4px; background: #eee; flex-shrink: 0; }
+        .ad-card .ad-body { flex: 1; }
+        .inactive-badge { background: #999; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
     </style>
     <link rel="stylesheet" href="css/abrehot-theme.css">
 </head>
@@ -46,6 +56,7 @@
             <button id="tabApproved">Approved Tutors</button>
             <button id="tabBookings">Bookings</button>
             <button id="tabContact">Contact Messages</button>
+            <button id="tabBookAds">Book Ads</button>
             <button id="logoutBtn" style="float:right; background:#888;">Log Out</button>
         </div>
         <div id="content"></div>
@@ -99,7 +110,7 @@
             gate.style.display = 'block';
         });
 
-        const tabs = { pending: 'tabPending', approved: 'tabApproved', bookings: 'tabBookings', contact: 'tabContact' };
+        const tabs = { pending: 'tabPending', approved: 'tabApproved', bookings: 'tabBookings', contact: 'tabContact', bookAds: 'tabBookAds' };
         Object.keys(tabs).forEach(function (key) {
             document.getElementById(tabs[key]).addEventListener('click', function () { showTab(key); });
         });
@@ -118,6 +129,7 @@
                 else if (key === 'approved') await renderTutorList('approved');
                 else if (key === 'bookings') await renderBookings();
                 else if (key === 'contact') await renderContact();
+                else if (key === 'bookAds') await renderBookAds();
             } catch (err) {
                 content.innerHTML = '<p style="color:#c0392b;">' + escapeHtml(err.message) + '</p>';
             }
@@ -190,6 +202,84 @@
                     + (m.feedback ? '<p><strong>Feedback:</strong> ' + escapeHtml(m.feedback) + '</p>' : '')
                     + '</div>';
             }).join('');
+        }
+
+        // --- Book Ads: the admin's "advertise a book, set a price" section ---
+
+        async function renderBookAds() {
+            content.innerHTML = '<p>Loading...</p>';
+            const ads = await adminRequest('/admin/book-ads');
+
+            const formHtml =
+                '<div class="ad-form">' +
+                '<h3>Add a Book Ad</h3>' +
+                '<label for="adTitle">Title *</label><input id="adTitle" placeholder="e.g. Grade 12 Physics Workbook">' +
+                '<label for="adAuthor">Author</label><input id="adAuthor" placeholder="e.g. Abrehot Publishing">' +
+                '<label for="adDescription">Description</label><textarea id="adDescription" placeholder="What is this book about?"></textarea>' +
+                '<label for="adPrice">Price (ETB) *</label><input id="adPrice" type="number" min="0" placeholder="e.g. 350">' +
+                '<label for="adImageUrl">Cover Image URL</label><input id="adImageUrl" placeholder="images/my-book-cover.jpg or a full https:// link">' +
+                '<label for="adBuyLink">Buy Link</label><input id="adBuyLink" placeholder="Telegram link, phone number, or store URL">' +
+                '<button id="addAdBtn">Add Ad</button>' +
+                '<p id="adFormMessage" style="color:#c0392b; margin-top:8px;"></p>' +
+                '</div>';
+
+            const listHtml = !ads.length
+                ? '<p class="empty">No book ads yet — add one above.</p>'
+                : ads.map(function (ad) {
+                    return '<div class="card ad-card">'
+                        + (ad.imageUrl ? '<img src="' + escapeHtml(ad.imageUrl) + '" alt="">' : '')
+                        + '<div class="ad-body">'
+                        + '<h3>' + escapeHtml(ad.title) + (ad.active ? '' : '<span class="inactive-badge">Hidden</span>') + '</h3>'
+                        + (ad.author ? '<p><strong>By:</strong> ' + escapeHtml(ad.author) + '</p>' : '')
+                        + (ad.description ? '<p>' + escapeHtml(ad.description) + '</p>' : '')
+                        + '<p><strong>Price:</strong> ' + escapeHtml(ad.price) + ' ETB</p>'
+                        + (ad.buyLink ? '<p><strong>Buy link:</strong> ' + escapeHtml(ad.buyLink) + '</p>' : '')
+                        + '<div class="actions">'
+                        + '<button onclick="toggleAdActive(\'' + ad._id + '\', ' + !ad.active + ')">' + (ad.active ? 'Hide from site' : 'Show on site') + '</button>'
+                        + '<button class="reject-btn" onclick="deleteAd(\'' + ad._id + '\')">Delete</button>'
+                        + '</div>'
+                        + '</div>'
+                        + '</div>';
+                }).join('');
+
+            content.innerHTML = formHtml + listHtml;
+
+            document.getElementById('addAdBtn').addEventListener('click', async function () {
+                const title = document.getElementById('adTitle').value.trim();
+                const price = document.getElementById('adPrice').value;
+                const msgEl = document.getElementById('adFormMessage');
+                if (!title || !price) {
+                    msgEl.textContent = 'Title and price are required.';
+                    return;
+                }
+                try {
+                    await adminRequest('/admin/book-ads', {
+                        method: 'POST',
+                        body: {
+                            title,
+                            author: document.getElementById('adAuthor').value.trim(),
+                            description: document.getElementById('adDescription').value.trim(),
+                            price,
+                            imageUrl: document.getElementById('adImageUrl').value.trim(),
+                            buyLink: document.getElementById('adBuyLink').value.trim(),
+                        },
+                    });
+                    renderBookAds();
+                } catch (err) {
+                    msgEl.textContent = err.message;
+                }
+            });
+        }
+
+        async function toggleAdActive(id, nextActive) {
+            await adminRequest('/admin/book-ads/' + id, { method: 'PATCH', body: { active: nextActive } });
+            renderBookAds();
+        }
+
+        async function deleteAd(id) {
+            if (!confirm('Delete this book ad permanently?')) return;
+            await adminRequest('/admin/book-ads/' + id, { method: 'DELETE' });
+            renderBookAds();
         }
 
         // Auto-unlock if we already have a secret from a previous session

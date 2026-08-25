@@ -36,6 +36,7 @@ app.use('/api/contact', require('./routes/contact'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/children', require('./routes/children'));
+app.use('/api/book-ads', require('./routes/bookads'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

@@ -679,6 +679,20 @@
         </div>
     </section>
 
+    <!-- Book Ads Section — books the admin is selling, managed from admin.html -->
+    <section class="educators-section" id="bookAdsSection" style="display:none;">
+        <div class="container">
+            <div class="educators-header">
+                <div>
+                    <span class="section-tag" data-en="From Our Team" data-am="ከቡድናችን">From Our Team</span>
+                    <h2 style="font-size: 2.25rem;" data-en="Books & Study Materials" data-am="መጻሕፍት እና የትምህርት ቁሳቁሶች">Books & Study Materials</h2>
+                </div>
+            </div>
+
+            <div class="educator-row" id="bookAdsRow"></div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container footer-inner">
@@ -757,6 +771,36 @@
                 }).join('');
             } catch (err) {
                 row.innerHTML = '<p style="padding:16px;color:#c0392b;">Could not load tutors: ' + escapeHtml(err.message) + '</p>';
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            var section = document.getElementById('bookAdsSection');
+            var row = document.getElementById('bookAdsRow');
+            try {
+                var ads = await apiRequest('/book-ads');
+                if (!ads.length) return; // keep the whole section hidden if the admin hasn't added any yet
+
+                section.style.display = 'block';
+                row.innerHTML = ads.map(function (ad) {
+                    return '<div class="instructor-card">'
+                        + (ad.imageUrl
+                            ? '<img src="' + escapeHtml(ad.imageUrl) + '" alt="' + escapeHtml(ad.title) + '" class="instructor-avatar" style="border-radius:8px;">'
+                            : '<div class="instructor-avatar" style="border-radius:8px;background:var(--sand-100, #F5EFE6);display:flex;align-items:center;justify-content:center;"><i class="bx bx-book" style="font-size:2rem;color:var(--terracotta);"></i></div>')
+                        + '<div class="instructor-meta">'
+                        + '<h3>' + escapeHtml(ad.title) + '</h3>'
+                        + (ad.author ? '<p style="font-size:0.85rem;opacity:0.8;">' + escapeHtml(ad.author) + '</p>' : '')
+                        + (ad.description ? '<p>' + escapeHtml(ad.description) + '</p>' : '')
+                        + '<p style="font-weight:700;color:var(--terracotta);">' + escapeHtml(ad.price) + ' ETB</p>'
+                        + (ad.buyLink
+                            ? '<a href="' + escapeHtml(ad.buyLink) + '" target="_blank" rel="noopener" style="font-size: 0.85rem; color: var(--terracotta); font-weight: 600; text-decoration: none;">Buy Now &rarr;</a>'
+                            : '<a href="contact.html" style="font-size: 0.85rem; color: var(--terracotta); font-weight: 600; text-decoration: none;">Contact to Buy &rarr;</a>')
+                        + '</div>'
+                        + '</div>';
+                }).join('');
+            } catch (err) {
+                console.error('Could not load book ads', err);
             }
         });
     </script>

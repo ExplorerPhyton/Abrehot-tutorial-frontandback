@@ -3,6 +3,7 @@ const TutorProfile = require('../models/TutorProfile');
 const Booking = require('../models/Booking');
 const ContactMessage = require('../models/ContactMessage');
 const User = require('../models/User');
+const BookAd = require('../models/BookAd');
 const { requireAdmin } = require('../middleware/adminAuth');
 const { notify } = require('../utils/notifications');
 
@@ -50,6 +51,49 @@ router.get('/bookings', async (req, res) => {
 router.get('/contact', async (req, res) => {
   const messages = await ContactMessage.find().sort({ createdAt: -1 }).limit(100);
   res.json(messages);
+});
+
+// GET /api/admin/book-ads — every ad, including inactive ones (admin-only view)
+router.get('/book-ads', async (req, res) => {
+  const ads = await BookAd.find().sort({ createdAt: -1 });
+  res.json(ads);
+});
+
+// POST /api/admin/book-ads — add a new book advertisement
+router.post('/book-ads', async (req, res) => {
+  const { title, author, description, price, imageUrl, buyLink } = req.body;
+  if (!title || price === undefined || price === '') {
+    return res.status(400).json({ message: 'Title and price are required' });
+  }
+  const ad = await BookAd.create({
+    title,
+    author,
+    description,
+    price: Number(price),
+    imageUrl,
+    buyLink,
+  });
+  res.status(201).json(ad);
+});
+
+// PATCH /api/admin/book-ads/:id — edit a book ad, or flip active/inactive
+router.patch('/book-ads/:id', async (req, res) => {
+  const editable = ['title', 'author', 'description', 'price', 'imageUrl', 'buyLink', 'active'];
+  const updates = {};
+  editable.forEach((field) => {
+    if (req.body[field] !== undefined) updates[field] = req.body[field];
+  });
+  if (updates.price !== undefined) updates.price = Number(updates.price);
+  const ad = await BookAd.findByIdAndUpdate(req.params.id, updates, { new: true });
+  if (!ad) return res.status(404).json({ message: 'Not found' });
+  res.json(ad);
+});
+
+// DELETE /api/admin/book-ads/:id
+router.delete('/book-ads/:id', async (req, res) => {
+  const ad = await BookAd.findByIdAndDelete(req.params.id);
+  if (!ad) return res.status(404).json({ message: 'Not found' });
+  res.json({ message: 'Removed' });
 });
 
 module.exports = router;
