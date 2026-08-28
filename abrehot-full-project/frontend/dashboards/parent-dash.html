@@ -569,6 +569,7 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Mode</th>
+                        <th>Price</th>
                         <th>Full Information</th>
                         <th>Booking Request Status</th>
                         <th>Cancel Session</th>
@@ -663,6 +664,7 @@
                         <th>Student</th>
                         <th>Tutor</th>
                         <th>Subject</th>
+                        <th>Price</th>
                         <th>Full Information</th>
                         <th>Status</th>
                     </tr>
@@ -769,7 +771,7 @@
         <div class="section">
             <h2>Quick Actions</h2>
             <div class="actionButtons">
-                <button onclick="location.href='../book.html'">Book a Session</button>
+                <button onclick="location.href='../book.html'">Schedule a Class</button>
                 <button onclick="location.href='../tutors.html'">Browse Tutors</button>
                 <button onclick="location.href='../contact.html'">Contact Support</button>
                 <button onclick="location.href='../donate.html'">Donate</button>
@@ -813,6 +815,22 @@
             <div class="detail">
                 <strong>Session Type</strong>
                 <span id="sessionType"></span>
+            </div>
+            <div class="detail">
+                <strong>Group Size</strong>
+                <span id="groupSize"></span>
+            </div>
+            <div class="detail">
+                <strong>Price</strong>
+                <span id="price"></span>
+            </div>
+            <div class="detail">
+                <strong>Payment Method</strong>
+                <span id="paymentMethod"></span>
+            </div>
+            <div class="detail">
+                <strong>Transaction Ref</strong>
+                <span id="transactionId"></span>
             </div>
             <div class="detail">
                 <strong>Meeting Platform</strong>
@@ -866,7 +884,11 @@
             date,
             time,
             duration,
-            notes
+            notes,
+            groupSize,
+            price,
+            paymentMethod,
+            transactionId
         ) {
             document.getElementById("studentName").innerHTML = student;
             document.getElementById("tutor").innerHTML = tutor;
@@ -874,6 +896,10 @@
             document.getElementById("topic").innerHTML = topic;
             document.getElementById("goal").innerHTML = goal;
             document.getElementById("sessionType").innerHTML = sessionType;
+            document.getElementById("groupSize").innerHTML = groupSize;
+            document.getElementById("price").innerHTML = price;
+            document.getElementById("paymentMethod").innerHTML = paymentMethod;
+            document.getElementById("transactionId").innerHTML = transactionId;
             document.getElementById("platform").innerHTML = platform;
             document.getElementById("location").innerHTML = location;
             document.getElementById("address").innerHTML = address;
@@ -1044,6 +1070,22 @@
                 return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
             }
 
+            // Group sessions split the tutor's hourly rate equally between the
+            // students — surface that, and the flat rate for private sessions.
+            function bookingPrice(b) {
+                if (b.session === 'group' && b.groupSize) {
+                    var per = b.perPersonPrice != null ? b.perPersonPrice :
+                        (b.tutorRate != null ? Math.round((b.tutorRate / b.groupSize) * 100) / 100 : null);
+                    if (per != null) return per + ' ETB/person';
+                    return 'Group of ' + b.groupSize;
+                }
+                return b.tutorRate != null ? b.tutorRate + ' ETB/hr' : '-';
+            }
+
+            function groupSizeLabel(b) {
+                return (b.session === 'group' && b.groupSize) ? b.groupSize + ' students' : '-';
+            }
+
             function bookingArgs(b) {
                 var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not yet assigned';
                 var studentName = b.child && b.child.name ? b.child.name : (b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-');
@@ -1062,6 +1104,10 @@
                     b.time || '-',
                     b.duration || '-',
                     b.notes || '-',
+                    groupSizeLabel(b),
+                    bookingPrice(b),
+                    b.paymentMethod || '-',
+                    b.transactionId || '-',
                 ].map(function (v) { return "'" + String(v).replace(/'/g, "\\'") + "'"; }).join(',\n');
             }
 
@@ -1107,7 +1153,7 @@
                 var upcomingRows = upcomingTable.querySelectorAll('tr');
                 for (var i = 1; i < upcomingRows.length; i++) upcomingRows[i].remove();
                 if (!upcoming.length) {
-                    upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="9" style="text-align:center;color:#666;">No upcoming sessions yet. <a href="../book.html">Book one</a>.</td></tr>');
+                    upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="10" style="text-align:center;color:#666;">No upcoming sessions yet. <a href="../book.html">Schedule one</a>.</td></tr>');
                 } else {
                     upcoming.forEach(function (b) {
                         var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not yet assigned';
@@ -1119,6 +1165,7 @@
                             + '<td>' + escapeHtml(fmtDate(b.date)) + '</td>'
                             + '<td>' + escapeHtml(b.time || '-') + '</td>'
                             + '<td>' + escapeHtml(b.session || '-') + '</td>'
+                            + '<td>' + escapeHtml(bookingPrice(b)) + '</td>'
                             + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
                             + '<td>' + escapeHtml(b.status) + '</td>'
                             + '<td><button onclick="cancelBooking(\'' + b._id + '\', this)">Remove</button></td>'
@@ -1130,7 +1177,7 @@
                 var historyRows = historyTable.querySelectorAll('tr');
                 for (var j = 1; j < historyRows.length; j++) historyRows[j].remove();
                 if (!past.length) {
-                    historyTable.insertAdjacentHTML('beforeend', '<tr><td colspan="6" style="text-align:center;color:#666;">No past sessions yet.</td></tr>');
+                    historyTable.insertAdjacentHTML('beforeend', '<tr><td colspan="7" style="text-align:center;color:#666;">No past sessions yet.</td></tr>');
                 } else {
                     past.forEach(function (b) {
                         var tutorName = (b.tutor && b.tutor.fullname) ? b.tutor.fullname : 'Not assigned';
@@ -1140,6 +1187,7 @@
                             + '<td>' + escapeHtml(b.child && b.child.name ? b.child.name : (b.requestedBy && b.requestedBy.fullname ? b.requestedBy.fullname : '-')) + '</td>'
                             + '<td>' + escapeHtml(tutorName) + '</td>'
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
+                            + '<td>' + escapeHtml(bookingPrice(b)) + '</td>'
                             + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
                             + '<td>' + escapeHtml(b.status) + '</td>'
                             + '</tr>');

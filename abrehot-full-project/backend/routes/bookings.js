@@ -5,10 +5,50 @@ const Child = require('../models/Child');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
 const { notifyAdmin } = require('../utils/mailer');
 const { notify } = require('../utils/notifications');
+const { verifyPaymentReference } = require('../utils/paymentVerifier');
 
 function toArray(value) {
   if (value === undefined || value === null || value === '') return [];
   return Array.isArray(value) ? value : [value];
+}
+
+function getDurationMinutes(durationStr) {
+  if (!durationStr) return 60;
+  if (durationStr.includes('1.5')) return 90;
+  if (durationStr.includes('2 +') || durationStr.includes('2+')) return 150;
+  if (durationStr.includes('2')) return 120;
+  return 60;
+}
+
+function getSessionTimeRange(dateVal, timeStr, durationStr) {
+  if (!dateVal || !timeStr) return null;
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return null;
+
+  let hours = 9, minutes = 0;
+  if (typeof timeStr === 'string' && timeStr.includes(':')) {
+    const parts = timeStr.split(':');
+    hours = parseInt(parts[0], 10) || 0;
+    minutes = parseInt(parts[1], 10) || 0;
+  }
+
+  const start = new Date(d);
+  start.setHours(hours, minutes, 0, 0);
+  const durMins = getDurationMinutes(durationStr);
+  const end = new Date(start.getTime() + durMins * 60 * 1000);
+
+  return { start: start.getTime(), end: end.getTime() };
+}
+
+function isSameDay(d1, d2) {
+  if (!d1 || !d2) return false;
+  const date1 = new Date(d1);
+  const date2 = new Date(d2);
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
 }
 
 // POST /api/bookings — matches book.html
@@ -16,12 +56,38 @@ router.post('/', attachUserIfPresent, async (req, res) => {
   try {
     const {
       grade, subject, other, topic, goal,
-      session, platform, city, address, language,
+      session, groupMode, groupSize, platform, city, address, language,
       date, time, duration, notes, tutorId, childId,
+      paymentMethod, transactionId,
+      planType, selectedDays, selectedTimeSlots,
     } = req.body;
 
     if (!grade) {
       return res.status(400).json({ message: 'Grade is required' });
+    }
+
+    if (planType === 'monthly') {
+      const daysArr = toArray(selectedDays);
+      if (!daysArr.length) {
+        return res.status(400).json({ message: 'Please select at least one day for your monthly tutoring plan.' });
+      }
+    }
+
+    if (!paymentMethod || !['CBE', 'Telebirr'].includes(paymentMethod)) {
+      return res.status(400).json({ message: 'Please select a valid payment method (CBE or Telebirr).' });
+    }
+    if (!transactionId || !transactionId.trim()) {
+      return res.status(400).json({ message: 'Transaction ID / Reference is required to complete your payment.' });
+    }
+
+    // --- Automated Payment Reference Verification ---
+    const paymentCheck = await verifyPaymentReference(paymentMethod, transactionId);
+    if (!paymentCheck.success) {
+      return res.status(400).json({ message: paymentCheck.message });
+    }
+
+    if (!date || !time) {
+      return res.status(400).json({ message: 'Preferred Date and Time are required to schedule your session.' });
     }
 
     // Tutors book out their own time — they don't book sessions with other
@@ -41,9 +107,48 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       return res.status(400).json({ message: 'That tutor is not available for booking.' });
     }
 
+    // --- Timetable Schedule Check ---
+    // Prevent double booking: verify the tutor has no existing overlapping session on the same date and time.
+    const reqRange = getSessionTimeRange(date, time, duration);
+    if (reqRange) {
+      const activeBookings = await Booking.find({
+        tutor: tutorId,
+        status: { $in: ['pending', 'confirmed'] },
+      });
+
+      const conflict = activeBookings.find((b) => {
+        if (!isSameDay(b.date, date)) return false;
+        const existRange = getSessionTimeRange(b.date, b.time, b.duration);
+        if (!existRange) return false;
+        return Math.max(reqRange.start, existRange.start) < Math.min(reqRange.end, existRange.end);
+      });
+
+      if (conflict) {
+        return res.status(400).json({
+          message: 'This tutor is already booked for another session at this time. Please select a different time or date.',
+        });
+      }
+    }
+
+    // Group sessions: the booker must say how many students are splitting the
+    // rate (2-30) and how the group will actually meet the tutor (online picks a
+    // platform, in-person picks a location).
+    let effectiveMode = session; // for 'online'/'in-person' the venue is the session itself
+    if (session === 'group') {
+      const size = Number(groupSize);
+      if (!Number.isInteger(size) || size < 2 || size > 30) {
+        return res.status(400).json({ message: 'Please enter how many students are in the group (2 to 30).' });
+      }
+      if (groupMode !== 'online' && groupMode !== 'in-person') {
+        return res.status(400).json({ message: 'Please choose how the group will meet: online or in-person.' });
+      }
+      effectiveMode = groupMode;
+    }
+
     // Session-type-specific requirements: an online meeting platform only makes
-    // sense for online sessions, and shouldn't be forced on in-person bookings.
-    if (session === 'online' && !platform) {
+    // sense for online sessions (including online group sessions), and shouldn't
+    // be forced on in-person bookings.
+    if (effectiveMode === 'online' && !platform) {
       return res.status(400).json({ message: 'Please choose an online meeting platform.' });
     }
 
@@ -57,6 +162,25 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       }
     }
 
+    // Snapshot the tutor's rate at booking time so the price shown today
+    // stays stable even if the tutor changes their profile later.
+    const isMonthlyPlan = planType === 'monthly';
+    const activeRate = isMonthlyPlan
+      ? (chosenTutor.monthlyPrice != null ? Number(chosenTutor.monthlyPrice) : (chosenTutor.price != null ? Number(chosenTutor.price) * 12 : undefined))
+      : (chosenTutor.price != null ? Number(chosenTutor.price) : undefined);
+    const tutorRate = activeRate;
+
+    // Group sessions are a flat split of the tutor's hourly rate across the
+    // attending students — no extra discount, the split IS the saving. Each
+    // student pays rate / groupSize, and the whole group collectively pays the
+    // full hourly rate (perPersonPrice * groupSize === tutorRate, modulo rounding).
+    let perPersonPrice, groupTotalPrice;
+    if (session === 'group' && tutorRate != null) {
+      const size = Number(groupSize);
+      perPersonPrice = Math.round((tutorRate / size) * 100) / 100;
+      groupTotalPrice = tutorRate;
+    }
+
     const booking = await Booking.create({
       requestedBy: req.user ? req.user.id : undefined,
       tutor: tutorId || undefined,
@@ -67,6 +191,8 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       topic,
       goal: toArray(goal),
       session,
+      groupMode: session === 'group' ? groupMode : undefined,
+      groupSize: session === 'group' ? Number(groupSize) : undefined,
       platform,
       city,
       address,
@@ -75,17 +201,34 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       time,
       duration,
       notes,
+      planType: isMonthlyPlan ? 'monthly' : 'hourly',
+      selectedDays: isMonthlyPlan ? toArray(selectedDays) : [],
+      selectedTimeSlots: isMonthlyPlan ? (selectedTimeSlots || []) : [],
+      paymentMethod,
+      transactionId: transactionId.trim(),
+      paymentStatus: 'Verified',
+      status: 'confirmed', // Auto-confirmed: timetable schedule check passed & payment reference verified
+      tutorRate,
+      perPersonPrice,
+      groupTotalPrice,
     });
 
-    res.status(201).json({ message: 'Booking request submitted', booking });
+    res.status(201).json({ message: 'Booking confirmed and scheduled successfully!', booking });
+
+    const groupLine = session === 'group'
+      ? `Group session for ${booking.groupSize} students — ${perPersonPrice != null ? perPersonPrice + ' ETB/person' : 'rate split equally'} (${groupMode})\n`
+      : '';
 
     notifyAdmin(
-      `New booking request (${grade})`,
+      `New confirmed booking (${grade}) - Paid via ${paymentMethod}`,
       `Subject(s): ${(booking.subject || []).join(', ') || other || '-'}\n` +
         (child ? `For: ${child.name}\n` : '') +
         `Session: ${session || '-'} via ${platform || '-'}\n` +
+        groupLine +
         `City: ${city || '-'}\n` +
         `Date/time: ${date || '-'} ${time || ''}\n` +
+        `Payment Method: ${paymentMethod}\n` +
+        `Transaction ID: ${transactionId.trim()}\n` +
         (notes ? `Notes: ${notes}\n` : '') +
         `\nView it on your admin page.`
     );
@@ -93,7 +236,8 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     if (tutorId) {
       TutorProfile.findById(tutorId).then((tutor) => {
         if (tutor && tutor.user) {
-          notify(tutor.user, `New booking request for ${(booking.subject || []).join(', ') || 'a session'} (${grade}).`, '../dashboards/tutor-dash.html');
+          const groupNote = session === 'group' ? ` for a group of ${booking.groupSize} students` : '';
+          notify(tutor.user, `New confirmed booking scheduled${groupNote} for ${(booking.subject || []).join(', ') || 'a session'} on ${date} ${time}.`, '../dashboards/tutor-dash.html');
         }
       });
     }

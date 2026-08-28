@@ -529,13 +529,14 @@
                 <button class="edit" id="updateGradesBtn">Update Grades</button>
             </div>
             <div class="card">
-                <h3>Teaching Information</h3>
+                <h3>Teaching Information & Pricing</h3>
                 <p><strong>Experience:</strong> <span id="displayExperience">-</span></p>
                 <p><strong>Languages:</strong> <span id="displayLanguages">-</span></p>
                 <p><strong>Mode:</strong> <span id="displayMode">-</span></p>
-                <p><strong>Hourly Rate:</strong> <span id="displayPrice">-</span> ETB</p>
+                <p><strong>Hourly Rate:</strong> <span id="displayPrice">-</span> ETB/hr</p>
+                <p><strong>Monthly Plan:</strong> <span id="displayMonthlyPrice">-</span> ETB/month</p>
                 <br>
-                <button class="edit" id="updateTeachingBtn">Update Teaching Info</button>
+                <button class="edit" id="updateTeachingBtn">Update Teaching Info & Rates</button>
             </div>
         </div>
         <br>
@@ -563,25 +564,9 @@
                         <th>Time</th>
                         <th>Subject</th>
                         <th>Mode</th>
+                        <th>Price</th>
                         <th>Full Information</th>
                         <th>Actions</th>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <br>
-        <div class="card">
-            <h3>New Booking Requests</h3>
-            <div class="table-scroll">
-                <table id="newRequestsTable">
-                    <tr>
-                        <th>Student</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Subject</th>
-                        <th>Mode</th>
-                        <th>Full Information</th>
-                        <th>Action</th>
                     </tr>
                 </table>
             </div>
@@ -656,6 +641,22 @@
                 <span id="sessionType"></span>
             </div>
             <div class="detail">
+                <strong>Group</strong>
+                <span id="groupLabel"></span>
+            </div>
+            <div class="detail">
+                <strong>Price</strong>
+                <span id="price"></span>
+            </div>
+            <div class="detail">
+                <strong>Payment Method</strong>
+                <span id="paymentMethod"></span>
+            </div>
+            <div class="detail">
+                <strong>Transaction Ref</strong>
+                <span id="transactionId"></span>
+            </div>
+            <div class="detail">
                 <strong>Meeting Platform</strong>
                 <span id="platform"></span>
             </div>
@@ -723,6 +724,10 @@
             phone,
             email,
             notes,
+            groupLabel,
+            price,
+            paymentMethod,
+            transactionId
         ) {
             document.getElementById("studentName").innerHTML = student;
             document.getElementById("studentGrade").innerHTML = grade;
@@ -730,6 +735,10 @@
             document.getElementById("topic").innerHTML = topic;
             document.getElementById("goal").innerHTML = goal;
             document.getElementById("sessionType").innerHTML = sessionType;
+            document.getElementById("groupLabel").innerHTML = groupLabel;
+            document.getElementById("price").innerHTML = price;
+            document.getElementById("paymentMethod").innerHTML = paymentMethod;
+            document.getElementById("transactionId").innerHTML = transactionId;
             document.getElementById("platform").innerHTML = platform;
             document.getElementById("location").innerHTML = location;
             document.getElementById("address").innerHTML = address;
@@ -908,8 +917,10 @@
                 if (languages === null) return;
                 var mode = prompt('Mode (Online, In-Person, or Both)', currentProfile.mode || '');
                 if (mode === null) return;
-                var price = prompt('Hourly rate (ETB, numbers only)', currentProfile.price || '');
+                var price = prompt('Hourly rate in ETB/hr', currentProfile.price != null ? currentProfile.price : '');
                 if (price === null) return;
+                var monthlyPrice = prompt('Monthly Plan fee in ETB/month', currentProfile.monthlyPrice != null ? currentProfile.monthlyPrice : '');
+                if (monthlyPrice === null) return;
                 try {
                     currentProfile = await apiRequest('/tutors/me', {
                         method: 'PATCH', auth: true,
@@ -917,7 +928,8 @@
                             experience: experience,
                             languages: languages.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
                             mode: mode,
-                            price: price ? Number(price) : undefined,
+                            price: price !== '' ? Number(price) : undefined,
+                            monthlyPrice: monthlyPrice !== '' ? Number(monthlyPrice) : undefined,
                         },
                     });
                     applyTutorProfile(currentProfile);
@@ -928,10 +940,16 @@
 
             document.getElementById('updateAvailabilityBtn').addEventListener('click', async function () {
                 if (!currentProfile) { alert('No tutor application on file yet.'); return; }
-                var availability = prompt('Availability (e.g. "Monday-Friday, 4-8 PM")', currentProfile.availability || '');
+                var daysStr = prompt('Available Days (comma-separated, e.g. "Monday, Wednesday, Friday, Saturday")', (currentProfile.availableDays || []).join(', ') || 'Monday, Wednesday, Friday');
+                if (daysStr === null) return;
+                var availability = prompt('Time Slots / Notes (e.g. "4:00 PM - 8:00 PM")', currentProfile.availability || '');
                 if (availability === null) return;
+                var daysArr = daysStr.split(',').map(function (d) { return d.trim(); }).filter(Boolean);
                 try {
-                    currentProfile = await apiRequest('/tutors/me', { method: 'PATCH', auth: true, body: { availability: availability } });
+                    currentProfile = await apiRequest('/tutors/me', {
+                        method: 'PATCH', auth: true,
+                        body: { availability: availability, availableDays: daysArr }
+                    });
                     applyTutorProfile(currentProfile);
                 } catch (err) {
                     alert('Could not update availability: ' + err.message);
@@ -959,9 +977,12 @@
                 document.getElementById('displayLanguages').textContent = (profile.languages || []).join(', ') || '-';
                 document.getElementById('displayMode').textContent = profile.mode || '-';
                 document.getElementById('displayPrice').textContent = profile.price != null ? profile.price : '-';
+                const mPriceEl = document.getElementById('displayMonthlyPrice');
+                if (mPriceEl) mPriceEl.textContent = profile.monthlyPrice != null ? profile.monthlyPrice : 'Not set';
                 document.getElementById('profileTitle').textContent = (profile.subjects || []).join(', ') + ' Tutor';
                 document.getElementById('profileStatus').textContent = profile.status === 'approved' ? 'Approved & Listed' : (profile.status === 'pending' ? 'Pending Review' : 'Not Approved');
-                document.getElementById('displayAvailability').innerHTML = '<i class="bx bx-time"></i> ' + escapeHtml(profile.availability || 'Not set yet');
+                var availText = (profile.availableDays && profile.availableDays.length ? 'Days: ' + profile.availableDays.join(', ') + ' — ' : '') + (profile.availability || 'Not set yet');
+                document.getElementById('displayAvailability').innerHTML = '<i class="bx bx-time"></i> ' + escapeHtml(availText);
                 document.getElementById('displayEducation').textContent = profile.education || 'Not set yet';
                 document.getElementById('displayInstitution').textContent = profile.institution || '-';
                 document.getElementById('displayExperienceQual').textContent = profile.experience ? (profile.experience + ' teaching experience') : '-';
@@ -995,6 +1016,31 @@
                 return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
             }
 
+            // For group sessions the tutor's hourly rate is split equally between the
+            // students — show both what each student pays and the total the group
+            // collectively pays; private sessions just show the flat hourly rate.
+            function bookingPrice(b) {
+                if (b.session === 'group' && b.groupSize) {
+                    var per = b.perPersonPrice != null ? b.perPersonPrice :
+                        (b.tutorRate != null ? Math.round((b.tutorRate / b.groupSize) * 100) / 100 : null);
+                    var total = b.groupTotalPrice != null ? b.groupTotalPrice : (b.tutorRate != null ? b.tutorRate : null);
+                    var parts = [];
+                    if (per != null) parts.push(per + ' ETB/person');
+                    if (total != null) parts.push(total + ' ETB total');
+                    if (parts.length) return parts.join(' \u00b7 ');
+                    return 'Group of ' + b.groupSize;
+                }
+                return b.tutorRate != null ? b.tutorRate + ' ETB/hr' : '-';
+            }
+
+            function groupLabel(b) {
+                if (b.session !== 'group') return '-';
+                var label = b.groupSize ? b.groupSize + ' students' : 'group';
+                if (b.groupMode === 'online') label += ' \u00d7 online';
+                else if (b.groupMode === 'in-person') label += ' \u00d7 in-person';
+                return label;
+            }
+
             function bookingArgs(b) {
                 var accountName = (b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest';
                 var studentName = (b.child && b.child.name) ? b.child.name : accountName;
@@ -1018,6 +1064,10 @@
                     phone,
                     email,
                     b.notes || '-',
+                    groupLabel(b),
+                    bookingPrice(b),
+                    b.paymentMethod || '-',
+                    b.transactionId || '-',
                 ].map(function (v) { return "'" + String(v).replace(/'/g, "\\'") + "'"; }).join(',\n');
             }
 
@@ -1091,8 +1141,7 @@
                     console.error('Could not load bookings', err);
                 }
 
-                var newRequests = bookings.filter(function (b) { return b.status === 'pending'; });
-                var upcoming = bookings.filter(function (b) { return b.status === 'confirmed'; });
+                var upcoming = bookings.filter(function (b) { return b.status === 'confirmed' || b.status === 'pending'; });
                 var completed = bookings.filter(function (b) { return b.status === 'completed'; });
                 var distinctStudents = {};
                 bookings.forEach(function (b) { if (b.requestedBy && b.requestedBy._id) distinctStudents[b.requestedBy._id] = true; });
@@ -1101,35 +1150,11 @@
                 document.getElementById('statCompleted').textContent = completed.length;
                 document.getElementById('statUpcoming').textContent = upcoming.length;
 
-                var newTable = document.getElementById('newRequestsTable');
-                if (newTable) {
-                    var newRows = newTable.querySelectorAll('tr');
-                    for (var i = 1; i < newRows.length; i++) newRows[i].remove();
-                    if (!newRequests.length) {
-                        newTable.insertAdjacentHTML('beforeend', '<tr><td colspan="10" style="text-align:center;color:#666;">No new booking requests.</td></tr>');
-                    } else {
-                        newRequests.forEach(function (b) {
-                            var studentName = (b.child && b.child.name) ? b.child.name : ((b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest');
-                            newTable.insertAdjacentHTML('beforeend',
-                                '<tr>'
-                                + '<td>' + escapeHtml(studentName) + '</td>'
-                                + '<td>' + escapeHtml(fmtDate(b.date)) + '</td>'
-                                + '<td>' + escapeHtml(b.time || '-') + '</td>'
-                                + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
-                                + '<td>' + escapeHtml(b.session || '-') + '</td>'
-                                + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
-                                + '<td><button onclick="confirmBooking(\'' + b._id + '\')">Accept</button> '
-                                + '<button onclick="cancelBooking(\'' + b._id + '\')">Decline</button></td>'
-                                + '</tr>');
-                        });
-                    }
-                }
-
                 var upcomingTable = document.getElementById('upcomingSessionsTable');
                 var upcomingRows = upcomingTable.querySelectorAll('tr');
                 for (var j = 1; j < upcomingRows.length; j++) upcomingRows[j].remove();
                 if (!upcoming.length) {
-                    upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="7" style="text-align:center;color:#666;">No upcoming sessions yet.</td></tr>');
+                    upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="8" style="text-align:center;color:#666;">No upcoming sessions yet.</td></tr>');
                 } else {
                     upcoming.forEach(function (b) {
                         var studentName = (b.child && b.child.name) ? b.child.name : ((b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest');
@@ -1140,6 +1165,7 @@
                             + '<td>' + escapeHtml(b.time || '-') + '</td>'
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                             + '<td>' + escapeHtml(b.session || '-') + '</td>'
+                            + '<td>' + escapeHtml(bookingPrice(b)) + '</td>'
                             + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
                             + '<td><button onclick="completeBooking(\'' + b._id + '\')">Mark Completed</button> '
                             + '<button onclick="cancelBooking(\'' + b._id + '\')">Cancel</button></td>'

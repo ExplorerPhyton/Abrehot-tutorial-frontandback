@@ -169,6 +169,16 @@
             showTab('pending');
         }
 
+        async function updatePaymentStatus(id, paymentStatus) {
+            try {
+                await adminRequest('/admin/bookings/' + id + '/payment-status', { method: 'PATCH', body: { paymentStatus: paymentStatus } });
+                renderBookings();
+            } catch (err) {
+                alert('Could not update payment status: ' + err.message);
+            }
+        }
+        window.updatePaymentStatus = updatePaymentStatus;
+
         async function renderBookings() {
             const bookings = await adminRequest('/admin/bookings');
             if (!bookings.length) {
@@ -176,13 +186,21 @@
                 return;
             }
             content.innerHTML = bookings.map(function (b) {
+                var tutorName = b.tutor && b.tutor.fullname ? b.tutor.fullname : 'Unassigned';
+                var payStatus = b.paymentStatus || 'Pending Verification';
+                var statusColor = payStatus === 'Verified' ? 'green' : (payStatus === 'Rejected' ? 'red' : '#d97706');
                 return '<div class="card">'
-                    + '<h3>' + escapeHtml(b.grade) + ' — ' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || 'No subject') + '</h3>'
+                    + '<h3>' + escapeHtml(b.grade) + ' — ' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || 'No subject') + ' (Tutor: ' + escapeHtml(tutorName) + ')</h3>'
                     + '<p><strong>Topic:</strong> ' + escapeHtml(b.topic) + ' &nbsp; <strong>Goal:</strong> ' + escapeHtml((b.goal || []).join(', ')) + '</p>'
-                    + '<p><strong>Session:</strong> ' + escapeHtml(b.session) + ' (' + escapeHtml(b.platform) + ') &nbsp; <strong>City:</strong> ' + escapeHtml(b.city) + '</p>'
-                    + '<p><strong>Date/Time:</strong> ' + escapeHtml(b.date ? new Date(b.date).toLocaleDateString() : '-') + ' ' + escapeHtml(b.time) + ' (' + escapeHtml(b.duration) + ')</p>'
+                    + '<p><strong>Session:</strong> ' + escapeHtml(b.session) + ' (' + escapeHtml(b.platform || '-') + ') &nbsp; <strong>City:</strong> ' + escapeHtml(b.city || '-') + '</p>'
+                    + '<p><strong>Date/Time:</strong> ' + escapeHtml(b.date ? new Date(b.date).toLocaleDateString() : '-') + ' ' + escapeHtml(b.time || '') + ' (' + escapeHtml(b.duration || '-') + ')</p>'
+                    + '<p><strong>Payment:</strong> ' + escapeHtml(b.paymentMethod || '-') + ' &nbsp; <strong>Transaction Ref / ID:</strong> ' + escapeHtml(b.transactionId || '-') + ' &nbsp; <strong>Payment Status:</strong> <span style="color:' + statusColor + ';font-weight:700;">' + escapeHtml(payStatus) + '</span></p>'
                     + (b.notes ? '<p><strong>Notes:</strong> ' + escapeHtml(b.notes) + '</p>' : '')
-                    + '<p><strong>Status:</strong> ' + escapeHtml(b.status) + '</p>'
+                    + '<p><strong>Session Status:</strong> ' + escapeHtml(b.status) + '</p>'
+                    + '<div style="margin-top:10px;">'
+                    + '<button onclick="updatePaymentStatus(\'' + b._id + '\', \'Verified\')">Mark Payment Verified</button> '
+                    + '<button onclick="updatePaymentStatus(\'' + b._id + '\', \'Rejected\')">Reject Payment</button>'
+                    + '</div>'
                     + '</div>';
             }).join('');
         }

@@ -401,6 +401,16 @@
                                 <i class="bx bx-book-open"></i> <span>Tutors</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="book.html">
+                                <i class="bx bx-calendar"></i> <span>Schedule</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="books.html">
+                                <i class="bx bx-book-heart"></i> <span>Books</span>
+                            </a>
+                        </li>
 
                         <li>
                             <a href="becomeatutor.html">
@@ -474,42 +484,65 @@
     <div id="google_translate_element"></div>
     <main class="donate">
         <h1>Support Abrehot Online Tutorials</h1>
-        <p>Every child deserves access to quality education. Your donation helps us expand educational opportunities,
-            support dedicated tutors, and make learning more accessible for students across Ethiopia. Every
-            contribution, no
-            matter the amount, makes a meaningful difference.</p>
-        <form>
+        <p>Every child deserves access to quality education. Your sponsorship helps us cover tutoring fees for deserving students, expand educational opportunities, and empower dedicated tutors across Ethiopia.</p>
+        <form id="donationForm">
+            <!-- Donation & Sponsorship Type -->
             <fieldset>
-                <legend><strong>Donation Amount</strong></legend>
-                <input type="radio" name="amount" value="100"> 100 ETB<br>
-                <input type="radio" name="amount" value="250"> 250 ETB<br>
-                <input type="radio" name="amount" value="500"> 500 ETB<br>
-                <input type="radio" name="amount" value="1000"> 1000 ETB<br>
-                <input type="radio" name="amount" value="other"> Other Amount
-                <br><br>
-                <label for="customAmount"><strong>Custom Amount (ETB)</strong></label><br>
-                <input type="number" id="customAmount" name="customAmount" placeholder="Enter your preferred amount">
+                <legend><strong>Sponsor Students or Donate</strong></legend>
+                <div class="session-type" style="display:flex; gap:20px; margin-bottom:16px;">
+                    <label>
+                        <input type="radio" name="donationType" value="sponsor" checked> Sponsor Students</label>
+                    <label>
+                        <input type="radio" name="donationType" value="general"> Custom Donation Amount</label>
+                </div>
+                
+                <!-- Student Sponsorship Input -->
+                <div id="sponsorSection">
+                    <div class="main-label"><label for="studentCount">Number of Students to Sponsor</label></div>
+                    <input type="number" id="studentCount" name="studentCount" value="1" min="1" max="100" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">
+                    <p style="font-size:14px; color:var(--primary); font-weight:600; margin-top:8px;" id="sponsorshipBreakdown">
+                        Sponsoring 1 student = 500 ETB / month
+                    </p>
+                </div>
+
+                <!-- Custom Amount Section -->
+                <div id="customSection" style="display:none; margin-top:16px;">
+                    <div class="main-label"><label for="customAmount">Custom Donation Amount (ETB)</label></div>
+                    <input type="number" id="customAmount" name="customAmount" placeholder="Enter your donation amount (e.g. 1000)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">
+                </div>
             </fieldset>
             <br>
+
+            <!-- Payment Information Box -->
             <fieldset>
-                <legend><strong>Payment Method</strong></legend>
-                <label for="payment">Choose a Payment Method</label><br>
-                <select id="payment" name="payment" required>
-                    <option value="">Select Payment Method</option>
-                    <option>Telebirr</option>
-                    <option>CBE Birr</option>
-                    <option>Chapa</option>
-                    <option>Bank Transfer</option>
-                </select>
+                <legend><strong>Payment Instructions</strong></legend>
+                <div style="background: #eaf4fb; padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--primary);">
+                    <p style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">Please complete your transfer via CBE or Telebirr:</p>
+                    <p style="margin-bottom: 4px;"><strong>1. Commercial Bank of Ethiopia (CBE):</strong> <span style="color:#1a5276; font-weight:700;">1000003191951</span> (Abraham birhanemeskel)</p>
+                    <p style="margin-bottom: 8px;"><strong>2. Telebirr:</strong> <span style="color:#1a5276; font-weight:700;">0996569438</span> (Abraham birhanemeskel)</p>
+                </div>
+
+                <div class="main-label"><label>Select Payment Method</label></div>
+                <div class="session-type" style="display:flex; gap:20px; margin-bottom:16px;">
+                    <label><input type="radio" name="paymentMethod" value="CBE" required> Commercial Bank of Ethiopia (CBE)</label>
+                    <label><input type="radio" name="paymentMethod" value="Telebirr" required> Telebirr</label>
+                </div>
+
+                <div class="main-label"><label for="transactionId">Transaction ID / Reference Number</label></div>
+                <input type="text" id="transactionId" name="transactionId" placeholder="e.g. TX123456789 or CBE Reference No." required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">
+                <br><br>
+                
+                <div class="main-label"><label for="donorName">Your Name (Optional)</label></div>
+                <input type="text" id="donorName" name="donorName" placeholder="Enter your name or leave blank for anonymous" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:5px;">
             </fieldset>
-            <div class="buttons">
-                <input type="submit" value="Donate Now">
-                <input type="reset" value="Clear Form">
+            <br>
+
+            <div class="buttons" style="display:flex; gap:15px;">
+                <input type="submit" value="Submit Donation & Sponsorship" style="flex:1; padding:12px; background:var(--secondary); color:white; border:none; border-radius:5px; font-weight:600; cursor:pointer;">
+                <input type="reset" value="Clear Form" style="flex:1; padding:12px; background:#ddd; border:none; border-radius:5px; font-weight:600; cursor:pointer;">
             </div>
             <br><br>
-            <p><strong>Note:</strong> Every donation is <strong>ANONYMOUS</strong>, is appreciated and helps us continue
-                our mission of making quality
-                tutoring more accessible throughout Ethiopia.</p>
+            <p><strong>Note:</strong> Every donation directly helps us make quality tutoring accessible to students throughout Ethiopia.</p>
         </form>
         <br>
         <fieldset class="why-donate">
@@ -673,6 +706,108 @@
                 showMenuSlowly();
             }
         });
+    </script>
+    <script>
+        (function () {
+            var SPONSOR_RATE_PER_STUDENT = 500; // ETB / student / month
+            var form = document.getElementById('donationForm');
+            if (!form) return;
+
+            var typeRadios = document.querySelectorAll('input[name="donationType"]');
+            var sponsorSection = document.getElementById('sponsorSection');
+            var customSection = document.getElementById('customSection');
+            var studentCount = document.getElementById('studentCount');
+            var customAmount = document.getElementById('customAmount');
+            var breakdown = document.getElementById('sponsorshipBreakdown');
+
+            function syncSections() {
+                var checked = document.querySelector('input[name="donationType"]:checked');
+                var isSponsor = checked && checked.value === 'sponsor';
+                sponsorSection.style.display = isSponsor ? 'block' : 'none';
+                customSection.style.display = isSponsor ? 'none' : 'block';
+            }
+
+            function updateBreakdown() {
+                var n = parseInt(studentCount.value, 10);
+                if (!n || n < 1) n = 1;
+                var total = n * SPONSOR_RATE_PER_STUDENT;
+                breakdown.textContent = 'Sponsoring ' + n + ' student' + (n === 1 ? '' : 's') + ' = ' + total.toLocaleString() + ' ETB / month';
+            }
+
+            typeRadios.forEach(function (r) { r.addEventListener('change', function () { syncSections(); updateBreakdown(); }); });
+            studentCount.addEventListener('input', updateBreakdown);
+            customAmount.addEventListener('input', syncSections);
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                var isSponsor = (function () {
+                    var c = document.querySelector('input[name="donationType"]:checked');
+                    return c && c.value === 'sponsor';
+                })();
+
+                var paymentMethod = (function () {
+                    var p = document.querySelector('input[name="paymentMethod"]:checked');
+                    return p ? p.value : null;
+                })();
+                var transactionId = document.getElementById('transactionId').value.trim();
+
+                if (!paymentMethod) {
+                    alert('Please select your payment method (CBE or Telebirr).');
+                    return;
+                }
+                if (!transactionId) {
+                    alert('Please enter your Transaction ID / Reference number.');
+                    document.getElementById('transactionId').focus();
+                    return;
+                }
+
+                var sponsorCount = parseInt(studentCount.value, 10) || 1;
+                var customVal = parseFloat(customAmount.value);
+                var totalAmount = isSponsor ? (sponsorCount * SPONSOR_RATE_PER_STUDENT) : (customVal > 0 ? customVal : null);
+                if (!isSponsor && (totalAmount === null || isNaN(totalAmount))) {
+                    alert('Please enter a valid custom donation amount.');
+                    return;
+                }
+
+                var donorName = document.getElementById('donorName').value.trim() || 'Anonymous';
+
+                var submitBtn = form.querySelector('input[type="submit"]');
+                submitBtn.value = 'Submitting...';
+                submitBtn.disabled = true;
+
+                try {
+                    var message = 'SPONSORSHIP / DONATION\n'
+                        + 'Type: ' + (isSponsor ? 'Student Sponsorship' : 'Custom Donation') + '\n'
+                        + (isSponsor ? 'Students sponsored: ' + sponsorCount + ' (' + SPONSOR_RATE_PER_STUDENT + ' ETB/student/month)' : 'Amount: ' + totalAmount + ' ETB') + '\n'
+                        + 'Total: ' + totalAmount.toLocaleString() + ' ETB\n'
+                        + 'Payment Method: ' + paymentMethod + '\n'
+                        + 'Transaction ID / Ref: ' + transactionId + '\n'
+                        + 'Donor: ' + donorName + '\n'
+                        + 'Time: ' + new Date().toLocaleString();
+
+                    await apiRequest('/contact', {
+                        method: 'POST',
+                        body: { subject: isSponsor ? 'Student Sponsorship Donation' : 'Donation', message: message }
+                    });
+
+                    form.reset();
+                    syncSections();
+                    updateBreakdown();
+                    alert(isSponsor
+                        ? 'Thank you for sponsoring ' + sponsorCount + ' student' + (sponsorCount === 1 ? '' : 's') + '! Your donation reference (' + transactionId + ') has been received and will be verified shortly.'
+                        : 'Thank you for your generous donation of ' + totalAmount.toLocaleString() + ' ETB! Your reference (' + transactionId + ') has been received.');
+                } catch (err) {
+                    alert('Could not submit donation: ' + err.message);
+                } finally {
+                    submitBtn.value = isSponsor ? 'Submit Donation & Sponsorship' : 'Submit Donation & Sponsorship';
+                    submitBtn.disabled = false;
+                }
+            });
+
+            syncSections();
+            updateBreakdown();
+        })();
     </script>
     <script type="text/javascript">
         function googleTranslateElementInit() {

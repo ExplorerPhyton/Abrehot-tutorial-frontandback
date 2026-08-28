@@ -68,12 +68,16 @@ router.get('/me', requireAuth, async (req, res) => {
   res.json(profile);
 });
 
-// PATCH /api/tutors/me — used by the "Update Subjects / Grades / Teaching Mode" buttons
+// PATCH /api/tutors/me — used by the "Update Profile / Pricing / Availability" buttons
 router.patch('/me', requireAuth, async (req, res) => {
   const profile = await TutorProfile.findOne({ user: req.user.id }).sort({ createdAt: -1 });
   if (!profile) return res.status(404).json({ message: 'No tutor profile found for this account' });
 
-  const editable = ['subjects', 'grades', 'languages', 'mode', 'price', 'bio', 'availability', 'experience', 'education', 'institution', 'city', 'address'];
+  const editable = [
+    'subjects', 'grades', 'languages', 'mode', 'price', 'monthlyPrice',
+    'bio', 'availability', 'availableDays', 'availableTimeSlots',
+    'experience', 'education', 'institution', 'city', 'address', 'profilePhotoUrl',
+  ];
   editable.forEach((field) => {
     if (req.body[field] !== undefined) profile[field] = req.body[field];
   });
@@ -113,16 +117,8 @@ router.get('/recommended', async (req, res) => {
   res.json(tutors);
 });
 
-// GET /api/tutors/:id — a single tutor's public profile
-router.get('/:id', async (req, res) => {
-  try {
-    const tutor = await TutorProfile.findById(req.params.id);
-    if (!tutor) return res.status(404).json({ message: 'Tutor not found' });
-    res.json(tutor);
-  } catch (err) {
-    res.status(400).json({ message: 'Invalid tutor id' });
-  }
-});
+// --- Rating & review routes MUST come BEFORE /:id so Express doesn't
+//     treat "rate" or "reviews" as a tutor id. ---
 
 // POST /api/tutors/:id/rate — rate a tutor (or update your existing rating of them)
 router.post('/:id/rate', requireAuth, async (req, res) => {
@@ -180,6 +176,17 @@ router.get('/:id/reviews', async (req, res) => {
         createdAt: r.createdAt,
       };
     }));
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid tutor id' });
+  }
+});
+
+// GET /api/tutors/:id — a single tutor's public profile (must come LAST among /:id routes)
+router.get('/:id', async (req, res) => {
+  try {
+    const tutor = await TutorProfile.findById(req.params.id);
+    if (!tutor) return res.status(404).json({ message: 'Tutor not found' });
+    res.json(tutor);
   } catch (err) {
     res.status(400).json({ message: 'Invalid tutor id' });
   }

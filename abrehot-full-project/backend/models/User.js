@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ['Parent', 'Student', 'Tutor'], required: true },
     city: { type: String, trim: true },
     avatar: { type: String, default: 'avatar-sky' },
+    // Actual uploaded photo stored as a base64 data URL (falls back to preset SVG avatar when null)
+    photoUrl: { type: String, default: null },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TutorProfile' }],
   },
   { timestamps: true }

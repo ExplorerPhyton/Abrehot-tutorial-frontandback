@@ -569,7 +569,8 @@
             <ul class="nav-links">
                 <li><a href="home.html" data-en="Home" data-am="መነሻ">Home</a></li>
                 <li><a href="tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a></li>
-                <li><a href="book.html" data-en="Book" data-am="ቀጠሮ ይያዙ">Book</a></li>
+                <li><a href="book.html" data-en="Schedule" data-am="ቀጠሮ ይያዙ">Schedule</a></li>
+                <li><a href="books.html" data-en="Books" data-am="መጻሕፍት">Books</a></li>
                 <li><a href="becomeatutor.html" data-en="Teach" data-am="ያስተምሩ">Teach</a></li>
                 <li><a href="aboutus.html" data-en="About" data-am="ስለ እኛ">About</a></li>
                 <li><a href="contact.html" data-en="Contact" data-am="ያግኙን">Contact</a></li>
@@ -589,7 +590,8 @@
                     <div class="nav-menu-panel">
                         <a href="home.html" data-en="Home" data-am="መነሻ">Home</a>
                         <a href="tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a>
-                        <a href="book.html" data-en="Book a Session" data-am="ቀጠሮ ይያዙ">Book a Session</a>
+                        <a href="book.html" data-en="Schedule a Class" data-am="ቀጠሮ ይያዙ">Schedule a Class</a>
+                        <a href="books.html" data-en="Books & Materials" data-am="መጻሕፍት">Books & Materials</a>
                         <a href="becomeatutor.html" data-en="Become a Tutor" data-am="አስተማሪ ይሁኑ">Become a Tutor</a>
                         <a href="aboutus.html" data-en="About" data-am="ስለ እኛ">About</a>
                         <a href="contact.html" data-en="Contact" data-am="ያግኙን">Contact</a>
@@ -759,8 +761,11 @@
                     var ratingHtml = t.ratingCount
                         ? '<i class="bx bxs-star"></i> ' + t.averageRating + ' <span style="color: var(--ink-500); font-size: 0.8rem; font-weight: 400;">(' + t.ratingCount + ')</span>'
                         : '<span style="color: var(--ink-500); font-size: 0.85rem;">No ratings yet</span>';
+                    var tutorPhoto = t.profilePhotoUrl
+                        ? '<img src="' + escapeHtml(t.profilePhotoUrl) + '" alt="' + escapeHtml(t.fullname) + '" class="instructor-avatar" style="object-fit:cover;">'
+                        : '<img src="images/pfp.webp" alt="' + escapeHtml(t.fullname) + '" class="instructor-avatar">';
                     return '<div class="instructor-card">'
-                        + '<img src="images/pfp.webp" alt="' + escapeHtml(t.fullname) + '" class="instructor-avatar">'
+                        + tutorPhoto
                         + '<div class="instructor-meta">'
                         + '<h3>' + escapeHtml(t.fullname) + '</h3>'
                         + '<div class="rating-badge">' + ratingHtml + '</div>'

@@ -143,6 +143,16 @@ function applyProfileAvatar(user) {
   var img = getDashboardProfileImage();
   if (!img) return;
   user = user || {};
+
+  // If the user has an uploaded photo, use it directly
+  if (user.photoUrl) {
+    img.src = user.photoUrl;
+    img.dataset.avatar = 'custom-photo';
+    img.alt = user.fullname ? user.fullname + ' photo' : 'Profile photo';
+    return;
+  }
+
+  // Otherwise fall back to preset SVG avatar
   var avatarId = getSelectedAvatarId(user);
   img.src = avatarDataUrl(avatarId, user);
   img.dataset.avatar = avatarId;
@@ -187,22 +197,90 @@ function renderPresetAvatarPicker(user) {
   status.id = 'avatarPickerStatus';
   status.className = 'avatar-picker-status';
   picker.appendChild(status);
+
+  // --- Photo upload button ---
+  var uploadWrap = document.createElement('div');
+  uploadWrap.style.cssText = 'flex-basis:100%;margin-top:8px;';
+
+  var fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.id = 'photoUploadInput';
+  fileInput.style.display = 'none';
+  fileInput.addEventListener('change', handlePhotoUpload);
+
+  var uploadBtn = document.createElement('button');
+  uploadBtn.type = 'button';
+  uploadBtn.id = 'photoUploadBtn';
+  uploadBtn.textContent = '\uD83D\uDCF7 Upload Photo';
+  uploadBtn.style.cssText = 'font-size:12px;padding:6px 12px;border-radius:6px;border:1px solid #ccc;background:var(--primary,#1A5276);color:white;cursor:pointer;';
+  uploadBtn.addEventListener('click', function () { fileInput.click(); });
+
+  uploadWrap.appendChild(fileInput);
+  uploadWrap.appendChild(uploadBtn);
+  picker.appendChild(uploadWrap);
+}
+
+async function handlePhotoUpload(e) {
+  var file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('Please select an image file.');
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Image must be under 2 MB.');
+    return;
+  }
+
+  setAvatarPickerStatus('Uploading photo…');
+
+  try {
+    var dataUrl = await readFileAsDataUrl(file);
+    var user = getUser() || {};
+    var isTutor = user.role === 'Tutor';
+
+    // Save to user profile
+    var updated = await apiRequest('/auth/me', { method: 'PATCH', auth: true, body: { photoUrl: dataUrl } });
+    setUser(updated);
+
+    // Tutors also save to tutor profile so tutor cards show the photo
+    if (isTutor) {
+      await apiRequest('/tutors/me', { method: 'PATCH', auth: true, body: { profilePhotoUrl: dataUrl } });
+    }
+
+    applyProfileAvatar(updated);
+    renderPresetAvatarPicker(updated);
+    setAvatarPickerStatus('Photo saved!');
+  } catch (err) {
+    setAvatarPickerStatus('');
+    alert('Could not save photo: ' + err.message);
+  }
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise(function (resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function () { resolve(reader.result); };
+    reader.onerror = function () { reject(new Error('Could not read file')); };
+    reader.readAsDataURL(file);
+  });
 }
 
 async function savePresetAvatar(avatarId) {
   var current = getUser() || {};
   var previous = Object.assign({}, current);
-  var optimistic = Object.assign({}, current, { avatar: avatarId });
+  var optimistic = Object.assign({}, current, { avatar: avatarId, photoUrl: null });
 
   setUser(optimistic);
   renderPresetAvatarPicker(optimistic);
-  setAvatarPickerStatus('Saving...');
+  setAvatarPickerStatus('Saving…');
 
   try {
     var updated = await apiRequest('/auth/me', {
       method: 'PATCH',
       auth: true,
-      body: { avatar: avatarId },
+      body: { avatar: avatarId, photoUrl: null },
     });
     setUser(updated);
     renderPresetAvatarPicker(updated);
@@ -312,6 +390,15 @@ async function submitRating(tutorId, ratingValue, containerEl) {
     window.location.href = onDashboardsPage ? '../login.html' : 'login.html';
     return;
   }
+
+  // Resolve containerEl: accept either the .rating div directly, or find it
+  // from a child element (e.g. the star that was clicked).
+  if (!containerEl || !containerEl.classList || !containerEl.classList.contains('rating')) {
+    var card = document.querySelector('.tutor-card[data-tutor-id="' + tutorId + '"]');
+    containerEl = card ? card.querySelector('.rating') : document.querySelector('.rating');
+  }
+  if (!containerEl) return;
+
   try {
     var result = await apiRequest('/tutors/' + tutorId + '/rate', {
       method: 'POST',
@@ -336,6 +423,20 @@ async function submitRating(tutorId, ratingValue, containerEl) {
     alert('Could not submit rating: ' + err.message);
   }
 }
+
+// Event-delegated click handler for rating stars — works on dynamically
+// rendered tutor cards so stars are clickable immediately after render.
+document.addEventListener('click', function (e) {
+  var star = e.target.closest('.rating .star');
+  if (!star) return;
+  var container = star.closest('.rating');
+  if (!container) return;
+  var card = container.closest('.tutor-card');
+  var tutorId = card ? card.dataset.tutorId : null;
+  var value = parseInt(star.dataset.value, 10);
+  if (!tutorId || !value) return;
+  submitRating(tutorId, value, container);
+});
 
 // Called by the heart icon on tutor cards (home.html). Persists to the
 // logged-in user's account instead of just toggling a CSS class.

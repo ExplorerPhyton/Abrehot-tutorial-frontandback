@@ -25,8 +25,19 @@ const tutorProfileSchema = new mongoose.Schema(
 
     city: { type: String, required: true, trim: true },
     address: String,
-    price: Number, // rate, e.g. per hour in ETB
+    // Actual uploaded profile photo stored as a base64 data URL (for tutor cards)
+    profilePhotoUrl: { type: String, default: null },
+    price: Number, // hourly rate in ETB
+    monthlyPrice: Number, // monthly plan fee in ETB
     availability: String, // free-text, e.g. "Monday-Friday, 4-8 PM"
+    availableDays: [String], // e.g. ['Monday', 'Wednesday', 'Friday']
+    availableTimeSlots: [
+      {
+        day: { type: String, enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+        startTime: String, // "16:00"
+        endTime: String, // "18:00"
+      },
+    ],
     bio: String,
 
     // Every application starts pending so you (the admin) can review before it appears in search

@@ -29,6 +29,7 @@ function publicUser(user) {
     role: user.role,
     city: user.city,
     avatar: user.avatar || 'avatar-sky',
+    photoUrl: user.photoUrl || null,
   };
 }
 
@@ -129,7 +130,7 @@ router.patch('/me', requireAuth, async (req, res) => {
     return res.status(400).json({ message: 'Please choose one of the preset avatars.' });
   }
 
-  const editable = ['fullname', 'phone', 'city', 'avatar'];
+  const editable = ['fullname', 'phone', 'city', 'avatar', 'photoUrl'];
   const updates = {};
   editable.forEach((field) => {
     if (req.body[field] !== undefined) updates[field] = req.body[field];

@@ -389,6 +389,16 @@
                                 <i class="bx bx-book-open"></i> <span>Tutors</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="book.html">
+                                <i class="bx bx-calendar"></i> <span>Schedule</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="books.html">
+                                <i class="bx bx-book-heart"></i> <span>Books</span>
+                            </a>
+                        </li>
 
                         <li>
                             <a href="becomeatutor.html">
@@ -522,14 +532,52 @@
                 <label><input type="checkbox" name="goal" value="revision"> Concept Revision</label><br>
                 <label><input type="checkbox" name="goal" value="weeklytutoring"> Regular Weekly
                     Tutoring</label><br><br>
+                <div class="main-label"><label>Tutoring Plan</label></div>
+                <div class="session-type">
+                    <label>
+                        <input type="radio" name="planType" value="hourly" checked> Hourly Session</label>
+                    <label>
+                        <input type="radio" name="planType" value="monthly"> Monthly Plan</label>
+                </div>
+                <br>
+                <div id="monthlyPlanSection" style="display:none; background:#eaf4fb; padding:16px; border-radius:8px; margin-bottom:16px; border-left:4px solid var(--primary);">
+                    <div class="main-label"><label>Select Preferred Days for Your Monthly Plan</label></div>
+                    <p style="font-size:13px; color:#555; margin-bottom:10px;" id="tutorAvailableDaysNote">Select the days that best suit your schedule:</p>
+                    <label><input type="checkbox" name="selectedDays" value="Monday"> Monday</label><br>
+                    <label><input type="checkbox" name="selectedDays" value="Tuesday"> Tuesday</label><br>
+                    <label><input type="checkbox" name="selectedDays" value="Wednesday"> Wednesday</label><br>
+                    <label><input type="checkbox" name="selectedDays" value="Thursday"> Thursday</label><br>
+                    <label><input type="checkbox" name="selectedDays" value="Friday"> Friday</label><br>
+                    <label><input type="checkbox" name="selectedDays" value="Saturday"> Saturday</label><br>
+                    <label><input type="checkbox" name="selectedDays" value="Sunday"> Sunday</label><br>
+                </div>
                 <div class="main-label"><label>Session Type</label></div>
                 <div class="session-type">
                     <label>
                         <input type="radio" name="session" value="online"> Online</label>
                     <label>
                         <input type="radio" name="session" value="in-person"> In-Person</label>
+                    <label>
+                        <input type="radio" name="session" value="group"> Group</label>
                 </div>
                 <br>
+                <div id="groupSection" style="display:none;">
+                    <div class="main-label"><label for="groupSize">Group Size (number of students)</label></div>
+                    <input type="number" id="groupSize" name="groupSize" min="2" max="30"
+                        placeholder="eg. 4">
+                    <p style="font-size:13px;color:#666;margin:-10px 0 16px;">
+                        The tutor's rate is split equally between the students — the bigger the group,
+                        the cheaper it is per person.
+                    </p>
+                    <div class="main-label"><label>How will the group meet?</label></div>
+                    <div class="session-type">
+                        <label>
+                            <input type="radio" name="groupMode" value="online"> Online</label>
+                        <label>
+                            <input type="radio" name="groupMode" value="in-person"> In-Person</label>
+                    </div>
+                    <br>
+                </div>
                 <div id="platformSection" style="display:none;">
                     <div class="main-label" id="platformLabel">Online Meeting Platform</div>
                     <label>
@@ -562,9 +610,9 @@
                     <option>Tigrinya</option>
                 </select><br>
                 <div class="main-label"><label for="date">Preferred Date</label></div>
-                <input type="date" id="date" name="date"><br>
+                <input type="date" id="date" name="date" required><br>
                 <div class="main-label"><label for="time">Preferred Time</label></div>
-                <input type="time" id="time" name="time"><br>
+                <input type="time" id="time" name="time" required><br>
                 <div class="main-label"><label for="duration">Duration</label></div>
                 <select id="duration" name="duration">
                     <option>1 Hour</option>
@@ -572,6 +620,26 @@
                     <option>2 Hours</option>
                     <option>2 + Hours</option>
                 </select>
+                <br><br>
+            </fieldset>
+            <br>
+            <!-- Payment Details -->
+            <fieldset>
+                <legend><strong>Payment Information</strong></legend>
+                <div style="background: #eaf4fb; padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--primary);">
+                    <p style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">⚡ Instant Automated Payment Verification:</p>
+                    <p style="margin-bottom: 4px;"><strong>1. Commercial Bank of Ethiopia (CBE):</strong> <span style="color:#1a5276; font-weight:700;">1000003191951</span> (Abraham birhanemeskel)</p>
+                    <p style="margin-bottom: 8px;"><strong>2. Telebirr:</strong> <span style="color:#1a5276; font-weight:700;">0996569438</span> (Abraham birhanemeskel)</p>
+                    <p style="font-size: 13px; color: #555;">Transfer the session fee via CBE or Telebirr and enter your Transaction Reference below. Our system automatically verifies the reference number format and checks for duplicates instantly upon submission.</p>
+                </div>
+                <div class="main-label"><label>Select Payment Method</label></div>
+                <div class="session-type">
+                    <label><input type="radio" name="paymentMethod" value="CBE" required> Commercial Bank of Ethiopia (CBE)</label>
+                    <label><input type="radio" name="paymentMethod" value="Telebirr" required> Telebirr</label>
+                </div>
+                <br>
+                <div class="main-label"><label for="transactionId">Transaction ID / Reference Number</label></div>
+                <input type="text" id="transactionId" name="transactionId" placeholder="e.g. TX123456789 or CBE Reference No." required>
                 <br><br>
             </fieldset>
             <br>
@@ -587,10 +655,16 @@
             <!-- Booking Summary -->
             <div class="booking-summary">
                 <p><strong>Booking Summary</strong></p><br>
+                <div><span class="main-label">Plan Type:</span> <span id="summaryPlanType">Hourly Session</span></div>
+                <div><span class="main-label">Selected Days (Monthly):</span> <span id="summarySelectedDays">-</span></div>
                 <div><span class="main-label">Subject:</span> <span id="summarySubject">-</span></div>
                 <div><span class="main-label">Preferred Language:</span> <span id="summaryLanguage">-</span></div>
                 <div><span class="main-label">Learning Goal:</span> <span id="summaryGoal">-</span></div>
                 <div><span class="main-label">Session Type:</span> <span id="summarySession">-</span></div>
+                <div><span class="main-label">Group Size:</span> <span id="summaryGroupSize">-</span></div>
+                <div><span class="main-label">Price:</span> <span id="summaryPrice">-</span></div>
+                <div><span class="main-label">Payment Method:</span> <span id="summaryPaymentMethod">-</span></div>
+                <div><span class="main-label">Transaction Ref:</span> <span id="summaryTransactionId">-</span></div>
                 <div><span class="main-label">Date:</span> <span id="summaryDate">-</span></div>
                 <div><span class="main-label">Time:</span> <span id="summaryTime">-</span></div>
                 <div><span class="main-label">Duration:</span> <span id="summaryDuration">-</span></div>
@@ -705,12 +779,23 @@
         <div style="text-align: center;">Copyright © 2026 Abrehot Online Tutorials. All rights reserved.</div>
     </div>
     <script>
+        // Set by the page's main script after it loads the tutor's profile
+        var tutorPrice = null;
+        var tutorMonthlyPrice = null;
+        var tutorAvailableDays = [];
         const inputs = document.querySelectorAll("input, select, textarea");
         inputs.forEach(function (input) {
             input.addEventListener("input", updateSummary);
             input.addEventListener("change", updateSummary);
         });
         function updateSummary() {
+            let planTypeRad = document.querySelector('input[name="planType"]:checked');
+            let isMonthly = planTypeRad && planTypeRad.value === 'monthly';
+            document.getElementById("summaryPlanType").textContent = isMonthly ? "Monthly Plan" : "Hourly Session";
+
+            let selectedDays = Array.from(document.querySelectorAll('input[name="selectedDays"]:checked')).map(function (el) { return el.value; });
+            document.getElementById("summarySelectedDays").textContent = (isMonthly && selectedDays.length) ? selectedDays.join(", ") : "-";
+
             let selectedSubjects = document.querySelectorAll('input[name="subject"]:checked');
             document.getElementById("summarySubject").textContent =
                 selectedSubjects.length ? Array.from(selectedSubjects).map(function (item) { return item.value; }).join(", ") : "-";
@@ -723,8 +808,39 @@
             document.getElementById("summaryGoal").textContent =
                 selectedGoals.length ? Array.from(selectedGoals).map(function (item) { return item.value; }).join(", ") : "-";
             let session = document.querySelector('input[name="session"]:checked');
+            let sessionLabel = { online: "Online", "in-person": "In-Person", group: "Group" }[session ? session.value : null];
             document.getElementById("summarySession").textContent =
-                session ? session.value : "-";
+                sessionLabel || "-";
+
+            // Group size + live split preview
+            let groupSize = document.getElementById("groupSize");
+            let size = groupSize ? parseInt(groupSize.value, 10) : 0;
+            document.getElementById("summaryGroupSize").textContent =
+                (session && session.value === "group" && size >= 2) ? size + " student" + (size === 1 ? "" : "s") : "-";
+
+            let priceEl = document.getElementById("summaryPrice");
+            if (isMonthly) {
+                if (tutorMonthlyPrice != null) {
+                    priceEl.textContent = tutorMonthlyPrice + " ETB/month";
+                } else if (tutorPrice != null) {
+                    priceEl.textContent = (tutorPrice * 12) + " ETB/month (Est.)";
+                } else {
+                    priceEl.textContent = "-";
+                }
+            } else if (session && session.value === "group" && size >= 2 && tutorPrice != null) {
+                let per = Math.round((tutorPrice / size) * 100) / 100;
+                let total = Math.round(per * size * 100) / 100;
+                priceEl.textContent = per + " ETB/person \u00d7 " + size + " = " + total + " ETB/hr total";
+            } else if (tutorPrice != null) {
+                priceEl.textContent = tutorPrice + " ETB/hr";
+            } else {
+                priceEl.textContent = "-";
+            }
+
+            let pm = document.querySelector('input[name="paymentMethod"]:checked');
+            document.getElementById("summaryPaymentMethod").textContent = pm ? pm.value : "-";
+            document.getElementById("summaryTransactionId").textContent = document.getElementById("transactionId").value || "-";
+
             document.getElementById("summaryDate").textContent =
                 document.getElementById("date").value || "-";
             document.getElementById("summaryTime").textContent =
@@ -851,16 +967,59 @@
                 form.prepend(banner);
             }
 
-            // The online-meeting-platform choice only makes sense for online
-            // sessions — keep it hidden (and never required) for in-person ones,
-            // and only show the location fields when they're actually relevant.
+            // Load the tutor's rates and available days so the form can preview pricing live,
+            // including the per-person split for group sessions & monthly plan availability.
+            try {
+                var tutorProfile = await apiRequest('/tutors/' + tutorId);
+                if (tutorProfile) {
+                    tutorPrice = tutorProfile.price != null ? Number(tutorProfile.price) : null;
+                    tutorMonthlyPrice = tutorProfile.monthlyPrice != null ? Number(tutorProfile.monthlyPrice) : null;
+                    tutorAvailableDays = tutorProfile.availableDays || [];
+                    if (tutorAvailableDays.length) {
+                        var note = document.getElementById('tutorAvailableDaysNote');
+                        if (note) note.textContent = 'This tutor\'s specified available days are: ' + tutorAvailableDays.join(', ') + '. Select the ones that best suit you:';
+                        // Pre-check the tutor's available days
+                        document.querySelectorAll('input[name="selectedDays"]').forEach(function (cb) {
+                            if (tutorAvailableDays.includes(cb.value)) cb.checked = true;
+                        });
+                    }
+                }
+            } catch (err) { /* rate unknown — the summary just shows "-" */ }
+
+            var planTypeRadios = form.querySelectorAll('input[name="planType"]');
+            var monthlyPlanSection = document.getElementById('monthlyPlanSection');
+            function syncPlanTypeSection() {
+                var checked = form.querySelector('input[name="planType"]:checked');
+                var isMonthly = checked && checked.value === 'monthly';
+                monthlyPlanSection.style.display = isMonthly ? 'block' : 'none';
+                updateSummary();
+            }
+            planTypeRadios.forEach(function (r) { r.addEventListener('change', syncPlanTypeSection); });
+            syncPlanTypeSection();
+            updateSummary();
+
+            // The venue fields (platform / location) depend on how the meeting
+            // happens. For plain online/in-person sessions the session type decides
+            // directly; a group session picks online or in-person from its own
+            // "How will the group meet?" radios.
             var sessionRadios = form.querySelectorAll('input[name="session"]');
+            var groupModeRadios = form.querySelectorAll('input[name="groupMode"]');
+            var groupSection = document.getElementById('groupSection');
             var platformSection = document.getElementById('platformSection');
             var locationSection = document.getElementById('locationSection');
             function syncSessionTypeSections() {
                 var checked = form.querySelector('input[name="session"]:checked');
-                var isOnline = checked && checked.value === 'online';
-                var isInPerson = checked && checked.value === 'in-person';
+                var type = checked ? checked.value : '';
+                var isGroup = type === 'group';
+                groupSection.style.display = isGroup ? 'block' : 'none';
+
+                var isOnline = type === 'online';
+                var isInPerson = type === 'in-person';
+                if (isGroup) {
+                    var gm = form.querySelector('input[name="groupMode"]:checked');
+                    isOnline = gm && gm.value === 'online';
+                    isInPerson = gm && gm.value === 'in-person';
+                }
                 platformSection.style.display = isOnline ? 'block' : 'none';
                 locationSection.style.display = isInPerson ? 'block' : 'none';
                 if (!isOnline) {
@@ -869,6 +1028,7 @@
                 }
             }
             sessionRadios.forEach(function (r) { r.addEventListener('change', syncSessionTypeSections); });
+            groupModeRadios.forEach(function (r) { r.addEventListener('change', syncSessionTypeSections); });
             syncSessionTypeSections();
 
             // Parents book "for" a specific child, since they won't be the one
@@ -914,13 +1074,53 @@
                     return;
                 }
 
+                var planTypeInput = form.querySelector('input[name="planType"]:checked');
+                var isMonthlyPlan = planTypeInput && planTypeInput.value === 'monthly';
+                var selectedDaysArr = Array.from(form.querySelectorAll('input[name="selectedDays"]:checked')).map(function (el) { return el.value; });
+                if (isMonthlyPlan && !selectedDaysArr.length) {
+                    showFormMessage(form, 'Please select at least one preferred day for your monthly tutoring plan.', true);
+                    monthlyPlanSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+
                 var sessionInput = form.querySelector('input[name="session"]:checked');
                 var platformInput = form.querySelector('input[name="platform"]:checked');
+                var groupModeInput = form.querySelector('input[name="groupMode"]:checked');
 
-                // Only online sessions need a meeting platform — in-person ones don't.
-                if (sessionInput && sessionInput.value === 'online' && !platformInput) {
-                    showFormMessage(form, 'Please choose an online meeting platform.', true);
-                    platformSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // A group session needs a size and a venue decision; an online
+                // session (plain or group) needs a meeting platform.
+                var isGroup = sessionInput && sessionInput.value === 'group';
+                if (isGroup) {
+                    var groupSizeEl = document.getElementById('groupSize');
+                    var gs = parseInt(groupSizeEl.value, 10);
+                    if (!gs || gs < 2 || gs > 30) {
+                        showFormMessage(form, 'Please enter how many students are in the group (2 to 30).', true);
+                        groupSizeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                    if (!groupModeInput) {
+                        showFormMessage(form, 'Please choose how the group will meet: online or in-person.', true);
+                        groupSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                }
+                if ((sessionInput && sessionInput.value === 'online') || (isGroup && groupModeInput && groupModeInput.value === 'online')) {
+                    if (!platformInput) {
+                        showFormMessage(form, 'Please choose an online meeting platform.', true);
+                        platformSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                    }
+                }
+
+                var paymentMethodInput = form.querySelector('input[name="paymentMethod"]:checked');
+                var transactionIdInput = document.getElementById('transactionId');
+                if (!paymentMethodInput) {
+                    showFormMessage(form, 'Please select your payment method (CBE or Telebirr).', true);
+                    return;
+                }
+                if (!transactionIdInput || !transactionIdInput.value.trim()) {
+                    showFormMessage(form, 'Please enter your Transaction ID or Reference number.', true);
+                    transactionIdInput.focus();
                     return;
                 }
 
@@ -935,6 +1135,8 @@
                     topic: document.getElementById('topic').value,
                     goal: goals,
                     session: sessionInput ? sessionInput.value : undefined,
+                    groupMode: groupModeInput ? groupModeInput.value : undefined,
+                    groupSize: isGroup ? document.getElementById('groupSize').value : undefined,
                     platform: platformInput ? platformInput.value : undefined,
                     city: document.getElementById('city').value,
                     address: document.getElementById('address').value,
@@ -943,6 +1145,10 @@
                     time: document.getElementById('time').value,
                     duration: document.getElementById('duration').value,
                     notes: document.getElementById('notes').value,
+                    planType: isMonthlyPlan ? 'monthly' : 'hourly',
+                    selectedDays: isMonthlyPlan ? selectedDaysArr : [],
+                    paymentMethod: paymentMethodInput.value,
+                    transactionId: transactionIdInput.value.trim(),
                     tutorId: tutorId || undefined,
                     childId: isParent ? childSelect.value : undefined,
                 };
@@ -955,6 +1161,8 @@
                     });
                     showFormMessage(form, data.message || 'Booking request submitted!', false);
                     form.reset();
+                    syncSessionTypeSections();
+                    updateSummary();
                     if (isParent && childrenLoaded.length) childSelect.required = true;
                 } catch (err) {
                     showFormMessage(form, err.message, true);

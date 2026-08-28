@@ -1154,13 +1154,90 @@ body.site-page .educator-row {
     background: #0F0D0A !important;
 }
 
+/* ---- Dark mode nav / header fix ---- */
 [data-theme="dark"] .header,
 [data-theme="dark"] header.navbar {
-    background: rgba(22, 19, 15, 0.9) !important;
+    background: #1a1714 !important;
+    color: #f5f0eb !important;
 }
 
+[data-theme="dark"] .header .head {
+    color: #f5f0eb !important;
+}
+
+[data-theme="dark"] .header .right-header {
+    color: #f5f0eb !important;
+}
+
+/* Sidebar navigation */
 [data-theme="dark"] .ver-nav {
-    background: rgba(22, 19, 15, 0.98) !important;
+    background: #1a1714 !important;
+    color: #f5f0eb !important;
+}
+
+[data-theme="dark"] .ver-nav a {
+    color: #f5f0eb !important;
+}
+
+[data-theme="dark"] .ver-nav a:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+}
+
+/* Header action buttons — all button elements in the header */
+[data-theme="dark"] .header button {
+    color: #f5f0eb !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* First two buttons (Sign Up / Log In) — outline style */
+[data-theme="dark"] .head-buttons a:first-child button,
+[data-theme="dark"] .head-buttons a:nth-child(2) button {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #f5f0eb !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Third button (Donate) — keep accent color */
+[data-theme="dark"] .head-buttons a:last-child button {
+    background: #C85A32 !important;
+    color: #ffffff !important;
+}
+
+/* Theme toggle FAB */
+[data-theme="dark"] .theme-toggle-fab {
+    background: #1a1714 !important;
+    color: #f5f0eb !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Home.html desktop nav links */
+[data-theme="dark"] .nav-links a {
+    color: #f5f0eb !important;
+}
+
+[data-theme="dark"] .nav-links a:hover {
+    color: #E17C50 !important;
+}
+
+/* Home.html mobile hamburger menu */
+[data-theme="dark"] .nav-menu summary {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #f5f0eb !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme="dark"] .nav-menu-panel {
+    background: #1a1714 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+[data-theme="dark"] .nav-menu-panel a {
+    color: #f5f0eb !important;
+}
+
+[data-theme="dark"] .nav-menu-panel a:hover {
+    color: #E17C50 !important;
 }
 
 [data-theme="dark"] ::placeholder {
