@@ -102,6 +102,9 @@
         [data-theme="dark"] .footer {
             background: var(--sand-100) !important;
         }
+        [data-theme="dark"] .brand-mark {
+    filter: brightness(0) invert(0.95);
+}
 
         .theme-toggle-fab {
             position: fixed;
@@ -142,8 +145,7 @@
         body.lang-am h1, 
         body.lang-am h2, 
         body.lang-am h3, 
-        body.lang-am h4,
-        body.lang-am .brand-name {
+        body.lang-am h4 {
             font-family: var(--font-amharic);
             font-weight: 600;
         }
@@ -263,26 +265,17 @@
         .brand-logo {
             display: flex;
             align-items: center;
-            gap: 12px;
             text-decoration: none;
-            color: var(--ink-900);
         }
 
-        /* Increased Logo Size */
-        .brand-mark {
-            width: 75px;
-            height: 75px;
-            object-fit: cover;
-            border: 1px solid var(--sand-300);
-            border-radius: var(--radius-sm);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.8);
-        }
-
-        .brand-name {
-            font-family: var(--font-serif);
-            font-size: 1.4rem;
-            letter-spacing: -0.01em;
-        }
+      .brand-mark {
+    height: 58px; /* Increased from 52px to enlarge the visual logo */
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin-top: -16px; /* Prevents the larger height from stretching the navbar */
+    margin-bottom: -16px;
+}
 
         .nav-right {
             display: flex;
@@ -577,6 +570,7 @@
             .nav-links, .nav-right .btn { display: none; }
             .nav-menu { display: block; }
             .hero-headline { font-size: 2.5rem; }
+            .brand-mark { height: 38px; }
         }
     </style>
 </head>
@@ -586,8 +580,7 @@
     <header class="navbar">
         <div class="container nav-inner">
             <a href="home.html" class="brand-logo">
-                <img src="images/Abrehot Tutoring Logo.jpg" alt="Abrehot Tutoring logo" class="brand-mark">
-                <span class="brand-name" data-en="Abrehot Tutoring" data-am="አብረሆት የትምህርት ድጋፍ">Abrehot Tutoring</span>
+                <img src="Abrehot-removebg-preview.png" alt="Abrehot Logo" class="brand-mark">
             </a>
 
             <ul class="nav-links">
