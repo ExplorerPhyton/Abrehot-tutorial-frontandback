@@ -63,7 +63,7 @@ function dashboardPathForRole(role) {
     Student: 'dashboards/student-dash.html',
     Tutor: 'dashboards/tutor-dash.html',
   };
-  return map[role] || 'home.html';
+  return map[role] || 'Index.html';
 }
 
 // Shows a small success/error message above a form without needing extra HTML.

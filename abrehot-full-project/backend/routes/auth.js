@@ -1,7 +1,34 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
 const User = require('../models/User');
+const TutorProfile = require('../models/TutorProfile');
+
+// Profile photos live on disk under backend/uploads/avatars and are served
+// from /uploads/avatars (see server.js). The 2 MB limit matches the
+// client-side check in frontend/js/api.js handlePhotoUpload().
+const UPLOAD_DIR = path.join(__dirname, '..', 'uploads', 'avatars');
+
+const photoUpload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+      cb(null, UPLOAD_DIR);
+    },
+    filename: function (req, file, cb) {
+      const ext = (path.extname(file.originalname || '') || '.jpg').toLowerCase();
+      cb(null, req.user.id + '-' + Date.now() + ext);
+    },
+  }),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: function (req, file, cb) {
+    if (file.mimetype && file.mimetype.startsWith('image/')) return cb(null, true);
+    cb(new Error('Only image files are allowed.'));
+  },
+});
 
 const PRESET_AVATARS = new Set([
   'avatar-sky',
