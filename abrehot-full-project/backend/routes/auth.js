@@ -72,15 +72,14 @@ router.post('/register', async (req, res) => {
     if (!fullname || !email || !password || !account) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
-    // "Tutor" is never a self-selectable signup role — becoming a tutor requires
-    // submitting an application (becomeatutor.html) that an admin reviews and
-    // approves. Only after approval does an account's role become "Tutor" (see
-    // the admin approve route). This blocks anyone from just picking "Tutor" at
-    // signup and skipping that process — including a direct API call that
-    // bypasses the create-account.html form entirely.
-    if (account !== 'Parent' && account !== 'Student') {
+    // "Tutor" is a self-selectable signup role, same as Parent/Student — picking
+    // it grants tutor-dashboard access immediately. Admin review (see
+    // routes/admin.js and routes/tutors.js) doesn't gate the role itself; it
+    // only decides whether the tutor's profile shows up in the public search
+    // on tutors.html (see the "status" field on TutorProfile).
+    if (account !== 'Parent' && account !== 'Student' && account !== 'Tutor') {
       return res.status(400).json({
-        message: 'Tutor accounts are created after your tutor application is approved. Please register as a Student or Parent, then apply on the Become a Tutor page.',
+        message: 'Please select Parent, Student, or Tutor.',
       });
     }
     if (confirmPassword !== undefined && password !== confirmPassword) {

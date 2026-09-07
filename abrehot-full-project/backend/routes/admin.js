@@ -23,8 +23,10 @@ router.post('/tutors/:id/approve', async (req, res) => {
   const tutor = await TutorProfile.findByIdAndUpdate(req.params.id, { status: 'approved' }, { new: true });
   if (!tutor) return res.status(404).json({ message: 'Not found' });
 
-  // This is the ONLY place a user's role becomes "Tutor" — approval is what
-  // actually grants tutor-dashboard access, not the signup form.
+  // Tutor accounts already have the "Tutor" role from signup — approval here
+  // only controls whether the profile is publicly listed on tutors.html.
+  // The role sync below is kept as a safety net for any legacy application
+  // whose user account somehow isn't marked "Tutor" yet.
   if (tutor.user) {
     await User.findByIdAndUpdate(tutor.user, { role: 'Tutor' });
   }

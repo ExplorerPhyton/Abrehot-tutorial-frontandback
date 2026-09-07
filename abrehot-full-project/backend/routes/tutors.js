@@ -12,9 +12,16 @@ function toArray(value) {
 }
 
 // POST /api/tutors/apply — matches becomeatutor.html
-// Login is required: approval promotes this account's role to "Tutor", so
-// there has to be an account to promote in the first place.
+// Login is required, and the account must already have the "Tutor" role
+// (chosen at signup on create-account.html). Parent and Student accounts
+// can't submit a tutor application — becoming a tutor happens by signing up
+// as one, not by applying from a Parent/Student account.
 router.post('/apply', requireAuth, async (req, res) => {
+  if (req.user.role !== 'Tutor') {
+    return res.status(403).json({
+      message: 'Only tutor accounts can submit a tutor application. Parent and Student accounts can\'t apply — sign up for a new account and choose "Tutor" instead.',
+    });
+  }
   try {
     const {
       fullname, gender, dob, phone, email,

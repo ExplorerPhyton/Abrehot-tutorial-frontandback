@@ -11,6 +11,11 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || '')
   .map((s) => s.trim())
   .filter(Boolean);
 
+// First-party HTTPS subdomains of the production site (www, api, and the
+// admin panel on admin.abrehottutoring.com.et) are always allowed — they are
+// all served by us, so they don't need to be listed in CLIENT_ORIGIN.
+const SITE_DOMAIN = 'abrehottutoring.com.et';
+
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -20,6 +25,17 @@ app.use(
       // local dev server).
       if (!origin || origin === 'null' || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
         return callback(null, true);
+      }
+      try {
+        const { protocol, hostname } = new URL(origin);
+        if (
+          protocol === 'https:' &&
+          (hostname === SITE_DOMAIN || hostname === 'www.' + SITE_DOMAIN || hostname.endsWith('.' + SITE_DOMAIN))
+        ) {
+          return callback(null, true);
+        }
+      } catch (e) {
+        /* not a parseable URL — fall through to rejection */
       }
       callback(new Error('Not allowed by CORS: ' + origin));
     },
