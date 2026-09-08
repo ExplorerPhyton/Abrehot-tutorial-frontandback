@@ -1178,7 +1178,7 @@
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                             + '<td>' + escapeHtml(b.session || '-') + '</td>'
                             + '<td>' + escapeHtml(bookingPrice(b)) + '</td>'
-                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
+                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button> <a href="../chat.html?bookingId=' + encodeURIComponent(b._id) + '">Chat</a></td>'
                             + '<td><button onclick="completeBooking(\'' + b._id + '\')">Mark Completed</button> '
                             + '<button onclick="cancelBooking(\'' + b._id + '\')">Cancel</button></td>'
                             + '</tr>');

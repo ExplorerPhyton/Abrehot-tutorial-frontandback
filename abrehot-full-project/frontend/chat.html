@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="js/theme.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Chat | Abrehot Online Tutorials</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/abrehot-theme.css">
+    <style>
+        :root { --ink:#173f4d; --teal:#235e65; --coral:#c66b4e; --paper:#f4efe7; --surface:#fffdf9; --muted:#6b7778; --line:#e5d9cd; }
+        * { box-sizing:border-box; }
+        body { margin:0; min-height:100vh; background:var(--paper); color:#24313a; font-family:'DM Sans',sans-serif; }
+        .topbar { padding:18px max(22px,5vw); background:var(--ink); color:white; display:flex; align-items:center; justify-content:space-between; gap:16px; border-bottom:4px solid #d48a63; }
+        .brand { color:white; text-decoration:none; font:700 20px 'Space Grotesk',sans-serif; }
+        .back-link { color:#d7e4df; text-decoration:none; font-size:14px; }
+        main { width:min(820px,calc(100% - 32px)); margin:34px auto 60px; }
+        .chat-shell { overflow:hidden; background:var(--surface); border:1px solid rgba(36,49,58,.1); border-radius:18px; box-shadow:0 18px 45px rgba(40,50,48,.1); }
+        .chat-heading { padding:26px 28px 20px; border-bottom:1px solid var(--line); }
+        h1 { margin:0 0 8px; color:var(--ink); font:700 clamp(24px,4vw,34px) 'Space Grotesk',sans-serif; }
+        .booking-meta { margin:0; color:var(--muted); font-size:14px; }
+        .messages { min-height:390px; max-height:58vh; overflow-y:auto; padding:24px 28px; background:#faf7f2; }
+        .empty { color:var(--muted); text-align:center; padding:100px 20px; }
+        .message { display:flex; flex-direction:column; align-items:flex-start; max-width:78%; margin:0 0 16px; }
+        .message.mine { align-items:flex-end; margin-left:auto; }
+        .message-head { color:var(--muted); font-size:12px; margin:0 0 5px 4px; }
+        .message.mine .message-head { text-align:right; margin:0 4px 5px 0; }
+        .bubble { padding:12px 15px; border-radius:14px 14px 14px 4px; background:white; border:1px solid var(--line); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
+        .message.mine .bubble { color:white; background:var(--teal); border-color:var(--teal); border-radius:14px 14px 4px 14px; box-shadow:0 2px 5px rgba(35,94,101,.2); }
+        .composer { display:flex; gap:12px; padding:20px 28px 24px; border-top:1px solid var(--line); }
+        textarea { flex:1; min-height:48px; max-height:130px; resize:vertical; padding:13px 14px; font:inherit; border:1px solid #cfc1b5; border-radius:10px; background:white; color:#24313a; }
+        button { border:0; border-radius:9px; padding:0 22px; background:var(--coral); color:white; font:600 14px 'DM Sans',sans-serif; cursor:pointer; }
+        button:hover { background:#a9513a; } button:disabled { cursor:wait; opacity:.6; }
+        .status { min-height:22px; padding:0 28px 18px; color:#b04736; font-size:13px; }
+        [data-theme="dark"] body { background:#16130f; color:var(--text); }
+        [data-theme="dark"] .chat-shell, [data-theme="dark"] .bubble, [data-theme="dark"] textarea { background:var(--surface); color:var(--text); }
+        [data-theme="dark"] .messages { background:#211c17; }
+        @media (max-width:600px) { main{width:calc(100% - 20px);margin-top:20px}.topbar{padding:16px}.chat-heading,.messages,.composer{padding-left:16px;padding-right:16px}.composer{flex-direction:column}button{min-height:46px}.message{max-width:90%} }
+    </style>
+</head>
+<body>
+    <header class="topbar"><a class="brand" href="index.html">Abrehot</a><a class="back-link" id="backLink" href="index.html">Back to dashboard</a></header>
+    <main>
+        <section class="chat-shell" aria-labelledby="chatTitle">
+            <div class="chat-heading"><h1 id="chatTitle">Tutor conversation</h1><p class="booking-meta" id="bookingMeta">Loading booking...</p></div>
+            <div class="messages" id="messages" aria-live="polite"><p class="empty">Loading messages...</p></div>
+            <p class="status" id="status" role="status"></p>
+            <form class="composer" id="composer"><textarea id="messageInput" maxlength="2000" placeholder="Write a message..." required></textarea><button id="sendButton" type="submit">Send message</button></form>
+        </section>
+    </main>
+    <script src="js/api.js"></script>
+    <script>
+        (function () {
+            var bookingId = new URLSearchParams(location.search).get('bookingId');
+            var messagesEl = document.getElementById('messages');
+            var statusEl = document.getElementById('status');
+            var input = document.getElementById('messageInput');
+            var sendButton = document.getElementById('sendButton');
+            var currentUser = getUser();
+            function status(text) { statusEl.textContent = text || ''; }
+            function dateText(value) { var date = new Date(value); return isNaN(date.getTime()) ? '' : date.toLocaleString([], { dateStyle:'medium', timeStyle:'short' }); }
+            function render(messages) {
+                messagesEl.textContent = '';
+                if (!messages.length) { messagesEl.innerHTML = '<p class="empty">No messages yet. Start the conversation.</p>'; return; }
+                messages.forEach(function (message) {
+                    var currentUserId = currentUser && (currentUser.id || currentUser._id);
+                    var mine = currentUserId && message.sender && String(message.sender._id) === String(currentUserId);
+                    var item = document.createElement('article'); item.className = 'message' + (mine ? ' mine' : '');
+                    var head = document.createElement('p'); head.className = 'message-head'; head.textContent = (message.sender && message.sender.fullname || 'Participant') + ' · ' + dateText(message.createdAt);
+                    var bubble = document.createElement('div'); bubble.className = 'bubble'; bubble.textContent = message.body;
+                    item.appendChild(head); item.appendChild(bubble); messagesEl.appendChild(item);
+                });
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+            async function load() {
+                if (!bookingId) { status('This chat link is missing a booking.'); return; }
+                try {
+                    // Refresh the identity before classifying bubbles as sent or received.
+                    currentUser = await apiRequest('/auth/me', { auth:true });
+                    var data = await apiRequest('/messages/booking/' + encodeURIComponent(bookingId), { auth:true });
+                    document.getElementById('bookingMeta').textContent = (data.booking.subject || []).join(', ') || 'Tutoring session';
+                    render(data.messages || []); status('');
+                } catch (err) { status(err.message); input.disabled = true; sendButton.disabled = true; }
+            }
+            document.getElementById('composer').addEventListener('submit', async function (event) {
+                event.preventDefault(); var body = input.value.trim(); if (!body || !bookingId) return;
+                sendButton.disabled = true;
+                try { await apiRequest('/messages/booking/' + encodeURIComponent(bookingId), { method:'POST', auth:true, body:{ body:body } }); input.value=''; await load(); }
+                catch (err) { status(err.message); }
+                finally { sendButton.disabled=false; input.focus(); }
+            });
+            if (currentUser && currentUser.role === 'Tutor') document.getElementById('backLink').href='dashboards/tutor-dash.html';
+            else if (currentUser && currentUser.role === 'Student') document.getElementById('backLink').href='dashboards/student-dash.html';
+            else document.getElementById('backLink').href='dashboards/parent-dash.html';
+            load(); window.setInterval(load, 5000);
+        }());
+    </script>
+</body>
+</html>

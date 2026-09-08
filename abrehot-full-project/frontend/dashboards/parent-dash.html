@@ -1209,7 +1209,7 @@
                             + '<td>' + escapeHtml(b.time || '-') + '</td>'
                             + '<td>' + escapeHtml(b.session || '-') + '</td>'
                             + '<td>' + escapeHtml(bookingPrice(b)) + '</td>'
-                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
+                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button> <a href="../chat.html?bookingId=' + encodeURIComponent(b._id) + '">Chat</a></td>'
                             + '<td>' + escapeHtml(b.status) + '</td>'
                             + '<td><button onclick="cancelBooking(\'' + b._id + '\', this)">Remove</button></td>'
                             + '</tr>');
@@ -1231,7 +1231,7 @@
                             + '<td>' + escapeHtml(tutorName) + '</td>'
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                             + '<td>' + escapeHtml(bookingPrice(b)) + '</td>'
-                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button></td>'
+                            + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button> <a href="../chat.html?bookingId=' + encodeURIComponent(b._id) + '">Chat</a></td>'
                             + '<td>' + escapeHtml(b.status) + '</td>'
                             + '</tr>');
                     });

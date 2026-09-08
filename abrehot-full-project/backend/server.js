@@ -46,6 +46,7 @@ app.use(express.urlencoded({ extended: true, limit: '5mb' })); // supports plain
 
 // --- Routes ---
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/messages', require('./routes/messages'));
 app.use('/api/tutors', require('./routes/tutors'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/contact', require('./routes/contact'));
