@@ -565,12 +565,71 @@
             align-items: center;
         }
 
+        .social-section {
+            padding: 0 0 38px;
+        }
+
+        .social-heading {
+            margin-bottom: 18px;
+            color: var(--ink-900);
+            font-family: var(--font-serif);
+            font-size: 1.65rem;
+        }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            color: var(--ink-700);
+            text-decoration: none;
+            background: var(--sand-50);
+            border: 1px solid var(--sand-200);
+            border-radius: var(--radius-md);
+            transition: transform .2s ease, border-color .2s ease, color .2s ease;
+        }
+
+        .social-link:hover {
+            color: var(--terracotta);
+            border-color: var(--terracotta);
+            transform: translateY(-2px);
+        }
+
+        .social-link i {
+            color: var(--terracotta);
+            font-size: 1.6rem;
+        }
+
+        .social-link span {
+            display: block;
+            font-size: .82rem;
+            font-weight: 700;
+        }
+
+        .social-link small {
+            display: block;
+            margin-top: 2px;
+            color: var(--ink-500);
+            font-size: .72rem;
+        }
+
         @media (max-width: 860px) {
             .hero-grid, .pillars-grid, .educator-row { grid-template-columns: 1fr; }
             .nav-links, .nav-right .btn { display: none; }
             .nav-menu { display: block; }
             .hero-headline { font-size: 2.5rem; }
             .brand-mark { height: 38px; }
+            .social-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .social-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -714,6 +773,27 @@
 
     <!-- Footer -->
     <footer class="footer">
+        <div class="container social-section">
+            <h2 class="social-heading" data-en="Follow Abrehot" data-am="አብረሆትን ይከተሉ">Follow Abrehot</h2>
+            <div class="social-grid">
+                <a class="social-link" href="https://www.instagram.com/abrehottutoring/" target="_blank" rel="noopener noreferrer" aria-label="Follow Abrehot on Instagram">
+                    <i class="bx bxl-instagram" aria-hidden="true"></i>
+                    <span>Instagram<small>@abrehottutoring</small></span>
+                </a>
+                <a class="social-link" href="https://www.tiktok.com/@abrehottutoring" target="_blank" rel="noopener noreferrer" aria-label="Follow Abrehot on TikTok">
+                    <i class="bx bxl-tiktok" aria-hidden="true"></i>
+                    <span>TikTok<small>@abrehottutoring</small></span>
+                </a>
+                <a class="social-link" href="https://x.com/abrehottutoring" target="_blank" rel="noopener noreferrer" aria-label="Follow Abrehot on X">
+                    <i class="bx bx-x" aria-hidden="true"></i>
+                    <span>X<small>@abrehottutoring</small></span>
+                </a>
+                <a class="social-link" href="https://t.me/abrehottutoring" target="_blank" rel="noopener noreferrer" aria-label="Join Abrehot on Telegram">
+                    <i class="bx bxl-telegram" aria-hidden="true"></i>
+                    <span>Telegram<small>@abrehottutoring</small></span>
+                </a>
+            </div>
+        </div>
         <div class="container footer-inner">
             <div data-en="&copy; 2026 Abrehot Educational Platform. All rights reserved." data-am="&copy; 2026 አብረሆት የትምህርት መድረክ። መብቱ በሕግ የተጠበቀ ነው።">
                 &copy; 2026 Abrehot Educational Platform. All rights reserved.

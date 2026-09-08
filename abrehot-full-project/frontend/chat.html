@@ -29,7 +29,18 @@
         .message.mine .message-head { text-align:right; margin:0 4px 5px 0; }
         .bubble { padding:12px 15px; border-radius:14px 14px 14px 4px; background:white; border:1px solid var(--line); line-height:1.5; white-space:pre-wrap; overflow-wrap:anywhere; }
         .message.mine .bubble { color:white; background:var(--teal); border-color:var(--teal); border-radius:14px 14px 4px 14px; box-shadow:0 2px 5px rgba(35,94,101,.2); }
-        .composer { display:flex; gap:12px; padding:20px 28px 24px; border-top:1px solid var(--line); }
+        .reply-preview { display:none; margin:16px 28px 0; padding:10px 12px; border-left:3px solid var(--coral); background:#f7eee7; color:var(--muted); font-size:13px; }
+        .reply-preview.show { display:flex; justify-content:space-between; gap:10px; }
+        .reply-preview button { padding:0 8px; background:transparent; color:var(--coral); }
+        .message-tools { display:flex; gap:6px; margin-top:4px; }
+        .message-tools button { padding:2px 7px; background:transparent; color:var(--muted); font-size:12px; }
+        .message-tools button:hover, .message-tools button.liked { color:var(--coral); }
+        .bubble-image { display:block; max-width:260px; max-height:260px; margin-top:8px; border-radius:9px; object-fit:cover; }
+        .composer { display:flex; gap:10px; padding:20px 28px 24px; border-top:1px solid var(--line); }
+        .attach-button { display:grid; place-items:center; width:48px; padding:0; background:#e7f0ed; color:var(--teal); font-size:21px; }
+        .attach-button:hover { background:#d4e4df; color:var(--ink); }
+        #imageInput { display:none; }
+        .attachment-name { align-self:center; max-width:140px; overflow:hidden; color:var(--muted); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
         textarea { flex:1; min-height:48px; max-height:130px; resize:vertical; padding:13px 14px; font:inherit; border:1px solid #cfc1b5; border-radius:10px; background:white; color:#24313a; }
         button { border:0; border-radius:9px; padding:0 22px; background:var(--coral); color:white; font:600 14px 'DM Sans',sans-serif; cursor:pointer; }
         button:hover { background:#a9513a; } button:disabled { cursor:wait; opacity:.6; }
@@ -47,7 +58,14 @@
             <div class="chat-heading"><h1 id="chatTitle">Tutor conversation</h1><p class="booking-meta" id="bookingMeta">Loading booking...</p></div>
             <div class="messages" id="messages" aria-live="polite"><p class="empty">Loading messages...</p></div>
             <p class="status" id="status" role="status"></p>
-            <form class="composer" id="composer"><textarea id="messageInput" maxlength="2000" placeholder="Write a message..." required></textarea><button id="sendButton" type="submit">Send message</button></form>
+            <div class="reply-preview" id="replyPreview"><span id="replyText"></span><button type="button" id="cancelReply" aria-label="Cancel reply">&times;</button></div>
+            <form class="composer" id="composer">
+                <input id="imageInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+                <button class="attach-button" id="attachButton" type="button" aria-label="Attach image" title="Attach image"><i class="bx bx-image-add" aria-hidden="true"></i></button>
+                <span class="attachment-name" id="attachmentName"></span>
+                <textarea id="messageInput" maxlength="2000" placeholder="Write a message..."></textarea>
+                <button id="sendButton" type="submit">Send message</button>
+            </form>
         </section>
     </main>
     <script src="js/api.js"></script>
@@ -58,7 +76,13 @@
             var statusEl = document.getElementById('status');
             var input = document.getElementById('messageInput');
             var sendButton = document.getElementById('sendButton');
+            var imageInput = document.getElementById('imageInput');
+            var attachmentName = document.getElementById('attachmentName');
+            var replyPreview = document.getElementById('replyPreview');
+            var replyText = document.getElementById('replyText');
             var currentUser = getUser();
+            var selectedImage = '';
+            var replyTo = null;
             function status(text) { statusEl.textContent = text || ''; }
             function dateText(value) { var date = new Date(value); return isNaN(date.getTime()) ? '' : date.toLocaleString([], { dateStyle:'medium', timeStyle:'short' }); }
             function render(messages) {
@@ -69,8 +93,29 @@
                     var mine = currentUserId && message.sender && String(message.sender._id) === String(currentUserId);
                     var item = document.createElement('article'); item.className = 'message' + (mine ? ' mine' : '');
                     var head = document.createElement('p'); head.className = 'message-head'; head.textContent = (message.sender && message.sender.fullname || 'Participant') + ' · ' + dateText(message.createdAt);
-                    var bubble = document.createElement('div'); bubble.className = 'bubble'; bubble.textContent = message.body;
+                    var bubble = document.createElement('div'); bubble.className = 'bubble';
+                    if (message.replyTo) {
+                        var quoted = document.createElement('div');
+                        quoted.style.cssText = 'border-left:3px solid var(--coral);padding-left:8px;margin-bottom:8px;opacity:.8;font-size:12px;';
+                        quoted.textContent = message.replyTo.body || 'Image';
+                        bubble.appendChild(quoted);
+                    }
+                    if (message.body) {
+                        var body = document.createElement('div'); body.textContent = message.body; bubble.appendChild(body);
+                    }
+                    if (message.imageUrl) {
+                        var image = document.createElement('img'); image.className = 'bubble-image'; image.src = message.imageUrl; image.alt = 'Attached image'; bubble.appendChild(image);
+                    }
                     item.appendChild(head); item.appendChild(bubble); messagesEl.appendChild(item);
+                    var tools = document.createElement('div'); tools.className = 'message-tools';
+                    var like = document.createElement('button'); like.type = 'button'; like.className = (message.likes || []).some(function (id) { return String(id) === String(currentUserId); }) ? 'liked' : '';
+                    like.textContent = '♥ ' + ((message.likes || []).length || ''); like.title = 'Like message';
+                    like.addEventListener('click', async function () {
+                        try { await apiRequest('/messages/' + message._id + '/like', { method:'PATCH', auth:true }); await load(); } catch (err) { status(err.message); }
+                    });
+                    var reply = document.createElement('button'); reply.type = 'button'; reply.textContent = 'Reply';
+                    reply.addEventListener('click', function () { replyTo = message; replyText.textContent = 'Replying to ' + (message.sender && message.sender.fullname || 'participant') + ': ' + (message.body || 'image'); replyPreview.classList.add('show'); input.focus(); });
+                    tools.appendChild(like); tools.appendChild(reply); item.appendChild(tools);
                 });
                 messagesEl.scrollTop = messagesEl.scrollHeight;
             }
@@ -84,10 +129,20 @@
                     render(data.messages || []); status('');
                 } catch (err) { status(err.message); input.disabled = true; sendButton.disabled = true; }
             }
+            document.getElementById('attachButton').addEventListener('click', function () { imageInput.click(); });
+            imageInput.addEventListener('change', function () {
+                var file = imageInput.files && imageInput.files[0];
+                if (!file) return;
+                if (file.size > 2 * 1024 * 1024) { status('Images must be 2 MB or smaller.'); imageInput.value=''; return; }
+                var reader = new FileReader();
+                reader.onload = function () { selectedImage = reader.result; attachmentName.textContent = file.name; };
+                reader.readAsDataURL(file);
+            });
+            document.getElementById('cancelReply').addEventListener('click', function () { replyTo=null; replyPreview.classList.remove('show'); });
             document.getElementById('composer').addEventListener('submit', async function (event) {
-                event.preventDefault(); var body = input.value.trim(); if (!body || !bookingId) return;
+                event.preventDefault(); var body = input.value.trim(); if ((!body && !selectedImage) || !bookingId) return;
                 sendButton.disabled = true;
-                try { await apiRequest('/messages/booking/' + encodeURIComponent(bookingId), { method:'POST', auth:true, body:{ body:body } }); input.value=''; await load(); }
+                try { await apiRequest('/messages/booking/' + encodeURIComponent(bookingId), { method:'POST', auth:true, body:{ body:body, imageUrl:selectedImage || undefined, replyTo:replyTo ? replyTo._id : undefined } }); input.value=''; imageInput.value=''; selectedImage=''; attachmentName.textContent=''; replyTo=null; replyPreview.classList.remove('show'); await load(); }
                 catch (err) { status(err.message); }
                 finally { sendButton.disabled=false; input.focus(); }
             });
