@@ -2,7 +2,13 @@
 // Include this on any page BEFORE your page-specific script:
 //   <script src="js/api.js"></script>   (use "../js/api.js" from inside /dashboards)
 
-const API_BASE = 'http://localhost:5000/api';
+// Pages opened from disk (file://) or a dev server on localhost use the local
+// backend; the deployed site uses the Railway-hosted API. When the Plesk
+// api subdomain works again, switch this back to
+// https://api.abrehottutoring.com.et/api
+const API_BASE = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname)
+  ? 'http://localhost:5000/api'
+  : 'https://abrehot-tutorial-frontandback-production.up.railway.app/api';
 
 function getToken() {
   return localStorage.getItem('abrehot_token');
@@ -63,7 +69,7 @@ function dashboardPathForRole(role) {
     Student: 'dashboards/student-dash.html',
     Tutor: 'dashboards/tutor-dash.html',
   };
-  return map[role] || 'Index.html';
+  return map[role] || 'index.html';
 }
 
 // Shows a small success/error message above a form without needing extra HTML.

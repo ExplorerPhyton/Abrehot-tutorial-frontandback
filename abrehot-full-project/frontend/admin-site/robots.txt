@@ -1,0 +1,3 @@
+# This admin panel is staff-only — keep it out of search engines entirely.
+User-agent: *
+Disallow: /

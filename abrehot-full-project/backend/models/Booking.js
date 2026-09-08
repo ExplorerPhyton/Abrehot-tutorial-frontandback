@@ -53,12 +53,7 @@ const bookingSchema = new mongoose.Schema(
     duration: { type: String, enum: ['1 Hour', '1.5 Hours', '2 Hours', '2 + Hours'] },
     notes: String,
 
-    // Payment details required before booking completion
-    paymentMethod: { type: String, enum: ['CBE', 'Telebirr'] },
-    transactionId: { type: String, trim: true },
-    paymentStatus: { type: String, enum: ['Pending Verification', 'Verified', 'Rejected'], default: 'Pending Verification' },
-
-    // Sessions are automatically confirmed upon timetable schedule check and payment completion
+    // Sessions are automatically confirmed after the timetable schedule check
     status: { type: String, enum: ['pending', 'confirmed', 'cancelled', 'completed'], default: 'confirmed' },
     // Set only once a session is marked completed by the tutor: true = the
     // student showed up, false = no-show. Null for everything else, which is

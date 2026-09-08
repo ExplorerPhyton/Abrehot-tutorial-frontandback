@@ -53,17 +53,6 @@ router.get('/bookings', async (req, res) => {
   res.json(bookings);
 });
 
-// PATCH /api/admin/bookings/:id/payment-status — verify or reject payment reference
-router.patch('/bookings/:id/payment-status', async (req, res) => {
-  const { paymentStatus } = req.body;
-  if (!['Pending Verification', 'Verified', 'Rejected'].includes(paymentStatus)) {
-    return res.status(400).json({ message: 'Invalid payment status' });
-  }
-  const booking = await Booking.findByIdAndUpdate(req.params.id, { paymentStatus }, { new: true });
-  if (!booking) return res.status(404).json({ message: 'Not found' });
-  res.json(booking);
-});
-
 // GET /api/admin/contact — quick visibility into contact form submissions
 router.get('/contact', async (req, res) => {
   const messages = await ContactMessage.find().sort({ createdAt: -1 }).limit(100);

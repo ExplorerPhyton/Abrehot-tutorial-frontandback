@@ -471,6 +471,63 @@
                 top: 10px;
             }
         }
+
+        /* Dashboard visual refresh */
+        body {
+            background: #f4efe7;
+            color: #24313a;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        header {
+            background: linear-gradient(135deg, #173f4d 0%, #235e65 62%, #c66b4e 170%);
+            padding: 28px clamp(22px, 5vw, 72px);
+            min-height: 170px;
+            align-items: center;
+            border-bottom: 4px solid #d48a63;
+        }
+
+        header h1 {
+            letter-spacing: 0;
+            font-size: clamp(24px, 3vw, 36px);
+        }
+
+        header p { color: #d7e4df; }
+
+        main {
+            width: min(1180px, calc(100% - 40px));
+            margin: 30px auto 60px;
+        }
+
+        .profile, .section, .card, .stat {
+            border: 1px solid rgba(36, 49, 58, .1);
+            box-shadow: 0 12px 30px rgba(40, 50, 48, .08);
+        }
+
+        .profile {
+            background: #fffdf9;
+            border-radius: 14px;
+            padding: 26px;
+            gap: 40px;
+        }
+
+        .profile img { border: 5px solid #f0d7c6; }
+        .profile button { background: #c66b4e; border-radius: 7px; }
+        .profile button:hover { background: #a9513a; }
+
+        .cards { gap: 16px; }
+        .stat, .card, .section { background: #fffdf9; border-radius: 12px; }
+        .stat { padding: 22px; }
+        table { background: #fffdf9; border-radius: 12px; overflow: hidden; }
+        table th { background: #e7f0ed; color: #173f4d; }
+        table td { border-color: #eadfd4; }
+
+        [data-theme="dark"] body { background: #16130f; }
+        [data-theme="dark"] .profile,
+        [data-theme="dark"] .section,
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .stat,
+        [data-theme="dark"] table { background: var(--surface); }
     </style>
 </head>
 
@@ -481,7 +538,7 @@
             <p>Welcome back, John Doe!</p>
         </div>
         <div class="head">
-            <a href="../Index.html"><button style="margin-right:12px;">Home</button></a>
+            <a href="../index.html"><button style="margin-right:12px;">Home</button></a>
             <div class="notification">
                 <button id="notificationBtn">
                     <i class="bx bxs-bell noti-icon"></i><span class="notification-count" id="notificationCount">4</span>
@@ -825,14 +882,6 @@
                 <span id="price"></span>
             </div>
             <div class="detail">
-                <strong>Payment Method</strong>
-                <span id="paymentMethod"></span>
-            </div>
-            <div class="detail">
-                <strong>Transaction Ref</strong>
-                <span id="transactionId"></span>
-            </div>
-            <div class="detail">
                 <strong>Meeting Platform</strong>
                 <span id="platform"></span>
             </div>
@@ -886,9 +935,7 @@
             duration,
             notes,
             groupSize,
-            price,
-            paymentMethod,
-            transactionId
+            price
         ) {
             document.getElementById("studentName").innerHTML = student;
             document.getElementById("tutor").innerHTML = tutor;
@@ -898,8 +945,6 @@
             document.getElementById("sessionType").innerHTML = sessionType;
             document.getElementById("groupSize").innerHTML = groupSize;
             document.getElementById("price").innerHTML = price;
-            document.getElementById("paymentMethod").innerHTML = paymentMethod;
-            document.getElementById("transactionId").innerHTML = transactionId;
             document.getElementById("platform").innerHTML = platform;
             document.getElementById("location").innerHTML = location;
             document.getElementById("address").innerHTML = address;
@@ -1106,8 +1151,6 @@
                     b.notes || '-',
                     groupSizeLabel(b),
                     bookingPrice(b),
-                    b.paymentMethod || '-',
-                    b.transactionId || '-',
                 ].map(function (v) { return "'" + String(v).replace(/'/g, "\\'") + "'"; }).join(',\n');
             }
 

@@ -5,7 +5,6 @@ const Child = require('../models/Child');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
 const { notifyAdmin } = require('../utils/mailer');
 const { notify } = require('../utils/notifications');
-const { verifyPaymentReference } = require('../utils/paymentVerifier');
 
 function toArray(value) {
   if (value === undefined || value === null || value === '') return [];
@@ -58,7 +57,6 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       grade, subject, other, topic, goal,
       session, groupMode, groupSize, platform, city, address, language,
       date, time, duration, notes, tutorId, childId,
-      paymentMethod, transactionId,
       planType, selectedDays, selectedTimeSlots,
     } = req.body;
 
@@ -71,19 +69,6 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       if (!daysArr.length) {
         return res.status(400).json({ message: 'Please select at least one day for your monthly tutoring plan.' });
       }
-    }
-
-    if (!paymentMethod || !['CBE', 'Telebirr'].includes(paymentMethod)) {
-      return res.status(400).json({ message: 'Please select a valid payment method (CBE or Telebirr).' });
-    }
-    if (!transactionId || !transactionId.trim()) {
-      return res.status(400).json({ message: 'Transaction ID / Reference is required to complete your payment.' });
-    }
-
-    // --- Automated Payment Reference Verification ---
-    const paymentCheck = await verifyPaymentReference(paymentMethod, transactionId);
-    if (!paymentCheck.success) {
-      return res.status(400).json({ message: paymentCheck.message });
     }
 
     if (!date || !time) {
@@ -105,6 +90,22 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     const chosenTutor = await TutorProfile.findById(tutorId).catch(function () { return null; });
     if (!chosenTutor || chosenTutor.status !== 'approved') {
       return res.status(400).json({ message: 'That tutor is not available for booking.' });
+    }
+
+    const requestedSubjects = toArray(subject)
+      .map((value) => String(value).trim())
+      .filter(Boolean);
+    const tutorSubjects = (chosenTutor.subjects || []).map((value) => String(value).trim().toLowerCase());
+    const unsupportedSubject = requestedSubjects.find(
+      (value) => !tutorSubjects.includes(value.toLowerCase())
+    );
+    if (!requestedSubjects.length) {
+      return res.status(400).json({ message: 'Please select a subject this tutor teaches.' });
+    }
+    if (unsupportedSubject) {
+      return res.status(400).json({
+        message: `This tutor does not teach ${unsupportedSubject}. Please choose one of the tutor's subjects.`,
+      });
     }
 
     // --- Timetable Schedule Check ---
@@ -186,7 +187,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       tutor: tutorId || undefined,
       child: child ? child._id : undefined,
       grade,
-      subject: toArray(subject),
+      subject: requestedSubjects,
       otherSubject: other,
       topic,
       goal: toArray(goal),
@@ -204,10 +205,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       planType: isMonthlyPlan ? 'monthly' : 'hourly',
       selectedDays: isMonthlyPlan ? toArray(selectedDays) : [],
       selectedTimeSlots: isMonthlyPlan ? (selectedTimeSlots || []) : [],
-      paymentMethod,
-      transactionId: transactionId.trim(),
-      paymentStatus: 'Verified',
-      status: 'confirmed', // Auto-confirmed: timetable schedule check passed & payment reference verified
+      status: 'confirmed', // Auto-confirmed after the timetable schedule check passes
       tutorRate,
       perPersonPrice,
       groupTotalPrice,
@@ -220,15 +218,13 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       : '';
 
     notifyAdmin(
-      `New confirmed booking (${grade}) - Paid via ${paymentMethod}`,
+      `New confirmed booking (${grade})`,
       `Subject(s): ${(booking.subject || []).join(', ') || other || '-'}\n` +
         (child ? `For: ${child.name}\n` : '') +
         `Session: ${session || '-'} via ${platform || '-'}\n` +
         groupLine +
         `City: ${city || '-'}\n` +
         `Date/time: ${date || '-'} ${time || ''}\n` +
-        `Payment Method: ${paymentMethod}\n` +
-        `Transaction ID: ${transactionId.trim()}\n` +
         (notes ? `Notes: ${notes}\n` : '') +
         `\nView it on your admin page.`
     );
