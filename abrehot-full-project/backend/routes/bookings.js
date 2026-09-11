@@ -50,6 +50,21 @@ function isSameDay(d1, d2) {
   );
 }
 
+function getDateKey(dateValue) {
+  const value = String(dateValue || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+}
+
+const TUTORING_PACKAGES = {
+  starter: { classSize: 'Self-paced', fee: 'Free', teacherPayment: undefined, min: 0, max: 0 },
+  'group-basic': { classSize: '6-10 students', fee: '450-600 ETB/student/hour', teacherPayment: 1000, min: 6, max: 10 },
+  'small-group': { classSize: '4-5 students', fee: '550-700 ETB/student/hour', teacherPayment: 1000, min: 4, max: 5 },
+  'mini-group': { classSize: '3 students', fee: '800 ETB/student/hour', teacherPayment: 1000, min: 3, max: 3 },
+  duo: { classSize: '2 students', fee: '1,000 ETB/student/hour', teacherPayment: 1000, min: 2, max: 2 },
+  'premium-one-to-one': { classSize: '1 student', fee: '1,800 ETB/hour', teacherPayment: 1000, min: 1, max: 1 },
+  'vip-one-to-one': { classSize: '1 student', fee: '2,300 ETB/hour', teacherPayment: 1000, min: 1, max: 1 },
+};
+
 // POST /api/bookings — matches book.html
 router.post('/', attachUserIfPresent, async (req, res) => {
   try {
@@ -57,11 +72,22 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       grade, subject, other, topic, goal,
       session, groupMode, groupSize, platform, city, address, language,
       date, time, duration, notes, tutorId, childId,
-      planType, selectedDays, selectedTimeSlots,
+      planType, selectedDays, selectedTimeSlots, packageId,
     } = req.body;
 
     if (!grade) {
       return res.status(400).json({ message: 'Grade is required' });
+    }
+
+    const selectedPackage = TUTORING_PACKAGES[packageId];
+    if (!selectedPackage) {
+      return res.status(400).json({ message: 'Please choose a valid tutoring package.' });
+    }
+    if (selectedPackage.min >= 2 && session !== 'group') {
+      return res.status(400).json({ message: 'Group packages must be booked as a group session.' });
+    }
+    if (selectedPackage.max === 1 && session !== 'online' && session !== 'in-person') {
+      return res.status(400).json({ message: 'One-to-one packages require an online or in-person session.' });
     }
 
     if (planType === 'monthly') {
@@ -73,6 +99,10 @@ router.post('/', attachUserIfPresent, async (req, res) => {
 
     if (!date || !time) {
       return res.status(400).json({ message: 'Preferred Date and Time are required to schedule your session.' });
+    }
+    const dateKey = getDateKey(date);
+    if (!dateKey) {
+      return res.status(400).json({ message: 'Please choose a valid booking date.' });
     }
 
     // Tutors book out their own time — they don't book sessions with other
@@ -108,37 +138,31 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       });
     }
 
-    // --- Timetable Schedule Check ---
-    // Prevent double booking: verify the tutor has no existing overlapping session on the same date and time.
-    const reqRange = getSessionTimeRange(date, time, duration);
-    if (reqRange) {
-      const activeBookings = await Booking.find({
-        tutor: tutorId,
-        status: { $in: ['pending', 'confirmed'] },
+    // A tutor accepts at most one active booking on each calendar date.
+    const dayStart = new Date(`${dateKey}T00:00:00.000Z`);
+    const dayEnd = new Date(dayStart.getTime() + 86400000);
+    const sameDayBooking = await Booking.findOne({
+      tutor: tutorId,
+      status: { $in: ['pending', 'confirmed'] },
+      $or: [
+        { dateKey },
+        { date: { $gte: dayStart, $lt: dayEnd } },
+      ],
+    });
+    if (sameDayBooking) {
+      return res.status(400).json({
+        message: 'This tutor is already booked for that day. Please select a different date.',
       });
-
-      const conflict = activeBookings.find((b) => {
-        if (!isSameDay(b.date, date)) return false;
-        const existRange = getSessionTimeRange(b.date, b.time, b.duration);
-        if (!existRange) return false;
-        return Math.max(reqRange.start, existRange.start) < Math.min(reqRange.end, existRange.end);
-      });
-
-      if (conflict) {
-        return res.status(400).json({
-          message: 'This tutor is already booked for another session at this time. Please select a different time or date.',
-        });
-      }
     }
 
     // Group sessions: the booker must say how many students are splitting the
     // rate (2-30) and how the group will actually meet the tutor (online picks a
     // platform, in-person picks a location).
     let effectiveMode = session; // for 'online'/'in-person' the venue is the session itself
-    if (session === 'group') {
+    if (selectedPackage.min >= 2) {
       const size = Number(groupSize);
-      if (!Number.isInteger(size) || size < 2 || size > 30) {
-        return res.status(400).json({ message: 'Please enter how many students are in the group (2 to 30).' });
+      if (!Number.isInteger(size) || size < selectedPackage.min || size > selectedPackage.max) {
+        return res.status(400).json({ message: `Group size must match the selected package (${selectedPackage.min}-${selectedPackage.max} students).` });
       }
       if (groupMode !== 'online' && groupMode !== 'in-person') {
         return res.status(400).json({ message: 'Please choose how the group will meet: online or in-person.' });
@@ -194,11 +218,17 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       session,
       groupMode: session === 'group' ? groupMode : undefined,
       groupSize: session === 'group' ? Number(groupSize) : undefined,
+      packageId,
+      packageClassSize: selectedPackage.classSize,
+      studentFee: selectedPackage.fee,
+      teacherPayment: selectedPackage.teacherPayment,
+      packageFee: selectedPackage.fee,
       platform,
       city,
       address,
       language,
       date: date || undefined,
+      dateKey,
       time,
       duration,
       notes,
@@ -238,6 +268,11 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       });
     }
   } catch (err) {
+    if (err && err.code === 11000) {
+      return res.status(400).json({
+        message: 'This tutor is already booked for that day. Please select a different date.',
+      });
+    }
     res.status(500).json({ message: 'Could not submit booking', error: err.message });
   }
 });

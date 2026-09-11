@@ -256,6 +256,12 @@
             margin-bottom: 10px;
         }
 
+        .subject-booking-help {
+            margin: -4px 0 14px;
+            color: #666;
+            font-size: 13px;
+        }
+
         .buttons {
             display: flex;
             gap: 15px;
@@ -509,6 +515,7 @@
                 <select id="subject" name="subject" required disabled>
                     <option value="">Loading tutor subjects...</option>
                 </select><br><br>
+                <p class="subject-booking-help">International exam preparation is grouped below so you can quickly find IELTS, TOEFL, SAT and other admissions exams.</p>
                 <div class="main-label"><label for="topic">Topic or Chapter (Optional)</label></div><br>
                 <input type="text" id="topic" name="topic" placeholder="e.g. Algebra, essay writing, photosynthesis"><br><br>
             </fieldset>
@@ -518,6 +525,18 @@
                 <label><input type="checkbox" name="goal" value="revision"> Concept Revision</label><br>
                 <label><input type="checkbox" name="goal" value="weeklytutoring"> Regular Weekly
                     Tutoring</label><br><br>
+                <div class="main-label"><label for="packageId">Tutoring Package</label></div>
+                <select id="packageId" name="packageId" required>
+                    <option value="">Select a package</option>
+                    <option value="starter">Starter / Recorded Lessons — Self-paced — Free</option>
+                    <option value="group-basic">Group Basic — 6–10 students — 450–600 ETB/student/hour</option>
+                    <option value="small-group">Small Group — 4–5 students — 550–700 ETB/student/hour</option>
+                    <option value="mini-group">Mini Group — 3 students — 800 ETB/student/hour</option>
+                    <option value="duo">Duo Tutoring — 2 students — 1,000 ETB/student/hour</option>
+                    <option value="premium-one-to-one">Premium 1-to-1 — 1 student — 1,800 ETB/hour</option>
+                    <option value="vip-one-to-one">VIP 1-to-1 — 1 student — 2,300 ETB/hour</option>
+                </select>
+                <p id="packageDetails" style="font-size:13px;color:#666;margin:8px 0 16px;">Choose based on how many students will attend.</p>
                 <div class="main-label"><label>Tutoring Plan</label></div>
                 <div class="session-type">
                     <label>
@@ -552,8 +571,7 @@
                     <input type="number" id="groupSize" name="groupSize" min="2" max="30"
                         placeholder="eg. 4">
                     <p style="font-size:13px;color:#666;margin:-10px 0 16px;">
-                        The tutor's rate is split equally between the students — the bigger the group,
-                        the cheaper it is per person.
+                        Enter the exact number of students for the selected group package.
                     </p>
                     <div class="main-label"><label>How will the group meet?</label></div>
                     <div class="session-type">
@@ -627,6 +645,7 @@
                 <div><span class="main-label">Preferred Language:</span> <span id="summaryLanguage">-</span></div>
                 <div><span class="main-label">Learning Goal:</span> <span id="summaryGoal">-</span></div>
                 <div><span class="main-label">Session Type:</span> <span id="summarySession">-</span></div>
+                <div><span class="main-label">Package:</span> <span id="summaryPackage">-</span></div>
                 <div><span class="main-label">Group Size:</span> <span id="summaryGroupSize">-</span></div>
                 <div><span class="main-label">Price:</span> <span id="summaryPrice">-</span></div>
                 <div><span class="main-label">Date:</span> <span id="summaryDate">-</span></div>
@@ -748,6 +767,15 @@
         var tutorMonthlyPrice = null;
         var tutorAvailableDays = [];
         var tutorSubjects = [];
+        var tutoringPackages = {
+            starter: { label: 'Starter / Recorded Lessons', size: 'Self-paced', fee: 'Free', min: 0, max: 0 },
+            'group-basic': { label: 'Group Basic', size: '6-10 students', fee: '450-600 ETB/student/hour', min: 6, max: 10 },
+            'small-group': { label: 'Small Group', size: '4-5 students', fee: '550-700 ETB/student/hour', min: 4, max: 5 },
+            'mini-group': { label: 'Mini Group', size: '3 students', fee: '800 ETB/student/hour', min: 3, max: 3 },
+            duo: { label: 'Duo Tutoring', size: '2 students', fee: '1,000 ETB/student/hour', min: 2, max: 2 },
+            'premium-one-to-one': { label: 'Premium 1-to-1', size: '1 student', fee: '1,800 ETB/hour', min: 1, max: 1 },
+            'vip-one-to-one': { label: 'VIP 1-to-1', size: '1 student', fee: '2,300 ETB/hour', min: 1, max: 1 },
+        };
         const inputs = document.querySelectorAll("input, select, textarea");
         inputs.forEach(function (input) {
             input.addEventListener("input", updateSummary);
@@ -776,6 +804,11 @@
             let sessionLabel = { online: "Online", "in-person": "In-Person", group: "Group" }[session ? session.value : null];
             document.getElementById("summarySession").textContent =
                 sessionLabel || "-";
+            let packageInput = document.getElementById('packageId');
+            let selectedPackage = packageInput && tutoringPackages[packageInput.value];
+            document.getElementById('summaryPackage').textContent = selectedPackage
+                ? selectedPackage.label + ' (' + selectedPackage.fee + ')'
+                : '-';
 
             // Group size + live split preview
             let groupSize = document.getElementById("groupSize");
@@ -784,7 +817,9 @@
                 (session && session.value === "group" && size >= 2) ? size + " student" + (size === 1 ? "" : "s") : "-";
 
             let priceEl = document.getElementById("summaryPrice");
-            if (isMonthly) {
+            if (selectedPackage) {
+                priceEl.textContent = selectedPackage.fee;
+            } else if (isMonthly) {
                 if (tutorMonthlyPrice != null) {
                     priceEl.textContent = tutorMonthlyPrice + " ETB/month";
                 } else if (tutorPrice != null) {
@@ -939,11 +974,28 @@
                     tutorSubjects = Array.isArray(tutorProfile.subjects) ? tutorProfile.subjects : [];
                     var subjectSelect = document.getElementById('subject');
                     subjectSelect.innerHTML = '<option value="">Select a subject</option>';
+                    var internationalEnglish = ['IELTS', 'TOEFL iBT', 'Duolingo English Test', 'PTE Academic', 'Cambridge English', 'OET'];
+                    var internationalAdmissions = ['SAT', 'ACT', 'GRE', 'GMAT', 'AP Exams', 'International Baccalaureate (IB)'];
+                    var groupedSubjects = [
+                        { label: 'International English Exams', subjects: [], catalog: internationalEnglish },
+                        { label: 'International Admissions & School Exams', subjects: [], catalog: internationalAdmissions },
+                        { label: 'Other Subjects', subjects: [] }
+                    ];
                     tutorSubjects.forEach(function (subject) {
-                        var option = document.createElement('option');
-                        option.value = subject;
-                        option.textContent = subject;
-                        subjectSelect.appendChild(option);
+                        var group = groupedSubjects.find(function (item) { return (item.catalog || []).includes(subject); });
+                        (group || groupedSubjects[2]).subjects.push(subject);
+                    });
+                    groupedSubjects.forEach(function (group) {
+                        if (!group.subjects.length) return;
+                        var subjectGroup = document.createElement('optgroup');
+                        subjectGroup.label = group.label;
+                        group.subjects.forEach(function (subject) {
+                            var option = document.createElement('option');
+                            option.value = subject;
+                            option.textContent = subject;
+                            subjectGroup.appendChild(option);
+                        });
+                        subjectSelect.appendChild(subjectGroup);
                     });
                     subjectSelect.disabled = tutorSubjects.length === 0;
                     if (!tutorSubjects.length) {
@@ -961,6 +1013,32 @@
             } catch (err) { /* rate unknown — the summary just shows "-" */ }
 
             var planTypeRadios = form.querySelectorAll('input[name="planType"]');
+            var packageInput = document.getElementById('packageId');
+            var packageDetails = document.getElementById('packageDetails');
+            function syncPackage() {
+                var selectedPackage = tutoringPackages[packageInput.value];
+                packageDetails.textContent = selectedPackage
+                    ? selectedPackage.label + ' | Class size: ' + selectedPackage.size + ' | Student fee: ' + selectedPackage.fee
+                    : 'Choose based on how many students will attend.';
+                var isGroupPackage = selectedPackage && selectedPackage.min >= 2;
+                form.querySelectorAll('input[name="session"]').forEach(function (radio) {
+                    radio.disabled = isGroupPackage ? radio.value !== 'group' : radio.value === 'group';
+                });
+                var groupRadio = form.querySelector('input[name="session"][value="group"]');
+                if (groupRadio) groupRadio.checked = !!isGroupPackage;
+                if (!isGroupPackage && !form.querySelector('input[name="session"]:checked')) {
+                    var onlineRadio = form.querySelector('input[name="session"][value="online"]');
+                    if (onlineRadio) onlineRadio.checked = true;
+                }
+                if (isGroupPackage) {
+                    document.getElementById('groupSize').min = selectedPackage.min;
+                    document.getElementById('groupSize').max = selectedPackage.max;
+                    document.getElementById('groupSize').value = selectedPackage.min === selectedPackage.max ? selectedPackage.min : '';
+                }
+                updateSummary();
+                syncSessionTypeSections();
+            }
+            packageInput.addEventListener('change', syncPackage);
             var monthlyPlanSection = document.getElementById('monthlyPlanSection');
             function syncPlanTypeSection() {
                 var checked = form.querySelector('input[name="planType"]:checked');
@@ -1004,6 +1082,7 @@
             sessionRadios.forEach(function (r) { r.addEventListener('change', syncSessionTypeSections); });
             groupModeRadios.forEach(function (r) { r.addEventListener('change', syncSessionTypeSections); });
             syncSessionTypeSections();
+            syncPackage();
 
             // Parents book "for" a specific child, since they won't be the one
             // attending the session. Students/tutors/guests don't see this.
@@ -1058,6 +1137,12 @@
                 }
 
                 var sessionInput = form.querySelector('input[name="session"]:checked');
+                var selectedPackage = tutoringPackages[document.getElementById('packageId').value];
+                if (!selectedPackage) {
+                    showFormMessage(form, 'Please choose a tutoring package.', true);
+                    document.getElementById('packageId').focus();
+                    return;
+                }
                 var platformInput = form.querySelector('input[name="platform"]:checked');
                 var groupModeInput = form.querySelector('input[name="groupMode"]:checked');
 
@@ -1067,8 +1152,8 @@
                 if (isGroup) {
                     var groupSizeEl = document.getElementById('groupSize');
                     var gs = parseInt(groupSizeEl.value, 10);
-                    if (!gs || gs < 2 || gs > 30) {
-                        showFormMessage(form, 'Please enter how many students are in the group (2 to 30).', true);
+                    if (!gs || gs < selectedPackage.min || gs > selectedPackage.max) {
+                        showFormMessage(form, 'Please enter a group size that matches the selected package (' + selectedPackage.min + '-' + selectedPackage.max + ' students).', true);
                         groupSizeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         return;
                     }
@@ -1103,6 +1188,8 @@
                     topic: document.getElementById('topic').value,
                     goal: goals,
                     session: sessionInput ? sessionInput.value : undefined,
+                    packageId: document.getElementById('packageId').value,
+                    packageClassSize: selectedPackage.size,
                     groupMode: groupModeInput ? groupModeInput.value : undefined,
                     groupSize: isGroup ? document.getElementById('groupSize').value : undefined,
                     platform: platformInput ? platformInput.value : undefined,

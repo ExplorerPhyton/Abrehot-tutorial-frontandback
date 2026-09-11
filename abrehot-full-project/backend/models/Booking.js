@@ -22,6 +22,11 @@ const bookingSchema = new mongoose.Schema(
     groupMode: { type: String, enum: ['online', 'in-person'] },
     // Only for group sessions: how many students are splitting the rate.
     groupSize: { type: Number, min: 2, max: 30 },
+    packageId: { type: String },
+    packageClassSize: { type: String },
+    studentFee: { type: String },
+    teacherPayment: { type: Number },
+    packageFee: { type: String },
     platform: { type: String, enum: ['googleMeet', 'zoom', 'microsoftTeams', 'telegram'] },
 
     // Plan type: 'hourly' session vs 'monthly' recurring plan
@@ -49,6 +54,8 @@ const bookingSchema = new mongoose.Schema(
     language: { type: String, enum: ['English', 'Amharic', 'Afaan Oromo', 'Tigrinya'] },
 
     date: Date,
+    // Calendar date key used to prevent two active bookings for one tutor on one day.
+    dateKey: String,
     time: String, // stored as "HH:MM" from the <input type="time">
     duration: { type: String, enum: ['1 Hour', '1.5 Hours', '2 Hours', '2 + Hours'] },
     notes: String,
@@ -61,6 +68,18 @@ const bookingSchema = new mongoose.Schema(
     attended: { type: Boolean, default: null },
   },
   { timestamps: true }
+);
+
+bookingSchema.index(
+  { tutor: 1, dateKey: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      tutor: { $exists: true },
+      dateKey: { $exists: true },
+      status: { $in: ['pending', 'confirmed'] },
+    },
+  }
 );
 
 module.exports = mongoose.model('Booking', bookingSchema);

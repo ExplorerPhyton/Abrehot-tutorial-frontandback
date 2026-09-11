@@ -1079,6 +1079,7 @@
             }
 
             document.getElementById('logoutBtn').addEventListener('click', function () {
+                if (!window.confirm('Are you sure you want to log out?')) return;
                 logout();
                 window.location.href = '../login.html';
             });

@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Dependencies
+node_modules/
+
+# Archives & deploy staging
+*.zip
+*.rar
+frontend-deploy/
+backend-deploy/
+
+# Tooling
+.qodo/

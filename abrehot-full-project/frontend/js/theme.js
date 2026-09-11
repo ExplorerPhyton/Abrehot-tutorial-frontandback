@@ -11,6 +11,7 @@
 (function () {
     var THEME_KEY = 'theme';
     var PALETTE_KEY = 'abrehot_palette';
+    var LANG_KEY = 'abrehot_lang';
     // Captured synchronously — document.currentScript is null in later callbacks.
     var THEME_SCRIPT_SRC = (document.currentScript && document.currentScript.src) || '';
 
@@ -191,6 +192,68 @@
         '}'
     ].join('\n');
 
+    var NAV_CSS = [
+        '#google_translate_element { display: none !important; }',
+        '.abrehot-legacy-source { display: none !important; }',
+        '.abrehot-site-navbar {',
+        '  position: sticky; top: 0; z-index: 50; padding: 16px 0;',
+        '  background: rgba(250, 248, 245, .85); color: var(--ink-700);',
+        '  border-bottom: 1px solid rgba(234, 222, 207, .6);',
+        '  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);',
+        '}',
+        'html[data-theme="dark"] .abrehot-site-navbar { background: rgba(20, 18, 16, .88); }',
+        '.abrehot-site-navbar .nav-inner {',
+        '  display: flex; align-items: center; gap: 18px; max-width: none;',
+        '  margin: 0; padding: 0 clamp(18px, 4vw, 100px);',
+        '}',
+        '.abrehot-site-navbar .brand-logo { display: flex; align-items: center; flex-shrink: 0; }',
+        '.abrehot-site-navbar .brand-mark {',
+        '  width: auto !important; height: 58px !important; object-fit: contain;',
+        '  display: block; margin: -16px 0;',
+        '}',
+        '.abrehot-site-navbar .nav-links {',
+        '  display: flex; align-items: center; gap: clamp(10px, 1.5vw, 24px);',
+        '  margin: 0; padding: 0; list-style: none; flex: 1;',
+        '}',
+        '.abrehot-site-navbar .nav-links a, .abrehot-site-navbar .nav-menu-panel a {',
+        '  color: var(--ink-700) !important; font-size: .82rem; font-weight: 700;',
+        '  text-decoration: none; white-space: nowrap;',
+        '}',
+        '.abrehot-site-navbar .nav-links a:hover, .abrehot-site-navbar .nav-menu-panel a:hover { color: var(--terracotta) !important; }',
+        '.abrehot-site-navbar .nav-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }',
+        '.abrehot-site-navbar .lang-switch { display: flex; gap: 3px; padding: 3px; border: 1px solid var(--sand-200); border-radius: 999px; }',
+        '.abrehot-site-navbar .lang-btn {',
+        '  min-height: 30px !important; padding: 4px 9px !important; border: 0 !important;',
+        '  border-radius: 999px !important; background: transparent !important; color: var(--ink-700) !important;',
+        '  box-shadow: none !important; font-size: .72rem !important;',
+        '}',
+        '.abrehot-site-navbar .lang-btn.active { background: var(--ink-900) !important; color: var(--sand-50) !important; }',
+        '.abrehot-site-navbar .nav-action {',
+        '  display: inline-flex; align-items: center; justify-content: center; min-height: 38px;',
+        '  padding: 9px 14px; border-radius: 6px; font-size: .78rem; font-weight: 700;',
+        '  text-decoration: none; white-space: nowrap;',
+        '}',
+        '.abrehot-site-navbar .nav-outline { border: 1px solid var(--ink-900); color: var(--ink-900) !important; background: transparent; }',
+        '.abrehot-site-navbar .nav-filled { border: 1px solid var(--terracotta); color: #fff !important; background: var(--grad-terracotta); }',
+        '.abrehot-site-navbar .nav-menu { display: none; position: relative; }',
+        '.abrehot-site-navbar .nav-menu summary { list-style: none; cursor: pointer; font-size: 1.55rem; color: var(--ink-900); }',
+        '.abrehot-site-navbar .nav-menu summary::-webkit-details-marker { display: none; }',
+        '.abrehot-site-navbar .nav-menu-panel {',
+        '  position: absolute; right: 0; top: calc(100% + 12px); display: grid; gap: 12px;',
+        '  min-width: 220px; padding: 16px; background: var(--sand-50);',
+        '  border: 1px solid var(--sand-200); border-radius: 8px; box-shadow: var(--shadow-raised);',
+        '}',
+        '@media (max-width: 1100px) {',
+        '  .abrehot-site-navbar .nav-links { gap: 10px; }',
+        '  .abrehot-site-navbar .nav-links a { font-size: .74rem; }',
+        '}',
+        '@media (max-width: 900px) {',
+        '  .abrehot-site-navbar .nav-links, .abrehot-site-navbar .nav-right > .nav-action { display: none; }',
+        '  .abrehot-site-navbar .nav-menu { display: block; }',
+        '  .abrehot-site-navbar .nav-inner { justify-content: space-between; }',
+        '}'
+    ].join('\n');
+
     // Amharic logo swap: the active language surfaces as a lang-am/lang-en class
     // on <html> or <body> (see applyLangClasses below), and these rules replace
     // the brand image in place. The URL is resolved against this script's own
@@ -234,6 +297,7 @@
             document.body.classList.toggle('lang-am', am);
             document.body.classList.toggle('lang-en', !am);
         }
+        translateDataElements(am ? 'am' : 'en');
         syncLangButtons();
     }
 
@@ -261,11 +325,118 @@
             var text = els[i].getAttribute('data-' + lang);
             if (text) els[i].innerHTML = text;
         }
+        translateLegacyContent(lang);
+        if (typeof window.translatePageContent === 'function') window.translatePageContent(lang);
+    }
+
+    var LEGACY_TRANSLATIONS = {
+        'About Us': 'ስለ እኛ',
+        'Our Mission': 'ተልዕኮአችን',
+        'Our Vision': 'ራዕያችን',
+        'Why Choose Us?': 'ለምን እኛን ይመርጣሉ?',
+        'Become A Tutor': 'አስተማሪ ይሁኑ',
+        'Contact Us': 'ያግኙን',
+        'Support Abrehot Online Tutorials': 'አብረሆትን ይደግፉ',
+        'Forgot Password': 'የይለፍ ቃል ረሱ?',
+        'Welcome Back': 'እንኳን ደህና መጡ',
+        'Sign in to manage your tutoring sessions, bookings, and profile.': 'የትምህርት ክፍሎችዎን፣ ቦታ ማስያዣዎችዎን እና መገለጫዎን ለማስተዳደር ይግቡ።',
+        'LOG IN': 'ግባ',
+        'Forgot Password?': 'የይለፍ ቃል ረሱ?',
+        "Don't have an account?": 'መለያ የለዎትም?',
+        'Create an Account': 'መለያ ይፍጠሩ',
+        'By signing in you agree to our': 'በመግባትዎ የእኛን',
+        'Terms of Service': 'የአገልግሎት ውሎች',
+        'and': 'እና',
+        'First create an account, then browse tutors, choose one, and finally complete the booking form.': 'መጀመሪያ መለያ ይፍጠሩ፣ ከዚያ አስተማሪዎችን ይመልከቱ፣ አንዱን ይምረጡ እና በመጨረሻ የቦታ ማስያዣ ቅጹን ይሙሉ።',
+        'Each tutor is reviewed before being approved on the platform.': 'እያንዳንዱ አስተማሪ በመድረኩ ከመፈቀዱ በፊት ይገመገማል።',
+        'Yes, you can select your preferred teaching mode when booking.': 'አዎ፣ ቦታ ሲያስይዙ የሚመርጡትን የማስተማሪያ ዘዴ መምረጥ ይችላሉ።',
+        'Check back soon — the admin is always adding new study materials.': 'በቅርቡ ይመለሱ፤ አስተዳደሩ ሁልጊዜ አዳዲስ የትምህርት ቁሳቁሶችን እየጨመረ ነው።',
+        'Books & Study Materials': 'መጻሕፍት እና የትምህርት ቁሳቁሶች',
+        'Find Your Tutor': 'አስተማሪዎን ይፈልጉ',
+        'Terms and Conditions': 'ውሎች እና ሁኔታዎች',
+        'Privacy Policy': 'የግላዊነት ፖሊሲ',
+        'Safety': 'ደህንነት',
+        'Services Offered': 'የሚሰጡ አገልግሎቶች',
+        'Cancellation & Rescheduling': 'ስረዛ እና የጊዜ ለውጥ',
+        'Punctuality & No-Show Policy': 'በሰዓት መገኘት እና አለመገኘት',
+        'Lesson Recording & Privacy': 'የትምህርት ቅጂ እና ግላዊነት',
+        'Intellectual Property & Copyright Laws': 'የአእምሮ ንብረት እና የቅጂ መብት ሕጎች',
+        'User Responsibilities & Code of Conduct': 'የተጠቃሚ ኃላፊነቶች እና የሥነ-ምግባር ደንብ',
+        'Termination & Policy Updates': 'መቋረጥ እና የፖሊሲ ማሻሻያዎች',
+        'Governing Law': 'የሚተዳደርበት ሕግ',
+        'Full Name': 'ሙሉ ስም',
+        'Gender': 'ጾታ',
+        'Date of Birth': 'የትውልድ ቀን',
+        'Phone Number': 'ስልክ ቁጥር',
+        'Email Address': 'የኢሜይል አድራሻ',
+        'Password': 'የይለፍ ቃል',
+        'Remember Me': 'አስታውሰኝ',
+        'Login As': 'እንደ ይግቡ',
+        'Parent': 'ወላጅ',
+        'Student': 'ተማሪ',
+        'Tutor': 'አስተማሪ',
+        'Log In': 'ግባ',
+        'Sign Up': 'ይመዝገቡ',
+        'Log Out': 'ውጣ',
+        'Submit': 'አስገባ',
+        'Send Message': 'መልዕክት ላክ',
+        'Search Tutor': 'አስተማሪ ይፈልጉ',
+        'Grade Level': 'የክፍል ደረጃ',
+        'Subject': 'ትምህርት ዓይነት',
+        'Language': 'ቋንቋ',
+        'Location': 'ቦታ',
+        'Teaching Mode': 'የማስተማሪያ ዘዴ',
+        'Online': 'በመስመር ላይ',
+        'In-Person': 'በአካል',
+        'Experience': 'ልምድ',
+        'Price Range': 'የዋጋ ክልል',
+        'Minimum Rating': 'ዝቅተኛ ደረጃ',
+        'Our Commitment': 'ቃል ኪዳናችን',
+        'For Students and Parents': 'ለተማሪዎች እና ወላጆች',
+        'For Tutors': 'ለአስተማሪዎች',
+        'Account Security': 'የመለያ ደህንነት',
+        'Online Meeting Safety': 'የመስመር ላይ ስብሰባ ደህንነት',
+        'Reporting a Problem': 'ችግር ሪፖርት ማድረግ',
+        'Our Promise': 'ቃል ኪዳናችን',
+        'Information We Collect': 'የምንሰበስበው መረጃ',
+        'Why We Collect It': 'ለምን እንሰበስበዋለን',
+        'Data Security': 'የመረጃ ደህንነት',
+        'Sharing Information': 'መረጃ ማጋራት',
+        'Cookies': 'ኩኪዎች',
+        'Your Rights': 'መብቶችዎ',
+        'Thank You!': 'እናመሰግናለን!'
+    };
+
+    function translateLegacyContent(lang) {
+        if (!document.body) return;
+        var translations = lang === 'am' ? LEGACY_TRANSLATIONS : {};
+        if (lang === 'en') {
+            for (var english in LEGACY_TRANSLATIONS) {
+                translations[LEGACY_TRANSLATIONS[english]] = english;
+            }
+        }
+        var nodes = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        var node;
+        while (node = nodes.nextNode()) {
+            var parent = node.parentElement;
+            if (!parent || /^(SCRIPT|STYLE|TEXTAREA)$/.test(parent.tagName)) continue;
+            var source = node.nodeValue.trim();
+            if (!source || !translations[source]) continue;
+            node.nodeValue = node.nodeValue.replace(source, translations[source]);
+        }
+        var fields = document.querySelectorAll('input[placeholder], textarea[placeholder], [title]');
+        for (var i = 0; i < fields.length; i++) {
+            var field = fields[i];
+            var placeholder = field.getAttribute('placeholder');
+            var title = field.getAttribute('title');
+            if (placeholder && translations[placeholder]) field.setAttribute('placeholder', translations[placeholder]);
+            if (title && translations[title]) field.setAttribute('title', translations[title]);
+        }
     }
 
     function syncLangButtons() {
         var am = desiredLang() === 'am';
-        var buttons = document.querySelectorAll('.abrehot-theme-cluster .ab-lang-btn');
+        var buttons = document.querySelectorAll('.abrehot-theme-cluster .ab-lang-btn, .abrehot-site-navbar .lang-btn');
         for (var i = 0; i < buttons.length; i++) {
             var isAmBtn = buttons[i].getAttribute('data-lang') === 'am';
             buttons[i].classList.toggle('active', isAmBtn === am);
@@ -289,8 +460,66 @@
         if (document.getElementById('abrehot-theme-style')) return;
         var style = document.createElement('style');
         style.id = 'abrehot-theme-style';
-        style.textContent = INJECTED_CSS + '\n' + amharicLogoCss();
+        style.textContent = INJECTED_CSS + '\n' + NAV_CSS + '\n' + amharicLogoCss();
         document.head.appendChild(style);
+    }
+
+    function removeGoogleTranslate() {
+        var widget = document.getElementById('google_translate_element');
+        if (widget) widget.remove();
+        var scripts = document.querySelectorAll('script[src*="translate.google.com"]');
+        for (var i = 0; i < scripts.length; i++) scripts[i].remove();
+    }
+
+    function createSiteNavbar() {
+        if (document.querySelector('header.navbar, .abrehot-site-navbar')) return;
+        var legacyHeader = document.querySelector('.header, body > header');
+
+        var pagePrefix = /\/(dashboards|admin-site)\//.test(window.location.pathname) ? '../' : '';
+        var shell = document.createElement('header');
+        shell.className = 'abrehot-site-navbar';
+        shell.innerHTML = [
+            '<div class="container nav-inner">',
+            '<a href="' + pagePrefix + 'index.html" class="brand-logo"><img src="' + pagePrefix + 'Abrehot-removebg-preview.png" alt="Abrehot Logo" class="brand-mark"></a>',
+            '<ul class="nav-links">',
+            '<li><a href="' + pagePrefix + 'index.html" data-en="Home" data-am="መነሻ">Home</a></li>',
+            '<li><a href="' + pagePrefix + 'tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a></li>',
+            '<li><a href="' + pagePrefix + 'book.html" data-en="Schedule" data-am="ቀጠሮ ይያዙ">Schedule</a></li>',
+            '<li><a href="' + pagePrefix + 'books.html" data-en="Books" data-am="መጻሕፍት">Books</a></li>',
+            '<li><a href="' + pagePrefix + 'becomeatutor.html" data-en="Teach" data-am="ያስተምሩ">Teach</a></li>',
+            '<li><a href="' + pagePrefix + 'aboutus.html" data-en="About" data-am="ስለ እኛ">About</a></li>',
+            '<li><a href="' + pagePrefix + 'contact.html" data-en="Contact" data-am="ያግኙን">Contact</a></li>',
+            '<li><a href="' + pagePrefix + 'donate.html" data-en="Donate" data-am="ይለግሱ">Donate</a></li>',
+            '</ul>',
+            '<div class="nav-right">',
+            '<div class="lang-switch"><button type="button" class="lang-btn active" data-lang="en">EN</button><button type="button" class="lang-btn" data-lang="am">አማ</button></div>',
+            '<a href="' + pagePrefix + 'login.html" class="nav-action nav-outline" data-en="Sign In" data-am="ግቡ">Sign In</a>',
+            '<a href="' + pagePrefix + 'create-account.html" class="nav-action nav-filled" data-en="Create Account" data-am="መለያ ይፍጠሩ">Create Account</a>',
+            '<details class="nav-menu"><summary aria-label="Open navigation menu"><i class="bx bx-menu"></i></summary><div class="nav-menu-panel">',
+            '<a href="' + pagePrefix + 'index.html" data-en="Home" data-am="መነሻ">Home</a>',
+            '<a href="' + pagePrefix + 'tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a>',
+            '<a href="' + pagePrefix + 'book.html" data-en="Schedule a Class" data-am="ቀጠሮ ይያዙ">Schedule a Class</a>',
+            '<a href="' + pagePrefix + 'books.html" data-en="Books &amp; Materials" data-am="መጻሕፍት">Books &amp; Materials</a>',
+            '<a href="' + pagePrefix + 'becomeatutor.html" data-en="Become a Tutor" data-am="አስተማሪ ይሁኑ">Become a Tutor</a>',
+            '<a href="' + pagePrefix + 'aboutus.html" data-en="About" data-am="ስለ እኛ">About</a>',
+            '<a href="' + pagePrefix + 'contact.html" data-en="Contact" data-am="ያግኙን">Contact</a>',
+            '<a href="' + pagePrefix + 'donate.html" data-en="Donate" data-am="ይለግሱ">Donate</a>',
+            '<a href="' + pagePrefix + 'login.html" data-en="Sign In" data-am="ግቡ">Sign In</a>',
+            '<a href="' + pagePrefix + 'create-account.html" data-en="Create Account" data-am="መለያ ይፍጠሩ">Create Account</a>',
+            '</div></details>',
+            '</div></div>'
+        ].join('');
+
+        if (legacyHeader) legacyHeader.classList.add('abrehot-legacy-source');
+        document.body.insertBefore(shell, document.body.firstChild);
+        var languageButtons = shell.querySelectorAll('.lang-btn');
+        for (var i = 0; i < languageButtons.length; i++) {
+            languageButtons[i].addEventListener('click', function () {
+                window.setLanguage(this.getAttribute('data-lang'));
+            });
+        }
+        translateDataElements(desiredLang());
+        syncLangButtons();
     }
 
     function syncControls() {
@@ -329,7 +558,7 @@
 
         // Language pill (EN / አማ) — skipped on pages that ship their own
         // language buttons in the navbar (home.html has #btn-en/#btn-am).
-        if (!document.getElementById('btn-en')) {
+        if (!document.getElementById('btn-en') && !document.querySelector('.abrehot-site-navbar')) {
             var langWrapper = document.createElement('div');
             langWrapper.className = 'theme-select-wrapper';
             langWrapper.title = 'ቋንቋ ይለውጡ / Change Language';
@@ -383,11 +612,15 @@
         document.addEventListener('DOMContentLoaded', function () {
             applyLangClasses();
             observeLangToggles();
+            removeGoogleTranslate();
+            createSiteNavbar();
             injectControls();
         });
     } else {
         applyLangClasses();
         observeLangToggles();
+        removeGoogleTranslate();
+        createSiteNavbar();
         injectControls();
     }
 })();

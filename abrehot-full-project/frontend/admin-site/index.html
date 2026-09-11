@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <script src="js/theme.js"></script>
+    <script src="../js/theme.js"></script>
     <meta charset="UTF-8">
     <!-- This panel is intentionally kept out of search engines — it lives on
          its own subdomain and is only for Abrehot staff. -->
@@ -114,6 +114,7 @@
         });
 
         document.getElementById('logoutBtn').addEventListener('click', function () {
+            if (!window.confirm('Are you sure you want to log out?')) return;
             clearSecret();
             app.style.display = 'none';
             gate.style.display = 'block';
