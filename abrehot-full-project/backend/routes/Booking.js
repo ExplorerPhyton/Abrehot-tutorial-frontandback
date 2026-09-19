@@ -74,10 +74,8 @@ const bookingSchema = new mongoose.Schema(
     duration: { type: String, enum: ['1 Hour', '1.5 Hours', '2 Hours', '2 + Hours'] },
     notes: String,
 
-    // New requests start 'pending' until an admin approves ('confirmed') or
-    // rejects ('rejected') them on the admin page. 'cancelled' is for an
-    // already-confirmed session that got called off afterward.
-    status: { type: String, enum: ['pending', 'confirmed', 'rejected', 'cancelled', 'completed'], default: 'pending' },
+    // Sessions are automatically confirmed after the timetable schedule check
+    status: { type: String, enum: ['pending', 'confirmed', 'cancelled', 'completed'], default: 'confirmed' },
     // Set only once a session is marked completed by the tutor: true = the
     // student showed up, false = no-show. Null for everything else, which is
     // what lets attendance % only count sessions that actually happened.

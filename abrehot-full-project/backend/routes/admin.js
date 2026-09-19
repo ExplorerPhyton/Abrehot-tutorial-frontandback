@@ -46,11 +46,53 @@ router.post('/tutors/:id/reject', async (req, res) => {
 // GET /api/admin/bookings — quick visibility into incoming booking requests
 router.get('/bookings', async (req, res) => {
   const bookings = await Booking.find()
-    .populate('tutor', 'fullname')
+    .populate('tutor', 'fullname user')
     .populate('requestedBy', 'fullname email')
     .sort({ createdAt: -1 })
     .limit(100);
   res.json(bookings);
+});
+
+// POST /api/admin/bookings/:id/approve — admin approves a pending request
+router.post('/bookings/:id/approve', async (req, res) => {
+  const booking = await Booking.findById(req.params.id).populate('tutor', 'fullname user');
+  if (!booking) return res.status(404).json({ message: 'Not found' });
+  if (booking.status !== 'pending') {
+    return res.status(400).json({ message: 'Only pending requests can be approved' });
+  }
+
+  booking.status = 'confirmed';
+  await booking.save();
+
+  if (booking.requestedBy) {
+    notify(booking.requestedBy, 'Your booking request was approved by an admin and is now confirmed.', '../dashboards/student-dash.html');
+  }
+  if (booking.tutor && booking.tutor.user) {
+    notify(booking.tutor.user, 'A booking request assigned to you was approved by an admin.', '../dashboards/tutor-dash.html');
+  }
+
+  res.json(booking);
+});
+
+// POST /api/admin/bookings/:id/reject — admin rejects a pending request
+router.post('/bookings/:id/reject', async (req, res) => {
+  const booking = await Booking.findById(req.params.id).populate('tutor', 'fullname user');
+  if (!booking) return res.status(404).json({ message: 'Not found' });
+  if (booking.status !== 'pending') {
+    return res.status(400).json({ message: 'Only pending requests can be rejected' });
+  }
+
+  booking.status = 'rejected';
+  await booking.save();
+
+  if (booking.requestedBy) {
+    notify(booking.requestedBy, 'Your booking request was not approved by the admin. Contact support if you have questions.', '../contact.html');
+  }
+  // The tutor is intentionally not notified here — they were never shown this
+  // request in the first place (see GET /api/bookings/for-tutor), so there's
+  // nothing for them to be told got rejected.
+
+  res.json(booking);
 });
 
 // GET /api/admin/contact — quick visibility into contact form submissions

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="js/theme.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abrehot | System Maintenance</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --sand-50: #FAF8F5;
+            --sand-100: #F5EFE6;
+            --sand-200: #EADECF;
+            --sand-300: #D8C5B0;
+            
+            --ink-900: #191615;
+            --ink-700: #3D3835;
+            --ink-500: #736C66;
+            
+            --terracotta: #C85A32;
+            --terracotta-hover: #A84522;
+            --sage: #A84522;
+            --gold-leaf: #D97706;
+
+            /* Modern Gradients */
+            --grad-terracotta: linear-gradient(135deg, #D6633B 0%, #B84720 100%);
+            --grad-hero-bg: radial-gradient(120% 80% at 50% 0%, #F5EFE6 0%, #FAF8F5 100%);
+            --grad-accent-glow: radial-gradient(600px circle at 50% 30%, rgba(200, 90, 50, 0.12), transparent 80%);
+            --grad-card-bg: linear-gradient(180deg, #FFFFFF 0%, #FAF8F5 100%);
+
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+
+            --shadow-paper: 0 4px 12px rgba(25, 22, 21, 0.03), 0 1px 3px rgba(25, 22, 21, 0.05);
+            --shadow-raised: 0 16px 32px -8px rgba(25, 22, 21, 0.08), 0 4px 12px rgba(25, 22, 21, 0.03);
+            --shadow-glow: 0 12px 28px -6px rgba(200, 90, 50, 0.25);
+            
+            --font-serif: 'Newsreader', Georgia, serif;
+            --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-amharic: 'Noto Sans Ethiopic', 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        [data-theme="dark"] {
+            --sand-50: #16130F;
+            --sand-100: #1E1A15;
+            --sand-200: #2C261F;
+            --sand-300: #40372C;
+            --ink-900: #F5EFE6;
+            --ink-700: #E4D9CB;
+            --ink-500: #B3A696;
+            --terracotta: #E17C50;
+            --terracotta-hover: #F0956E;
+            --sage: #E17C50;
+            --gold-leaf: #E8A33D;
+            --grad-terracotta: linear-gradient(135deg, #E17C50 0%, #C85A32 100%);
+            --grad-hero-bg: radial-gradient(120% 80% at 50% 0%, #1E1A15 0%, #16130F 100%);
+            --grad-accent-glow: radial-gradient(600px circle at 50% 30%, rgba(225, 124, 80, 0.15), transparent 80%);
+            --grad-card-bg: linear-gradient(180deg, #201B16 0%, #16130F 100%);
+            --shadow-paper: 0 4px 12px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-raised: 0 16px 32px -8px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 12px 28px -6px rgba(225, 124, 80, 0.3);
+            color-scheme: dark;
+        }
+
+        [data-theme="dark"] .brand-mark {
+            filter: brightness(0) invert(0.95);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--sand-50);
+            color: var(--ink-700);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body.lang-am { font-family: var(--font-amharic); }
+        body.lang-am h1, body.lang-am h2, body.lang-am h3 { font-family: var(--font-amharic); font-weight: 600; }
+
+        h1, h2, h3 { color: var(--ink-900); font-family: var(--font-serif); font-weight: 500; }
+
+        /* ASCII Background Overlay */
+        .ascii-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+            overflow: hidden;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.35;
+            color: var(--terracotta);
+            opacity: 0.12;
+            word-break: break-all;
+            white-space: pre-wrap;
+            mix-blend-mode: multiply;
+            padding: 10px;
+        }
+
+        [data-theme="dark"] .ascii-bg {
+            opacity: 0.15;
+            mix-blend-mode: screen;
+        }
+
+        /* Top Header Area */
+        .top-bar {
+            padding: 24px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .top-bar-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-mark {
+            height: 52px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* Language Switcher */
+        .lang-switch {
+            display: inline-flex;
+            background: rgba(245, 239, 230, 0.75);
+            border: 1px solid var(--sand-300);
+            border-radius: var(--radius-sm);
+            padding: 3px;
+            gap: 2px;
+            backdrop-filter: blur(8px);
+        }
+
+        [data-theme="dark"] .lang-switch {
+            background: var(--sand-200);
+            border-color: var(--sand-300);
+        }
+
+        .lang-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--ink-500);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-family: var(--font-sans);
+        }
+
+        .lang-btn.active {
+            background: #FFFFFF;
+            color: var(--ink-900);
+            box-shadow: 0 2px 6px rgba(25, 22, 21, 0.08);
+        }
+
+        [data-theme="dark"] .lang-btn.active {
+            background: var(--sand-100) !important;
+            color: var(--ink-900);
+        }
+
+        /* Maintenance Hero Section */
+        .maintenance-section {
+            padding: 40px 0 60px;
+            background: var(--grad-hero-bg);
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .maintenance-section::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            background: var(--grad-accent-glow);
+            pointer-events: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-card {
+            background: var(--grad-card-bg);
+            border: 1px solid var(--sand-200);
+            border-radius: var(--radius-lg);
+            padding: 56px 40px;
+            box-shadow: var(--shadow-raised);
+            text-align: center;
+            max-width: 720px;
+            margin: 0 auto;
+            backdrop-filter: blur(12px);
+        }
+
+        /* Animated Pulsing Icon Box */
+        .server-pulse-box {
+            position: relative;
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(200, 90, 50, 0.15) 0%, rgba(200, 90, 50, 0.03) 100%);
+        }
+
+        .server-pulse-box::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 1px solid var(--terracotta);
+            opacity: 0.3;
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.95); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 0.1; }
+            100% { transform: scale(0.95); opacity: 0.6; }
+        }
+
+        .server-pulse-box i {
+            font-size: 2.8rem;
+            color: var(--terracotta);
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: var(--sage);
+            margin-bottom: 12px;
+        }
+
+        .m-headline {
+            font-size: 2.75rem;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin-bottom: 16px;
+        }
+
+        .m-headline em {
+            font-style: italic;
+            background: var(--grad-terracotta);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .m-copy {
+            font-size: 1.05rem;
+            color: var(--ink-500);
+            margin-bottom: 36px;
+            max-width: 540px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Status Grid */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 36px;
+            border-top: 1px solid var(--sand-200);
+            border-bottom: 1px solid var(--sand-200);
+            padding: 20px 0;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .status-item {
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: var(--ink-500);
+            margin-bottom: 4px;
+        }
+
+        .status-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--ink-900);
+        }
+
+        /* Social Links */
+        .social-mini-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink-500);
+            margin-bottom: 16px;
+        }
+
+        .social-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .social-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            color: var(--ink-700);
+            text-decoration: none;
+            background: var(--sand-50);
+            border: 1px solid var(--sand-200);
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .social-chip:hover {
+            color: var(--terracotta);
+            border-color: var(--terracotta);
+            transform: translateY(-2px);
+        }
+
+        .social-chip i {
+            color: var(--terracotta);
+            font-size: 1.1rem;
+        }
+
+        /* Minimal Footer */
+        .footer {
+            padding: 24px 0;
+            font-size: 0.85rem;
+            color: var(--ink-500);
+            border-top: 1px solid var(--sand-200);
+            background: var(--sand-50);
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 640px) {
+            .main-card { padding: 36px 20px; }
+            .m-headline { font-size: 2.1rem; }
+            .status-grid { grid-template-columns: 1fr; gap: 12px; }
+            .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+        }
+    </style>
+</head>
+<body class="lang-en">
+
+    <!-- ASCII Background Grid Container -->
+    <div class="ascii-bg" id="asciiContainer"></div>
+
+    <!-- Top Header Bar -->
+    <header class="top-bar">
+        <div class="container top-bar-inner">
+            <a href="index.html" class="brand-logo">
+                <img src="Abrehot-removebg-preview.png" alt="Abrehot Logo" class="brand-mark">
+            </a>
+
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="setLanguage('en')" id="btn-en">EN</button>
+                <button class="lang-btn" onclick="setLanguage('am')" id="btn-am">አማ</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Box -->
+    <main class="maintenance-section">
+        <div class="container">
+            <div class="main-card">
+                
+                <div class="server-pulse-box">
+                    <i class="bx bx-cog bx-spin"></i>
+                </div>
+
+                <span class="section-tag" data-en="Scheduled System Upgrade" data-am="የታቀደ የሲስተም ማሻሻያ">Scheduled System Upgrade</span>
+                
+                <h1 class="m-headline" data-en="We are upgrading our <em>learning servers</em>." data-am="የትምህርት መድረካችንን <em>እያሻሻልን ነው</em>።">
+                    We are upgrading our <em>learning servers</em>.
+                </h1>
+
+                <p class="m-copy" data-en="Abrehot is currently undergoing scheduled maintenance to enhance session stability and platform speed. We will be back online as soon as upgrades complete." data-am="አብረሆት የሲስተም ብቃትን እና ፍጥነትን ለማሻሻል በትርፍ ጊዜ ጥገና ላይ ይገኛል። ማሻሻያው እንደተጠናቀቀ ተመልሰን እንሰራለን።">
+                    Abrehot is currently undergoing scheduled maintenance to enhance session stability and platform speed. We will be back online as soon as upgrades complete.
+                </p>
+
+                <!-- Status Cards -->
+                <div class="status-grid">
+                    <div class="status-item">
+                        <div class="status-label" data-en="System Status" data-am="የሲስተሙ ሁኔታ">System Status</div>
+                        <div class="status-value" style="color: var(--terracotta);" data-en="Under Maintenance" data-am="ጥገና ላይ">Under Maintenance</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label" data-en="User Data" data-am="የተጠቃሚ መረጃ">User Data</div>
+                        <div class="status-value" style="color: #27ae60;" data-en="100% Safe" data-am="100% ደህንነቱ የተጠበቀ">100% Safe</div>
+                    </div>
+                </div>
+
+                <!-- Community / Socials Links -->
+                <div class="social-mini-title" data-en="Need urgent assistance? Follow our channels:" data-am="አስቸኳይ እርዳታ ከፈለጉ ማህበራዊ ገጾቻችንን ይከተሉ፡">
+                    Need urgent assistance? Follow our channels:
+                </div>
+
+                <div class="social-row">
+                    <a href="https://t.me/abrehottutoring" target="_blank" rel="noopener noreferrer" class="social-chip">
+                        <i class="bx bxl-telegram"></i> Telegram
+                    </a>
+                    <a href="https://www.instagram.com/abrehottutoring/" target="_blank" rel="noopener noreferrer" class="social-chip">
+                        <i class="bx bxl-instagram"></i> Instagram
+                    </a>
+                    <a href="mailto:support@abrehot.com" class="social-chip">
+                        <i class="bx bx-envelope"></i> Email Support
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div data-en="&copy; 2026 Abrehot Educational Platform. All rights reserved." data-am="&copy; 2026 አብረሆት የትምህርት መድረክ። መብቱ በሕግ የተጠበቀ ነው።">
+                &copy; 2026 Abrehot Educational Platform. All rights reserved.
+            </div>
+            <div data-en="Addis Ababa, Ethiopia" data-am="አዲስ አበባ፣ ኢትዮጵያ">Addis Ababa, Ethiopia</div>
+        </div>
+    </footer>
+
+    <!-- ASCII Background Generator Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('asciiContainer');
+            const chars = '0123456789ABCDEF/\\_+-*~#@%&<>[]{}';
+            const width = Math.ceil(window.innerWidth / 8);
+            const height = Math.ceil(window.innerHeight / 16);
+            let grid = [];
+
+            for (let i = 0; i < height; i++) {
+                let row = '';
+                for (let j = 0; j < width; j++) {
+                    row += chars[Math.floor(Math.random() * chars.length)];
+                }
+                grid.push(row);
+            }
+            
+            container.textContent = grid.join('\n');
+
+            // Subtle continuous animation effect
+            setInterval(() => {
+                const randomRow = Math.floor(Math.random() * height);
+                let rowArr = grid[randomRow].split('');
+                for (let k = 0; k < 5; k++) {
+                    const randomCol = Math.floor(Math.random() * width);
+                    rowArr[randomCol] = chars[Math.floor(Math.random() * chars.length)];
+                }
+                grid[randomRow] = rowArr.join('');
+                container.textContent = grid.join('\n');
+            }, 100);
+        });
+    </script>
+
+    <!-- Language Switching JS -->
+    <script>
+        function setLanguage(lang) {
+            const body = document.body;
+            const btnEn = document.getElementById('btn-en');
+            const btnAm = document.getElementById('btn-am');
+            
+            if (lang === 'am') {
+                body.classList.remove('lang-en');
+                body.classList.add('lang-am');
+                btnAm.classList.add('active');
+                btnEn.classList.remove('active');
+            } else {
+                body.classList.remove('lang-am');
+                body.classList.add('lang-en');
+                btnEn.classList.add('active');
+                btnAm.classList.remove('active');
+            }
+
+            const elements = document.querySelectorAll('[data-en][data-am]');
+            
+            elements.forEach(el => {
+                const text = el.getAttribute(`data-${lang}`);
+                if (text) {
+                    if (el.querySelector('em')) {
+                        const emText = lang === 'am' ? 'እያሻሻልን ነው' : 'learning servers';
+                        const baseText = lang === 'am' ? 'የትምህርት መድረካችንን ' : 'We are upgrading our ';
+                        const endText = lang === 'am' ? '።' : '.';
+                        el.innerHTML = `${baseText}<em>${emText}</em>${endText}`;
+                    } else {
+                        el.innerHTML = text;
+                    }
+                }
+            });
+
+            localStorage.setItem('abrehot_lang', lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('abrehot_lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>

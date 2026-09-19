@@ -235,20 +235,21 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       planType: isMonthlyPlan ? 'monthly' : 'hourly',
       selectedDays: isMonthlyPlan ? toArray(selectedDays) : [],
       selectedTimeSlots: isMonthlyPlan ? (selectedTimeSlots || []) : [],
-      status: 'confirmed', // Auto-confirmed after the timetable schedule check passes
+      status: 'pending', // Awaiting admin approval — see /api/admin/bookings/:id/approve|reject
       tutorRate,
       perPersonPrice,
       groupTotalPrice,
+      ...(req.paymentFields || {}), // paymentStatus, and paymentMethod/paymentScreenshot/transactionId for paid packages — set by validatePaymentOnCreate
     });
 
-    res.status(201).json({ message: 'Booking confirmed and scheduled successfully!', booking });
+    res.status(201).json({ message: 'Booking request submitted! An admin will review and approve it shortly.', booking });
 
     const groupLine = session === 'group'
       ? `Group session for ${booking.groupSize} students — ${perPersonPrice != null ? perPersonPrice + ' ETB/person' : 'rate split equally'} (${groupMode})\n`
       : '';
 
     notifyAdmin(
-      `New confirmed booking (${grade})`,
+      `New booking request awaiting approval (${grade})`,
       `Subject(s): ${(booking.subject || []).join(', ') || other || '-'}\n` +
         (child ? `For: ${child.name}\n` : '') +
         `Session: ${session || '-'} via ${platform || '-'}\n` +
@@ -256,17 +257,12 @@ router.post('/', attachUserIfPresent, async (req, res) => {
         `City: ${city || '-'}\n` +
         `Date/time: ${date || '-'} ${time || ''}\n` +
         (notes ? `Notes: ${notes}\n` : '') +
-        `\nView it on your admin page.`
+        `\nApprove or reject it on your admin page.`
     );
 
-    if (tutorId) {
-      TutorProfile.findById(tutorId).then((tutor) => {
-        if (tutor && tutor.user) {
-          const groupNote = session === 'group' ? ` for a group of ${booking.groupSize} students` : '';
-          notify(tutor.user, `New confirmed booking scheduled${groupNote} for ${(booking.subject || []).join(', ') || 'a session'} on ${date} ${time}.`, '../dashboards/tutor-dash.html');
-        }
-      });
-    }
+    // Note: the assigned tutor is intentionally NOT notified here — they
+    // shouldn't see or hear about a request until an admin approves it
+    // (see POST /api/admin/bookings/:id/approve, which notifies them then).
   } catch (err) {
     if (err && err.code === 11000) {
       return res.status(400).json({
@@ -288,11 +284,12 @@ router.get('/mine', requireAuth, async (req, res) => {
 });
 
 // GET /api/bookings/for-tutor — bookings assigned to the logged-in user's tutor profile
-// (for tutor-dash.html)
+// (for tutor-dash.html). Pending requests are excluded — a tutor only finds out
+// about a request once an admin has approved it.
 router.get('/for-tutor', requireAuth, async (req, res) => {
   const profile = await TutorProfile.findOne({ user: req.user.id }).sort({ createdAt: -1 });
   if (!profile) return res.json([]); // not a tutor / no application yet — just show nothing
-  const bookings = await Booking.find({ tutor: profile._id })
+  const bookings = await Booking.find({ tutor: profile._id, status: { $ne: 'pending' } })
     .populate('requestedBy', 'fullname email phone role')
     .populate('child', 'name grade')
     .sort({ date: 1, createdAt: -1 });
@@ -315,6 +312,11 @@ router.patch('/:id/cancel', requireAuth, async (req, res) => {
   if (!isRequester && !isAssignedTutor) {
     return res.status(403).json({ message: 'Not allowed to cancel this booking' });
   }
+  // A pending request hasn't been approved yet — that decision belongs to the
+  // admin (see /api/admin/bookings/:id/approve|reject), not the tutor.
+  if (isAssignedTutor && !isRequester && booking.status === 'pending') {
+    return res.status(403).json({ message: 'This request is awaiting admin approval — only an admin can accept or reject it.' });
+  }
 
   booking.status = 'cancelled';
   await booking.save();
@@ -333,29 +335,8 @@ router.patch('/:id/cancel', requireAuth, async (req, res) => {
   res.json(booking);
 });
 
-// PATCH /api/bookings/:id/confirm — tutor accepts a pending request
-router.patch('/:id/confirm', requireAuth, async (req, res) => {
-  const booking = await Booking.findById(req.params.id);
-  if (!booking) return res.status(404).json({ message: 'Booking not found' });
-
-  const tutorProfile = await TutorProfile.findOne({ user: req.user.id });
-  const isAssignedTutor = tutorProfile && booking.tutor && booking.tutor.toString() === tutorProfile._id.toString();
-  if (!isAssignedTutor) {
-    return res.status(403).json({ message: 'Only the assigned tutor can confirm this booking' });
-  }
-  if (booking.status !== 'pending') {
-    return res.status(400).json({ message: 'Only pending requests can be confirmed' });
-  }
-
-  booking.status = 'confirmed';
-  await booking.save();
-
-  if (booking.requestedBy) {
-    notify(booking.requestedBy, 'Your booking request was confirmed by the tutor.', '../dashboards/student-dash.html');
-  }
-
-  res.json(booking);
-});
+// Note: approving/rejecting a pending booking request is done by an admin —
+// see POST /api/admin/bookings/:id/approve and /:id/reject in routes/admin.js.
 
 // PATCH /api/bookings/:id/complete — tutor marks a confirmed session done.
 // body: { attended: true|false } — true if the student showed up, false for
