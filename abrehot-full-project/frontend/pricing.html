@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en" data-adeyababa-rain>
+<head>
+    <script src="js/theme.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing & Packages | Abrehot Academic Tutoring</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --sand-50: #FAF8F5;
+            --sand-100: #F5EFE6;
+            --sand-200: #EADECF;
+            --sand-300: #D8C5B0;
+            
+            --ink-900: #191615;
+            --ink-700: #3D3835;
+            --ink-500: #736C66;
+            
+            --terracotta: #C85A32;
+            --terracotta-hover: #A84522;
+            --sage: #A84522;
+            --gold-leaf: #D97706;
+
+            /* Modern Gradients */
+            --grad-terracotta: linear-gradient(135deg, #D6633B 0%, #B84720 100%);
+            --grad-hero-bg: radial-gradient(120% 80% at 50% 0%, #F5EFE6 0%, #FAF8F5 100%);
+            --grad-accent-glow: radial-gradient(600px circle at 80% 20%, rgba(200, 90, 50, 0.08), transparent 80%);
+            --grad-card-bg: linear-gradient(180deg, #FFFFFF 0%, #FAF8F5 100%);
+            --grad-border: linear-gradient(135deg, rgba(216, 197, 176, 0.8) 0%, rgba(216, 197, 176, 0.2) 100%);
+            --grad-text: linear-gradient(135deg, #191615 30%, #C85A32 100%);
+
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+
+            --shadow-paper: 0 4px 12px rgba(25, 22, 21, 0.03), 0 1px 3px rgba(25, 22, 21, 0.05);
+            --shadow-raised: 0 16px 32px -8px rgba(25, 22, 21, 0.08), 0 4px 12px rgba(25, 22, 21, 0.03);
+            --shadow-glow: 0 12px 28px -6px rgba(200, 90, 50, 0.25);
+            
+            --font-serif: 'Newsreader', Georgia, serif;
+            --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-amharic: 'Noto Sans Ethiopic', 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Dark mode */
+        [data-theme="dark"] {
+            --sand-50: #16130F;
+            --sand-100: #1E1A15;
+            --sand-200: #2C261F;
+            --sand-300: #40372C;
+            --ink-900: #F5EFE6;
+            --ink-700: #E4D9CB;
+            --ink-500: #B3A696;
+            --terracotta: #E17C50;
+            --terracotta-hover: #F0956E;
+            --sage: #E17C50;
+            --gold-leaf: #E8A33D;
+            --grad-terracotta: linear-gradient(135deg, #E17C50 0%, #C85A32 100%);
+            --grad-hero-bg: radial-gradient(120% 80% at 50% 0%, #1E1A15 0%, #16130F 100%);
+            --grad-accent-glow: radial-gradient(600px circle at 80% 20%, rgba(225, 124, 80, 0.12), transparent 80%);
+            --grad-card-bg: linear-gradient(180deg, #201B16 0%, #16130F 100%);
+            --grad-border: linear-gradient(135deg, rgba(64, 55, 44, 0.8) 0%, rgba(64, 55, 44, 0.2) 100%);
+            --grad-text: linear-gradient(135deg, #F5EFE6 30%, #E17C50 100%);
+            --shadow-paper: 0 4px 12px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-raised: 0 16px 32px -8px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 12px 28px -6px rgba(225, 124, 80, 0.3);
+            color-scheme: dark;
+        }
+
+        [data-theme="dark"] .navbar {
+            background: rgba(22, 19, 15, 0.85);
+            border-bottom-color: var(--sand-200);
+        }
+        [data-theme="dark"] .lang-switch {
+            background: var(--sand-200);
+            border-color: var(--sand-300);
+        }
+        [data-theme="dark"] .btn-outline-ink {
+            background: var(--sand-200);
+            color: var(--ink-900);
+            border-color: var(--sand-300);
+        }
+        [data-theme="dark"] .btn-outline-ink:hover {
+            background: var(--sand-300);
+            border-color: var(--ink-900);
+        }
+        [data-theme="dark"] .nav-menu summary {
+            background: var(--sand-200);
+            border-color: var(--sand-300);
+        }
+        [data-theme="dark"] .pricing-card,
+        [data-theme="dark"] .nav-menu-panel,
+        [data-theme="dark"] .footer {
+            background: var(--sand-100) !important;
+        }
+        [data-theme="dark"] .brand-mark {
+            filter: brightness(0) invert(0.95);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--sand-50);
+            color: var(--ink-700);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body.lang-am { font-family: var(--font-amharic); }
+        body.lang-am h1, body.lang-am h2, body.lang-am h3, body.lang-am h4 {
+            font-family: var(--font-amharic);
+            font-weight: 600;
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--ink-900);
+            font-family: var(--font-serif);
+            font-weight: 500;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* UI Controls */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            border: 1px solid transparent;
+            width: 100%;
+        }
+
+        .btn-terracotta { 
+            background: var(--grad-terracotta); 
+            color: #FFFFFF; 
+            box-shadow: 0 4px 12px rgba(200, 90, 50, 0.2);
+        }
+        .btn-terracotta:hover { 
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-outline-ink { 
+            background: rgba(255, 255, 255, 0.6); 
+            color: var(--ink-900); 
+            border-color: var(--sand-300);
+            backdrop-filter: blur(8px);
+        }
+        .btn-outline-ink:hover { 
+            border-color: var(--ink-900); 
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .lang-switch {
+            display: inline-flex;
+            background: rgba(245, 239, 230, 0.7);
+            border: 1px solid var(--sand-300);
+            border-radius: var(--radius-sm);
+            padding: 3px;
+            gap: 2px;
+            backdrop-filter: blur(8px);
+        }
+
+        .lang-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--ink-500);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-family: var(--font-sans);
+        }
+
+        .lang-btn.active {
+            background: #FFFFFF;
+            color: var(--ink-900);
+            box-shadow: 0 2px 6px rgba(25, 22, 21, 0.08);
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: var(--sage);
+            margin-bottom: 8px;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(250, 248, 245, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(234, 222, 207, 0.6);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 18px;
+            max-width: none;
+            margin: 0;
+            padding-left: 100px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            height: 58px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            margin-top: -16px;
+            margin-bottom: -16px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            list-style: none;
+            flex: 0 0 auto;
+            justify-content: flex-start;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--ink-700);
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: var(--terracotta); }
+
+        .nav-menu { display: none; position: relative; }
+        .nav-menu summary {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            list-style: none;
+            border: 1px solid var(--sand-300);
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--ink-900);
+            cursor: pointer;
+        }
+        .nav-menu summary::-webkit-details-marker { display: none; }
+
+        .nav-menu-panel {
+            position: absolute;
+            right: 0;
+            top: 54px;
+            width: min(86vw, 320px);
+            display: grid;
+            gap: 8px;
+            padding: 16px;
+            border: 1px solid var(--sand-200);
+            border-radius: var(--radius-md);
+            background: #FFFFFF;
+            box-shadow: var(--shadow-raised);
+        }
+
+        .nav-menu-panel a {
+            color: var(--ink-700);
+            font-weight: 600;
+            text-decoration: none;
+            padding: 9px 10px;
+            border-radius: var(--radius-sm);
+        }
+
+        .nav-menu-panel a:hover {
+            color: var(--terracotta);
+            background: rgba(200, 90, 50, 0.08);
+        }
+
+        /* Header Hero */
+        .pricing-hero {
+            padding: 72px 0 48px;
+            background: var(--grad-hero-bg);
+            border-bottom: 1px solid var(--sand-200);
+            text-align: center;
+            position: relative;
+        }
+
+        .pricing-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .pricing-hero p {
+            font-size: 1.1rem;
+            color: var(--ink-500);
+            max-width: 600px;
+            margin: 0 auto 36px;
+        }
+
+        /* Sub-navigation for Mode Selection */
+        .mode-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mode-btn {
+            border: 1px solid var(--sand-300);
+            background: rgba(255, 255, 255, 0.6);
+            padding: 8px 18px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--ink-700);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background: var(--sand-300);
+            color: var(--ink-900);
+            border-color: var(--sand-300);
+        }
+
+        /* Tab Switcher for Track Switch */
+        .track-switch-wrapper {
+            display: inline-flex;
+            background: var(--sand-100);
+            border: 1px solid var(--sand-300);
+            border-radius: var(--radius-md);
+            padding: 6px;
+            gap: 6px;
+            box-shadow: var(--shadow-paper);
+        }
+
+        .track-btn {
+            border: none;
+            background: transparent;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--ink-700);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .track-btn.active {
+            background: var(--grad-terracotta);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(200, 90, 50, 0.25);
+        }
+
+        /* Pricing Grid */
+        .pricing-section {
+            padding: 64px 0 88px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 32px;
+            color: var(--ink-900);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            align-items: stretch;
+            margin-bottom: 64px;
+        }
+
+        .pricing-card {
+            background: var(--grad-card-bg);
+            border: 1px solid var(--sand-200);
+            border-radius: var(--radius-md);
+            padding: 32px 20px;
+            box-shadow: var(--shadow-paper);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--sand-300);
+            box-shadow: var(--shadow-raised);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--terracotta);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--grad-terracotta);
+            color: #FFFFFF;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 4px 16px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(200, 90, 50, 0.3);
+        }
+
+        .card-header h3 {
+            font-size: 1.35rem;
+            margin-bottom: 6px;
+        }
+
+        .card-header .capacity {
+            font-size: 0.85rem;
+            color: var(--sage);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .price-box {
+            margin: 16px 0 24px;
+            border-bottom: 1px solid var(--sand-200);
+            padding-bottom: 20px;
+        }
+
+        .price-box .amount {
+            font-size: 2.1rem;
+            font-family: var(--font-serif);
+            font-weight: 600;
+            color: var(--ink-900);
+        }
+
+        .price-box .period {
+            font-size: 0.85rem;
+            color: var(--ink-500);
+            margin-top: 4px;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 32px;
+            flex-grow: 1;
+        }
+
+        .features-list li {
+            font-size: 0.88rem;
+            color: var(--ink-700);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .features-list li i {
+            color: var(--terracotta);
+            font-size: 1.1rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .track-content {
+            display: none;
+        }
+
+        .track-content.active {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 48px 0 32px;
+            font-size: 0.875rem;
+            color: var(--ink-500);
+            background: #FFFFFF;
+            border-top: 1px solid var(--sand-200);
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        @media (max-width: 860px) {
+            .nav-links, .nav-right .btn { display: none; }
+            .nav-menu { display: block; }
+            .pricing-hero h1 { font-size: 2.25rem; }
+            .brand-mark { height: 38px; }
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="lang-en">
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="container nav-inner">
+            <a href="index.html" class="brand-logo">
+                <img src="Abrehot-removebg-preview.png" alt="Abrehot Logo" class="brand-mark">
+            </a>
+
+            <ul class="nav-links">
+                <li><a href="index.html" data-en="Home" data-am="መነሻ">Home</a></li>
+                <li><a href="tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a></li>
+                <li><a href="pricing.html" class="active" data-en="Pricing" data-am="ዋጋዎች">Pricing</a></li>
+                <li><a href="book.html" data-en="Schedule" data-am="ቀጠሮ ይያዙ">Schedule</a></li>
+                <li><a href="books.html" data-en="Books" data-am="መጻሕፍት">Books</a></li>
+                <li><a href="becomeatutor.html" data-en="Teach" data-am="ያስተምሩ">Teach</a></li>
+                <li><a href="aboutus.html" data-en="About" data-am="ስለ እኛ">About</a></li>
+                <li><a href="contact.html" data-en="Contact" data-am="ያግኙን">Contact</a></li>
+            </ul>
+
+            <div class="nav-right">
+                <div class="lang-switch">
+                    <button class="lang-btn active" onclick="setLanguage('en')" id="btn-en">EN</button>
+                    <button class="lang-btn" onclick="setLanguage('am')" id="btn-am">አማ</button>
+                </div>
+
+                <a href="login.html" class="btn btn-outline-ink" style="width: auto;" data-en="Sign In" data-am="ግቡ">Sign In</a>
+                <a href="create-account.html" class="btn btn-terracotta" style="width: auto;" data-en="Create Account" data-am="መለያ ይፍጠሩ">Create Account</a>
+                <details class="nav-menu">
+                    <summary aria-label="Open navigation menu"><i class="bx bx-menu"></i></summary>
+                    <div class="nav-menu-panel">
+                        <a href="index.html" data-en="Home" data-am="መነሻ">Home</a>
+                        <a href="tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a>
+                        <a href="pricing.html" data-en="Pricing" data-am="ዋጋዎች">Pricing</a>
+                        <a href="book.html" data-en="Schedule a Class" data-am="ቀጠሮ ይያዙ">Schedule a Class</a>
+                        <a href="books.html" data-en="Books & Materials" data-am="መጻሕፍት">Books & Materials</a>
+                        <a href="becomeatutor.html" data-en="Become a Tutor" data-am="አስተማሪ ይሁኑ">Become a Tutor</a>
+                        <a href="aboutus.html" data-en="About" data-am="ስለ እኛ">About</a>
+                        <a href="contact.html" data-en="Contact" data-am="ያግኙን">Contact</a>
+                        <a href="login.html" data-en="Sign In" data-am="ግቡ">Sign In</a>
+                        <a href="create-account.html" data-en="Create Account" data-am="መለያ ይፍጠሩ">Create Account</a>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </header>
+
+    <!-- Pricing Hero -->
+    <section class="pricing-hero">
+        <div class="container">
+            <span class="section-tag" data-en="Flexible Learning Plans" data-am="ተለዋዋጭ የትምህርት ዕቅዶች">Flexible Learning Plans</span>
+            <h1 data-en="Transparent Rates for Every Student" data-am="ግልጽ የትምህርት ክፍያ ለሁሉም">Transparent Rates for Every Student</h1>
+            <p data-en="Choose between rates tailored for local curricula or international student programs." data-am="ለሀገር ውስጥ ወይም ለዓለም አቀፍ ተማሪዎች የተዘጋጁ የትምህርት ክፍያዎችን ይምረጡ።">
+                Choose between rates tailored for local curricula or international student programs.
+            </p>
+
+            <div class="track-switch-wrapper">
+                <button class="track-btn active" onclick="switchTrack('local')" id="track-local-btn" data-en="Local Students" data-am="የሀገር ውስጥ ተማሪዎች">Local Students</button>
+                <button class="track-btn" onclick="switchTrack('international')" id="track-intl-btn" data-en="International Students" data-am="የዓለም አቀፍ ተማሪዎች">International Students</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Sections -->
+    <section class="pricing-section">
+        <div class="container">
+            
+            <!-- LOCAL STUDENTS TRACK -->
+            <div id="local-track" class="track-content active">
+                
+                <h2 class="section-title" data-en="Standard Hourly Tutoring" data-am="መደበኛ የሰዓት ትምህርት">Standard Hourly Tutoring</h2>
+                <div class="pricing-grid">
+                    <!-- 1 to 1 -->
+                    <div class="pricing-card featured">
+                        <span class="popular-badge" data-en="Popular" data-am="ተመራጭ">Popular</span>
+                        <div class="card-header">
+                            <span class="capacity" data-en="1 Student" data-am="1 ተማሪ">1 Student</span>
+                            <h3 data-en="1-to-1 Tutoring" data-am="1-ለ-1 ትምህርት">1-to-1 Tutoring</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">1,500</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per hour" data-am="በሰዓት">per hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Direct personalized instruction" data-am="የግል የተለየ ትምህርት">Direct personalized instruction</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Flexible schedule arrangement" data-am="ተለዋዋጭ የጊዜ ሰሌዳ">Flexible schedule arrangement</span></li>
+                        </ul>
+                        <a href="book.html?package=local-1on1" class="btn btn-terracotta" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+
+                    <!-- Mini Group -->
+                    <div class="pricing-card">
+                        <div class="card-header">
+                            <span class="capacity" data-en="2 to 3 Students" data-am="2 እስከ 3 ተማሪዎች">2 to 3 Students</span>
+                            <h3 data-en="Mini Group" data-am="ትንሽ ቡድን">Mini Group</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">850</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per student / hour" data-am="በሰዓት ለ አንድ ተማሪ">per student / hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Focused peer learning" data-am="የተጠናከረ የቡድን ትምህርት">Focused peer learning</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="High individual attention" data-am="ከፍተኛ የግል ትኩረት">High individual attention</span></li>
+                        </ul>
+                        <a href="book.html?package=local-minigroup" class="btn btn-outline-ink" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+
+                    <!-- Small Group -->
+                    <div class="pricing-card">
+                        <div class="card-header">
+                            <span class="capacity" data-en="4 to 5 Students" data-am="4 እስከ 5 ተማሪዎች">4 እስከ 5 Students</span>
+                            <h3 data-en="Small Group" data-am="መደበኛ ቡድን">Small Group</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">500</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per student / hour" data-am="በሰዓት ለ አንድ ተማሪ">per student / hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Interactive study sessions" data-am="ተግባራዊ የቡድን ትምህርት">Interactive study sessions</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Balanced pace and interaction" data-am="ተመጣጣኝ የትምህርት ፍጥነት">Balanced pace and interaction</span></li>
+                        </ul>
+                        <a href="book.html?package=local-smallgroup" class="btn btn-outline-ink" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+
+                    <!-- Large Group -->
+                    <div class="pricing-card">
+                        <div class="card-header">
+                            <span class="capacity" data-en="6 to 10 Students" data-am="6 እስከ 10 ተማሪዎች">6 to 10 Students</span>
+                            <h3 data-en="Large Group" data-am="ትልቅ ቡድን">Large Group</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">400</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per student / hour" data-am="በሰዓት ለ አንድ ተማሪ">per student / hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Collaborative classroom setting" data-am="የጋራ ክፍል ትምህርት">Collaborative classroom setting</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Most affordable hourly option" data-am="አነስተኛ የሰዓት ክፍያ">Most affordable hourly option</span></li>
+                        </ul>
+                        <a href="book.html?package=local-largegroup" class="btn btn-outline-ink" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+                </div>
+
+                <h2 class="section-title" data-en="Intensive Exam Prep (Monthly Rates)" data-am="የተጠናከረ የፈተና ዝግጅት (የወር ክፍያ)">Intensive Exam Prep (Monthly Rates)</h2>
+                
+                <!-- Toggle Grade Level inside Local Track -->
+                <div class="mode-switcher">
+                    <button class="mode-btn active" onclick="switchGradePrep('g15')" id="g15-btn">Grades 1–5 (3 hrs/wk)</button>
+                    <button class="mode-btn" onclick="switchGradePrep('g6')" id="g6-btn">Grade 6 Prep (4 hrs/wk)</button>
+                    <button class="mode-btn" onclick="switchGradePrep('g8')" id="g8-btn">Grade 8 Prep (4 hrs/wk)</button>
+                    <button class="mode-btn" onclick="switchGradePrep('g12')" id="g12-btn">Grade 12 Prep (4 hrs/wk)</button>
+                </div>
+
+                <!-- Prep Grades 1-5 -->
+                <div id="prep-g15" class="prep-group-content">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">1 Student</span><h3>1-on-1 Prep</h3></div>
+                            <div class="price-box"><span class="amount">18,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g15-1on1" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">2 to 3 Students</span><h3>2-3 Students</h3></div>
+                            <div class="price-box"><span class="amount">12,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g15-2to3" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">4 to 5 Students</span><h3>4-5 Students</h3></div>
+                            <div class="price-box"><span class="amount">8,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g15-4to5" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">6 to 10 Students</span><h3>6-10 Students</h3></div>
+                            <div class="price-box"><span class="amount">5,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g15-6to10" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prep Grade 6 -->
+                <div id="prep-g6" class="prep-group-content" style="display: none;">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">1 Student</span><h3>1-on-1 Prep</h3></div>
+                            <div class="price-box"><span class="amount">20,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g6-1on1" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">2 to 3 Students</span><h3>2-3 Students</h3></div>
+                            <div class="price-box"><span class="amount">10,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g6-2to3" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">4 to 5 Students</span><h3>4-5 Students</h3></div>
+                            <div class="price-box"><span class="amount">5,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g6-4to5" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">6 to 10 Students</span><h3>6-10 Students</h3></div>
+                            <div class="price-box"><span class="amount">4,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g6-6to10" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prep Grade 8 -->
+                <div id="prep-g8" class="prep-group-content" style="display: none;">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">1 Student</span><h3>1-on-1 Prep</h3></div>
+                            <div class="price-box"><span class="amount">21,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g8-1on1" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">2 to 3 Students</span><h3>2-3 Students</h3></div>
+                            <div class="price-box"><span class="amount">12,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g8-2to3" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">4 to 5 Students</span><h3>4-5 Students</h3></div>
+                            <div class="price-box"><span class="amount">7,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g8-4to5" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">6 to 10 Students</span><h3>6-10 Students</h3></div>
+                            <div class="price-box"><span class="amount">6,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g8-6to10" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prep Grade 12 -->
+                <div id="prep-g12" class="prep-group-content" style="display: none;">
+                    <div class="pricing-grid">
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">1 Student</span><h3>1-on-1 Prep</h3></div>
+                            <div class="price-box"><span class="amount">24,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g12-1on1" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">2 to 3 Students</span><h3>2-3 Students</h3></div>
+                            <div class="price-box"><span class="amount">14,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g12-2to3" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">4 to 5 Students</span><h3>4-5 Students</h3></div>
+                            <div class="price-box"><span class="amount">9,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g12-4to5" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                        <div class="pricing-card">
+                            <div class="card-header"><span class="capacity">6 to 10 Students</span><h3>6-10 Students</h3></div>
+                            <div class="price-box"><span class="amount">8,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                            <a href="book.html?package=prep-g12-6to10" class="btn btn-outline-ink">Select Plan</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- INTERNATIONAL STUDENTS TRACK -->
+            <div id="intl-track" class="track-content">
+                
+                <h2 class="section-title" data-en="Standard Hourly Tutoring" data-am="መደበኛ የሰዓት ትምህርት">Standard Hourly Tutoring</h2>
+                <div class="pricing-grid">
+                    <!-- 1 to 1 -->
+                    <div class="pricing-card featured">
+                        <span class="popular-badge" data-en="Popular" data-am="ተመራጭ">Popular</span>
+                        <div class="card-header">
+                            <span class="capacity" data-en="1 Student" data-am="1 ተማሪ">1 Student</span>
+                            <h3 data-en="1-to-1 Tutoring" data-am="1-ለ-1 ትምህርት">1-to-1 Tutoring</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">2,500</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per hour" data-am="በሰዓት">per hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Individualized syllabus match" data-am="የተዘጋጀ የትምህርት ፕሮግራም">Individualized syllabus match</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Dedicated mentor guidance" data-am="የተለየ መካሪ ድጋፍ">Dedicated mentor guidance</span></li>
+                        </ul>
+                        <a href="book.html?package=intl-1on1" class="btn btn-terracotta" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+
+                    <!-- Mini Group -->
+                    <div class="pricing-card">
+                        <div class="card-header">
+                            <span class="capacity" data-en="2 to 3 Students" data-am="2 እስከ 3 ተማሪዎች">2 to 3 Students</span>
+                            <h3 data-en="Mini Group" data-am="ትንሽ ቡድን">Mini Group</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">1,500</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per student / hour" data-am="በሰዓት ለ አንድ ተማሪ">per student / hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Small peer group interaction" data-am="የቡድን ትምህርት ተሳትፎ">Small peer group interaction</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Customized lesson progression" data-am="ተለዋዋጭ የትምህርት እድገት">Customized lesson progression</span></li>
+                        </ul>
+                        <a href="book.html?package=intl-minigroup" class="btn btn-outline-ink" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+
+                    <!-- Small Group -->
+                    <div class="pricing-card">
+                        <div class="card-header">
+                            <span class="capacity" data-en="4 to 5 Students" data-am="4 እስከ 5 ተማሪዎች">4 እስከ 5 Students</span>
+                            <h3 data-en="Small Group" data-am="መደበኛ ቡድን">Small Group</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">1,000</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per student / hour" data-am="በሰዓት ለ አንድ ተማሪ">per student / hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Structured course coverage" data-am="የተዋቀረ ትምህርት">Structured course coverage</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Collaborative learning environment" data-am="የተጠናከረ የትምህርት ክፍለ ጊዜ">Collaborative learning environment</span></li>
+                        </ul>
+                        <a href="book.html?package=intl-smallgroup" class="btn btn-outline-ink" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+
+                    <!-- Large Group -->
+                    <div class="pricing-card">
+                        <div class="card-header">
+                            <span class="capacity" data-en="6 to 10 Students" data-am="6 እስከ 10 ተማሪዎች">6 እስከ 10 Students</span>
+                            <h3 data-en="Large Group" data-am="ትልቅ ቡድን">Large Group</h3>
+                        </div>
+                        <div class="price-box">
+                            <span class="amount">700</span> <span style="font-size: 0.95rem; font-weight: 600;">ETB</span>
+                            <div class="period" data-en="per student / hour" data-am="በሰዓት ለ አንድ ተማሪ">per student / hour</div>
+                        </div>
+                        <ul class="features-list">
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Interactive group atmosphere" data-am="የተሳካ የቡድን ድባብ">Interactive group atmosphere</span></li>
+                            <li><i class="bx bx-check-circle"></i> <span data-en="Best value per hour" data-am="ተመጣጣኝ የሰዓት ክፍያ">Best value per hour</span></li>
+                        </ul>
+                        <a href="book.html?package=intl-largegroup" class="btn btn-outline-ink" data-en="Select Plan" data-am="ዕቅዱን ይምረጡ">Select Plan</a>
+                    </div>
+                </div>
+
+                <h2 class="section-title" data-en="Intensive Exam Prep (Monthly Rates — 4 hrs/wk)" data-am="የተጠናከረ የፈተና ዝግጅት (የወር ክፍያ — 4 ሰዓት/ሳምንት)">Intensive Exam Prep (Monthly Rates — 4 hrs/wk)</h2>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="card-header"><span class="capacity">1 Student</span><h3>1-on-1 Exam Prep</h3></div>
+                        <div class="price-box"><span class="amount">30,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                        <a href="book.html?package=intl-prep-1on1" class="btn btn-outline-ink">Select Plan</a>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="card-header"><span class="capacity">2 to 3 Students</span><h3>2-3 Students</h3></div>
+                        <div class="price-box"><span class="amount">20,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                        <a href="book.html?package=intl-prep-2to3" class="btn btn-outline-ink">Select Plan</a>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="card-header"><span class="capacity">4 to 5 Students</span><h3>4-5 Students</h3></div>
+                        <div class="price-box"><span class="amount">10,500</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                        <a href="book.html?package=intl-prep-4to5" class="btn btn-outline-ink">Select Plan</a>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="card-header"><span class="capacity">6 to 10 Students</span><h3>6-10 Students</h3></div>
+                        <div class="price-box"><span class="amount">5,000</span> <span style="font-size: 0.95rem;">ETB</span><div class="period">per month</div></div>
+                        <a href="book.html?package=intl-prep-6to10" class="btn btn-outline-ink">Select Plan</a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-inner">
+            <div data-en="&copy; 2026 Abrehot Educational Platform. All rights reserved." data-am="&copy; 2026 አብረሆት የትምህርት መድረክ። መብቱ በሕግ የተጠበቀ ነው።">
+                &copy; 2026 Abrehot Educational Platform. All rights reserved.
+            </div>
+            <div style="color: var(--ink-500); font-size: 0.85rem;" data-en="Addis Ababa, Ethiopia" data-am="አዲስ አበባ፣ ኢትዮጵያ">Addis Ababa, Ethiopia</div>
+        </div>
+    </footer>
+
+    <script>
+        function switchTrack(track) {
+            const localTrack = document.getElementById('local-track');
+            const intlTrack = document.getElementById('intl-track');
+            const localBtn = document.getElementById('track-local-btn');
+            const intlBtn = document.getElementById('track-intl-btn');
+
+            if (track === 'international') {
+                localTrack.classList.remove('active');
+                intlTrack.classList.add('active');
+                intlBtn.classList.add('active');
+                localBtn.classList.remove('active');
+            } else {
+                intlTrack.classList.remove('active');
+                localTrack.classList.add('active');
+                localBtn.classList.add('active');
+                intlBtn.classList.remove('active');
+            }
+        }
+
+        function switchGradePrep(grade) {
+            const prepBlocks = document.querySelectorAll('.prep-group-content');
+            prepBlocks.forEach(b => b.style.display = 'none');
+
+            const btns = document.querySelectorAll('.mode-switcher .mode-btn');
+            btns.forEach(b => b.classList.remove('active'));
+
+            document.getElementById(`prep-${grade}`).style.display = 'block';
+            document.getElementById(`${grade}-btn`).classList.add('active');
+        }
+
+        function setLanguage(lang) {
+            const body = document.body;
+            const btnEn = document.getElementById('btn-en');
+            const btnAm = document.getElementById('btn-am');
+            
+            if (lang === 'am') {
+                body.classList.remove('lang-en');
+                body.classList.add('lang-am');
+                btnAm.classList.add('active');
+                btnEn.classList.remove('active');
+            } else {
+                body.classList.remove('lang-am');
+                body.classList.add('lang-en');
+                btnEn.classList.add('active');
+                btnAm.classList.remove('active');
+            }
+
+            const elements = document.querySelectorAll('[data-en][data-am]');
+            elements.forEach(el => {
+                const text = el.getAttribute(`data-${lang}`);
+                if (text) {
+                    el.innerHTML = text;
+                }
+            });
+
+            localStorage.setItem('abrehot_lang', lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('abrehot_lang') || 'en';
+            setLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>

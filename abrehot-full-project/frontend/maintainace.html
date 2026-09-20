@@ -220,38 +220,118 @@
             backdrop-filter: blur(12px);
         }
 
-        /* Animated Pulsing Icon Box */
+        /* Pure CSS 3D Cog Container */
         .server-pulse-box {
             position: relative;
-            width: 88px;
-            height: 88px;
+            width: 110px;
+            height: 110px;
             margin: 0 auto 28px;
             display: grid;
             place-items: center;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(200, 90, 50, 0.15) 0%, rgba(200, 90, 50, 0.03) 100%);
+            perspective: 600px;
         }
 
         .server-pulse-box::after {
             content: '';
             position: absolute;
-            inset: -8px;
+            inset: -4px;
             border-radius: 50%;
-            border: 1px solid var(--terracotta);
-            opacity: 0.3;
-            animation: pulseGlow 2.5s infinite ease-in-out;
+            border: 1px dashed var(--terracotta);
+            opacity: 0.35;
+            animation: pulseGlow 3s infinite ease-in-out;
         }
 
         @keyframes pulseGlow {
-            0% { transform: scale(0.95); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 0.1; }
-            100% { transform: scale(0.95); opacity: 0.6; }
+            0% { transform: scale(0.92); opacity: 0.5; }
+            50% { transform: scale(1.08); opacity: 0.15; }
+            100% { transform: scale(0.92); opacity: 0.5; }
         }
 
-        .server-pulse-box i {
-            font-size: 2.8rem;
-            color: var(--terracotta);
+        .cog-3d-scene {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate3DCog 8s linear infinite;
         }
+
+        @keyframes rotate3DCog {
+            0% {
+                transform: rotateX(25deg) rotateY(-20deg) rotateZ(0deg);
+            }
+            100% {
+                transform: rotateX(25deg) rotateY(-20deg) rotateZ(360deg);
+            }
+        }
+
+        .cog-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, var(--terracotta) 0%, var(--terracotta-hover) 85%);
+            box-shadow: 
+                inset 0 2px 4px rgba(255, 255, 255, 0.4),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.4),
+                0 6px 12px rgba(200, 90, 50, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cog-face.front {
+            transform: translateZ(6px);
+        }
+
+        .cog-face.back {
+            transform: translateZ(-6px) rotateY(180deg);
+            background: var(--terracotta-hover);
+        }
+
+        /* Center Hole */
+        .cog-face::before {
+            content: '';
+            width: 22px;
+            height: 22px;
+            background: var(--sand-50);
+            border-radius: 50%;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.5),
+                0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="dark"] .cog-face::before {
+            background: var(--sand-100);
+        }
+
+        /* 3D Gear Teeth */
+        .cog-teeth {
+            position: absolute;
+            inset: 0;
+            transform-style: preserve-3d;
+        }
+
+        .tooth {
+            position: absolute;
+            width: 12px;
+            height: 14px;
+            top: -6px;
+            left: calc(50% - 6px);
+            background: linear-gradient(180deg, var(--terracotta) 0%, var(--terracotta-hover) 100%);
+            border-radius: 2px;
+            transform-origin: center 41px;
+            box-shadow: 
+                0 2px 4px rgba(0, 0, 0, 0.25),
+                inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        }
+
+        .tooth:nth-child(1)  { transform: rotate(0deg) translateZ(0); }
+        .tooth:nth-child(2)  { transform: rotate(45deg) translateZ(0); }
+        .tooth:nth-child(3)  { transform: rotate(90deg) translateZ(0); }
+        .tooth:nth-child(4)  { transform: rotate(135deg) translateZ(0); }
+        .tooth:nth-child(5)  { transform: rotate(180deg) translateZ(0); }
+        .tooth:nth-child(6)  { transform: rotate(225deg) translateZ(0); }
+        .tooth:nth-child(7)  { transform: rotate(270deg) translateZ(0); }
+        .tooth:nth-child(8)  { transform: rotate(315deg) translateZ(0); }
 
         .section-tag {
             display: inline-block;
@@ -409,8 +489,22 @@
         <div class="container">
             <div class="main-card">
                 
+                <!-- 3D Revolving Cog -->
                 <div class="server-pulse-box">
-                    <i class="bx bx-cog bx-spin"></i>
+                    <div class="cog-3d-scene">
+                        <div class="cog-teeth">
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                            <div class="tooth"></div>
+                        </div>
+                        <div class="cog-face front"></div>
+                        <div class="cog-face back"></div>
+                    </div>
                 </div>
 
                 <span class="section-tag" data-en="Scheduled System Upgrade" data-am="የታቀደ የሲስተም ማሻሻያ">Scheduled System Upgrade</span>
@@ -485,7 +579,6 @@
             
             container.textContent = grid.join('\n');
 
-            // Subtle continuous animation effect
             setInterval(() => {
                 const randomRow = Math.floor(Math.random() * height);
                 let rowArr = grid[randomRow].split('');

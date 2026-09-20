@@ -564,6 +564,12 @@
                 <br>
                 <button class="edit" id="updateTeachingBtn">Update Teaching Info & Rates</button>
             </div>
+            <div class="card">
+                <h3>Biography</h3>
+                <p id="displayBio">-</p>
+                <br>
+                <button class="edit" id="updateBioBtn">Update Bio</button>
+            </div>
         </div>
         <br>
         <div class="stats">
@@ -924,6 +930,18 @@
                 }
             });
 
+            document.getElementById('updateBioBtn').addEventListener('click', async function () {
+                if (!currentProfile) { alert('No tutor application on file yet.'); return; }
+                var bio = prompt('Short biography', currentProfile.bio || '');
+                if (bio === null) return;
+                try {
+                    currentProfile = await apiRequest('/tutors/me', { method: 'PATCH', auth: true, body: { bio: bio } });
+                    applyTutorProfile(currentProfile);
+                } catch (err) {
+                    alert('Could not update bio: ' + err.message);
+                }
+            });
+
             document.getElementById('updateTeachingBtn').addEventListener('click', async function () {
                 if (!currentProfile) { alert('No tutor application on file yet.'); return; }
                 var experience = prompt('Experience (e.g. "3-5 Years")', currentProfile.experience || '');
@@ -992,6 +1010,7 @@
                 document.getElementById('displayLanguages').textContent = (profile.languages || []).join(', ') || '-';
                 document.getElementById('displayMode').textContent = profile.mode || '-';
                 document.getElementById('displayPrice').textContent = profile.price != null ? profile.price : '-';
+                document.getElementById('displayBio').textContent = profile.bio || '-';
                 const mPriceEl = document.getElementById('displayMonthlyPrice');
                 if (mPriceEl) mPriceEl.textContent = profile.monthlyPrice != null ? profile.monthlyPrice : 'Not set';
                 document.getElementById('profileTitle').textContent = (profile.subjects || []).join(', ') + ' Tutor';

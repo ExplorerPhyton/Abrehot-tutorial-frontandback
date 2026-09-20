@@ -30,7 +30,7 @@ router.post('/apply', requireAuth, async (req, res) => {
       city, address, price, availability, bio,
     } = req.body;
 
-    if (!fullname || !phone || !email || !city) {
+    if (!fullname || !phone || !email || !city || !String(availability || '').trim()) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
