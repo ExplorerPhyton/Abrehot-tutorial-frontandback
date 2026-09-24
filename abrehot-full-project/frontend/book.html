@@ -458,11 +458,12 @@
                 <div class="main-label"><label>Tutoring Plan</label></div>
                 <div class="session-type">
                     <label><input type="radio" name="planType" value="hourly" checked> Hourly Session</label>
+                    <label><input type="radio" name="planType" value="weekly"> Weekly Subscription</label>
                     <label><input type="radio" name="planType" value="monthly"> Monthly Plan</label>
                 </div>
                 <br>
                 <div id="monthlyPlanSection" style="display:none; background:#eaf4fb; padding:16px; border-radius:8px; margin-bottom:16px; border-left:4px solid var(--primary);">
-                    <div class="main-label"><label>Select Preferred Days for Your Monthly Plan</label></div>
+                    <div class="main-label"><label>Select Your Study Days</label></div>
                     <p style="font-size:13px; color:#555; margin-bottom:10px;" id="tutorAvailableDaysNote">Select the days that best suit your schedule:</p>
                     <label><input type="checkbox" name="selectedDays" value="Monday"> Monday</label><br>
                     <label><input type="checkbox" name="selectedDays" value="Tuesday"> Tuesday</label><br>
@@ -550,7 +551,7 @@
             <div class="booking-summary">
                 <p><strong>Booking Preview</strong></p><br>
                 <div><span class="main-label">Plan Type:</span> <span id="summaryPlanType">Hourly Session</span></div>
-                <div><span class="main-label">Selected Days (Monthly):</span> <span id="summarySelectedDays">-</span></div>
+                <div><span class="main-label">Selected Study Days:</span> <span id="summarySelectedDays">-</span></div>
                 <div><span class="main-label">Subject:</span> <span id="summarySubject">-</span></div>
                 <div><span class="main-label">Preferred Language:</span> <span id="summaryLanguage">-</span></div>
                 <div><span class="main-label">Learning Goal:</span> <span id="summaryGoal">-</span></div>
@@ -620,11 +621,11 @@
 
         function updateSummary() {
             let planTypeRad = document.querySelector('input[name="planType"]:checked');
-            let isMonthly = planTypeRad && planTypeRad.value === 'monthly';
-            document.getElementById("summaryPlanType").textContent = isMonthly ? "Monthly Plan" : "Hourly Session";
+            let isRecurring = planTypeRad && (planTypeRad.value === 'weekly' || planTypeRad.value === 'monthly');
+            document.getElementById("summaryPlanType").textContent = planTypeRad && planTypeRad.value === 'weekly' ? "Weekly Subscription" : (planTypeRad && planTypeRad.value === 'monthly' ? "Monthly Plan" : "Hourly Session");
 
             let selectedDays = Array.from(document.querySelectorAll('input[name="selectedDays"]:checked')).map(function (el) { return el.value; });
-            document.getElementById("summarySelectedDays").textContent = (isMonthly && selectedDays.length) ? selectedDays.join(", ") : "-";
+            document.getElementById("summarySelectedDays").textContent = (isRecurring && selectedDays.length) ? selectedDays.join(", ") : "-";
 
             let selectedSubject = document.getElementById("subject");
             document.getElementById("summarySubject").textContent = selectedSubject && selectedSubject.value ? selectedSubject.value : "-";
@@ -804,8 +805,8 @@
             var monthlyPlanSection = document.getElementById('monthlyPlanSection');
             function syncPlanTypeSection() {
                 var checked = form.querySelector('input[name="planType"]:checked');
-                var isMonthly = checked && checked.value === 'monthly';
-                monthlyPlanSection.style.display = isMonthly ? 'block' : 'none';
+                var isRecurring = checked && (checked.value === 'weekly' || checked.value === 'monthly');
+                monthlyPlanSection.style.display = isRecurring ? 'block' : 'none';
                 updateSummary();
             }
             planTypeRadios.forEach(function (r) { r.addEventListener('change', syncPlanTypeSection); });
@@ -875,10 +876,10 @@
                 }
 
                 var planTypeInput = form.querySelector('input[name="planType"]:checked');
-                var isMonthlyPlan = planTypeInput && planTypeInput.value === 'monthly';
+                var isRecurringPlan = planTypeInput && (planTypeInput.value === 'weekly' || planTypeInput.value === 'monthly');
                 var selectedDaysArr = Array.from(form.querySelectorAll('input[name="selectedDays"]:checked')).map(function (el) { return el.value; });
-                if (isMonthlyPlan && !selectedDaysArr.length) {
-                    alert('Please select at least one preferred day for your monthly tutoring plan.');
+                if (isRecurringPlan && !selectedDaysArr.length) {
+                    alert('Please select at least one study day for your subscription.');
                     monthlyPlanSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return;
                 }
@@ -927,8 +928,9 @@
                     time: document.getElementById('time').value,
                     duration: document.getElementById('duration').value,
                     notes: document.getElementById('notes').value,
-                    planType: isMonthlyPlan ? 'monthly' : 'hourly',
-                    selectedDays: isMonthlyPlan ? selectedDaysArr : [],
+                    planType: isRecurringPlan ? planTypeInput.value : 'hourly',
+                    selectedDays: isRecurringPlan ? selectedDaysArr : [],
+                    tutorRate: tutorPrice,
                     tutorId: tutorId || undefined,
                     tutorName: tutorName || undefined,
                     childId: isParent ? childSelect.value : undefined,

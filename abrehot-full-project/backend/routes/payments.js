@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
+const { subscriptionEndDate } = require('../utils/subscription');
 
 const router = express.Router();
 
@@ -69,9 +70,32 @@ router.patch('/:id', async (req, res, next) => {
     }
 
     const approved = action === 'approve';
+    const existingBooking = await Booking.findById(id).select('subscriptionFrequency').lean();
+    if (!existingBooking) return res.status(404).json({ message: 'Booking not found.' });
+    const reviewTime = new Date();
     const update = approved
-      ? { $set: { paymentStatus: 'approved', paymentReviewedAt: new Date() }, $unset: { paymentNote: '' } }
-      : { $set: { paymentStatus: 'rejected', paymentNote: String(note).trim().slice(0, 500), paymentReviewedAt: new Date() } };
+      ? {
+          $set: {
+            paymentStatus: 'approved',
+            paymentReviewedAt: reviewTime,
+            ...(existingBooking.subscriptionFrequency
+              ? {
+                  subscriptionStatus: 'active',
+                  subscriptionStartedAt: reviewTime,
+                  subscriptionEndsAt: subscriptionEndDate(reviewTime, existingBooking.subscriptionFrequency),
+                }
+              : {}),
+          },
+          $unset: { paymentNote: '' },
+        }
+      : {
+          $set: {
+            paymentStatus: 'rejected',
+            paymentNote: String(note).trim().slice(0, 500),
+            paymentReviewedAt: reviewTime,
+            subscriptionStatus: 'pending',
+          },
+        };
 
     const booking = await Booking.findByIdAndUpdate(id, update, { new: true, runValidators: false })
       .populate('tutor', 'fullname user')

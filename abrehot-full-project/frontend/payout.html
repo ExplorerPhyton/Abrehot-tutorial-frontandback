@@ -397,6 +397,10 @@
             }
 
             const draft = JSON.parse(rawDraft);
+            const durationHours = draft.duration && draft.duration.indexOf('1.5') !== -1 ? 1.5 : (draft.duration && draft.duration.indexOf('2 +') !== -1 ? 2.5 : (draft.duration && draft.duration.indexOf('2') !== -1 ? 2 : 1));
+            const selectedDaysCount = Array.isArray(draft.selectedDays) ? draft.selectedDays.length : 0;
+            const studentHourlyRate = draft.session === 'group' && Number(draft.groupSize) > 0 ? Number(draft.tutorRate || 0) / Number(draft.groupSize) : Number(draft.tutorRate || 0);
+            const estimatedSubscription = draft.planType === 'weekly' ? studentHourlyRate * durationHours * selectedDaysCount : (draft.planType === 'monthly' ? studentHourlyRate * durationHours * selectedDaysCount * 4 : null);
             const proofSection = document.getElementById('proofSection');
             const pendingNote = document.getElementById('pendingNote');
             const submitBtn = document.getElementById('submitBtn');
@@ -412,7 +416,9 @@
                 <div><strong>Grade:</strong> ${draft.grade || '-'}</div>
                 <div><strong>Date & Time:</strong> ${draft.date || '-'} at ${draft.time || '-'}</div>
                 <div><strong>Duration:</strong> ${draft.duration || '-'}</div>
-                <div><strong>Plan Type:</strong> ${draft.planType === 'monthly' ? 'Monthly Plan' : 'Hourly Session'}</div>
+                <div><strong>Plan Type:</strong> ${draft.planType === 'weekly' ? 'Weekly Subscription' : (draft.planType === 'monthly' ? 'Monthly Subscription' : 'Hourly Session')}</div>
+                ${draft.selectedDays && draft.selectedDays.length ? `<div><strong>Study Days:</strong> ${draft.selectedDays.join(', ')}</div>` : ''}
+                ${estimatedSubscription != null ? `<div><strong>Estimated subscription:</strong> ${estimatedSubscription.toFixed(2)} ETB</div>` : ''}
                 <div><strong>Session Type:</strong> ${draft.session || '-'}</div>
                 <div><strong>Language:</strong> ${draft.language || '-'}</div>
                 ${draft.tutorName ? `<div><strong>Tutor:</strong> ${draft.tutorName}</div>` : ''}
@@ -503,7 +509,7 @@
                     localStorage.removeItem('pendingBookingDraft');
                     alert(isFree
                         ? (response.message || 'Booking completed successfully!')
-                        : 'Booking submitted! It is now pending payment verification. You can chat with your tutor once the admin approves your payment.');
+                        : 'Booking submitted! It is now pending payment verification. Your subscription timer starts after the admin approves your payment.');
 
                     const user = getUser();
                     window.location.href = user ? dashboardPathForRole(user.role) : 'index.html';

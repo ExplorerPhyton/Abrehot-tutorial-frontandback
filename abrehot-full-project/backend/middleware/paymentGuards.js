@@ -65,17 +65,38 @@ async function requireApprovedPayment(req, res, next) {
     if (!mongoose.isValidObjectId(bookingId)) return next(); // let the route handle bad ids
 
     // lean() so missing paymentStatus stays undefined instead of picking up the schema default
-    const booking = await Booking.findById(bookingId).select('paymentStatus paymentNote').lean();
+    const booking = await Booking.findById(bookingId)
+      .select('paymentStatus paymentNote subscriptionFrequency subscriptionEndsAt subscriptionStatus')
+      .lean();
     if (!booking) return next(); // route will 404
 
     const status = booking.paymentStatus;
-    if (!status || status === 'approved') return next();
+    if (!status || status === 'approved') {
+      if (
+        status === 'approved' &&
+        booking.subscriptionFrequency &&
+        booking.subscriptionEndsAt &&
+        new Date(booking.subscriptionEndsAt) <= new Date()
+      ) {
+        return res.status(403).json({
+          message: 'Your subscription has ended. Pay your subscription to continue chatting.',
+          paymentStatus: 'expired',
+          renewalUrl: '/renew.html?bookingId=' + bookingId,
+          subscriptionEndsAt: booking.subscriptionEndsAt,
+        });
+      }
+      return next();
+    }
 
     const message =
       status === 'rejected'
         ? 'Your payment was rejected' + (booking.paymentNote ? ': ' + booking.paymentNote : '.') + ' Please contact support.'
         : 'Chat unlocks once your payment is approved.';
-    return res.status(403).json({ message, paymentStatus: status });
+    return res.status(403).json({
+      message,
+      paymentStatus: status,
+      renewalUrl: booking.subscriptionFrequency ? '/renew.html?bookingId=' + bookingId : undefined,
+    });
   } catch (err) {
     next(err);
   }

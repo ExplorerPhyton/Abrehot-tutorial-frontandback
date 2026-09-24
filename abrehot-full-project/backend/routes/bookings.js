@@ -5,6 +5,7 @@ const Child = require('../models/Child');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
 const { notifyAdmin } = require('../utils/mailer');
 const { notify } = require('../utils/notifications');
+const { calculateSubscription } = require('../utils/subscription');
 
 function toArray(value) {
   if (value === undefined || value === null || value === '') return [];
@@ -90,10 +91,10 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       return res.status(400).json({ message: 'One-to-one packages require an online or in-person session.' });
     }
 
-    if (planType === 'monthly') {
+    if (planType === 'weekly' || planType === 'monthly') {
       const daysArr = toArray(selectedDays);
       if (!daysArr.length) {
-        return res.status(400).json({ message: 'Please select at least one day for your monthly tutoring plan.' });
+        return res.status(400).json({ message: 'Please select at least one study day for your subscription.' });
       }
     }
 
@@ -189,11 +190,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
 
     // Snapshot the tutor's rate at booking time so the price shown today
     // stays stable even if the tutor changes their profile later.
-    const isMonthlyPlan = planType === 'monthly';
-    const activeRate = isMonthlyPlan
-      ? (chosenTutor.monthlyPrice != null ? Number(chosenTutor.monthlyPrice) : (chosenTutor.price != null ? Number(chosenTutor.price) * 12 : undefined))
-      : (chosenTutor.price != null ? Number(chosenTutor.price) : undefined);
-    const tutorRate = activeRate;
+    const tutorRate = chosenTutor.price != null ? Number(chosenTutor.price) : undefined;
 
     // Group sessions are a flat split of the tutor's hourly rate across the
     // attending students — no extra discount, the split IS the saving. Each
@@ -204,6 +201,21 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       const size = Number(groupSize);
       perPersonPrice = Math.round((tutorRate / size) * 100) / 100;
       groupTotalPrice = tutorRate;
+    }
+
+    let subscription;
+    try {
+      subscription = calculateSubscription({
+        planType,
+        packageId,
+        tutorRate,
+        session,
+        groupSize,
+        selectedDays: toArray(selectedDays),
+        duration,
+      });
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
     }
 
     const booking = await Booking.create({
@@ -232,13 +244,16 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       time,
       duration,
       notes,
-      planType: isMonthlyPlan ? 'monthly' : 'hourly',
-      selectedDays: isMonthlyPlan ? toArray(selectedDays) : [],
-      selectedTimeSlots: isMonthlyPlan ? (selectedTimeSlots || []) : [],
+      planType: ['weekly', 'monthly'].includes(planType) ? planType : 'hourly',
+      selectedDays: ['weekly', 'monthly'].includes(planType) ? toArray(selectedDays) : [],
+      selectedTimeSlots: ['weekly', 'monthly'].includes(planType) ? (selectedTimeSlots || []) : [],
       status: 'pending', // Awaiting admin approval — see /api/admin/bookings/:id/approve|reject
       tutorRate,
       perPersonPrice,
       groupTotalPrice,
+      subscriptionFrequency: subscription.frequency,
+      subscriptionAmount: subscription.amount,
+      subscriptionStatus: subscription.frequency ? 'pending' : undefined,
       ...(req.paymentFields || {}), // paymentStatus, and paymentMethod/paymentScreenshot/transactionId for paid packages — set by validatePaymentOnCreate
     });
 
@@ -294,6 +309,64 @@ router.get('/for-tutor', requireAuth, async (req, res) => {
     .populate('child', 'name grade')
     .sort({ date: 1, createdAt: -1 });
   res.json(bookings);
+});
+
+// GET /api/bookings/:id — used by the subscription renewal page.
+router.get('/:id', requireAuth, async (req, res) => {
+  const booking = await Booking.findById(req.params.id)
+    .populate('tutor', 'fullname')
+    .populate('child', 'name grade');
+  if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+  const isRequester = booking.requestedBy && booking.requestedBy.toString() === req.user.id;
+  let isAssignedTutor = false;
+  if (booking.tutor) {
+    const tutorProfile = await TutorProfile.findOne({ user: req.user.id });
+    isAssignedTutor = tutorProfile && booking.tutor._id.toString() === tutorProfile._id.toString();
+  }
+  if (!isRequester && !isAssignedTutor) return res.status(403).json({ message: 'Not allowed to view this booking' });
+  res.json(booking);
+});
+
+// PATCH /api/bookings/:id/renew — submits payment proof for the same schedule.
+router.patch('/:id/renew', requireAuth, async (req, res) => {
+  const { paymentMethod, paymentScreenshot, transactionId } = req.body || {};
+  const booking = await Booking.findById(req.params.id);
+  if (!booking) return res.status(404).json({ message: 'Booking not found' });
+  if (!booking.requestedBy || booking.requestedBy.toString() !== req.user.id) {
+    return res.status(403).json({ message: 'Only the student can renew this subscription' });
+  }
+  if (!['weekly', 'monthly'].includes(booking.subscriptionFrequency)) {
+    return res.status(400).json({ message: 'This booking does not use a recurring subscription.' });
+  }
+  if (booking.subscriptionEndsAt && booking.subscriptionEndsAt > new Date()) {
+    return res.status(400).json({ message: 'This subscription is still active.' });
+  }
+  if (!['CBE', 'Telebirr'].includes(paymentMethod)) {
+    return res.status(400).json({ message: 'Please choose CBE or Telebirr.' });
+  }
+  if (typeof paymentScreenshot !== 'string' || !/^data:image\/(png|jpe?g|webp);base64,/.test(paymentScreenshot)) {
+    return res.status(400).json({ message: 'Please upload a payment screenshot (PNG, JPG or WEBP).' });
+  }
+  if (paymentScreenshot.length > 3500000) {
+    return res.status(400).json({ message: 'Screenshot is too large. Please upload a smaller image.' });
+  }
+
+  booking.paymentMethod = paymentMethod;
+  booking.paymentScreenshot = paymentScreenshot;
+  booking.transactionId = typeof transactionId === 'string' ? transactionId.trim().slice(0, 100) : undefined;
+  booking.paymentStatus = 'pending';
+  booking.paymentNote = undefined;
+  booking.paymentReviewedAt = undefined;
+  booking.subscriptionStatus = 'pending';
+  booking.subscriptionStartedAt = undefined;
+  booking.subscriptionEndsAt = undefined;
+  await booking.save();
+  notifyAdmin(
+    `Subscription renewal awaiting approval (${booking._id})`,
+    `Please review the renewal payment screenshot for booking ${booking._id}.`
+  );
+  res.json({ message: 'Renewal submitted for payment verification.', paymentStatus: booking.paymentStatus });
 });
 
 // PATCH /api/bookings/:id/cancel — used by the "Cancel"/"Remove" buttons.

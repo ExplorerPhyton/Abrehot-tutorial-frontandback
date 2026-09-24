@@ -43,9 +43,10 @@ const bookingSchema = new mongoose.Schema(
     packageFee: { type: String },
     platform: { type: String, enum: ['googleMeet', 'zoom', 'microsoftTeams', 'telegram'] },
 
-    // Plan type: 'hourly' session vs 'monthly' recurring plan
-    planType: { type: String, enum: ['hourly', 'monthly'], default: 'hourly' },
-    selectedDays: [String], // for monthly plan: e.g. ['Monday', 'Wednesday', 'Friday']
+    // Recurring subscriptions are priced from the package's hourly rate,
+    // selected days, and session duration at booking time.
+    planType: { type: String, enum: ['hourly', 'weekly', 'monthly'], default: 'hourly' },
+    selectedDays: [String], // for recurring plans: e.g. ['Monday', 'Wednesday', 'Friday']
     selectedTimeSlots: [
       {
         day: String,
@@ -62,6 +63,11 @@ const bookingSchema = new mongoose.Schema(
     tutorRate: Number,
     perPersonPrice: Number,
     groupTotalPrice: Number,
+    subscriptionFrequency: { type: String, enum: ['weekly', 'monthly'] },
+    subscriptionAmount: Number,
+    subscriptionStatus: { type: String, enum: ['pending', 'active', 'expired'] },
+    subscriptionStartedAt: Date,
+    subscriptionEndsAt: Date,
 
     city: String,
     address: String,

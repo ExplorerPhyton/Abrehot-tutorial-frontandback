@@ -104,6 +104,15 @@
             var selectedImage = '';
             var replyTo = null;
             function status(text) { statusEl.textContent = text || ''; }
+            function showSubscriptionLock(err) {
+                document.getElementById('composer').style.display = 'none';
+                messagesEl.innerHTML = '<div style="max-width:520px;margin:70px auto;padding:28px;text-align:center;background:#fffdf9;border:1px solid #d5e2dc;border-radius:12px;box-shadow:0 8px 24px rgba(40,50,48,.08);">' +
+                    '<h2 style="margin:0 0 10px;color:#173f4d;">Subscription required</h2>' +
+                    '<p style="margin:0 0 20px;color:#6b7778;">' + (err.message || 'Pay your subscription to continue chatting.') + '</p>' +
+                    (err.renewalUrl ? '<a href="' + err.renewalUrl + '" style="display:inline-block;padding:11px 18px;background:#235e65;color:#fff;border-radius:7px;text-decoration:none;font-weight:600;">Pay subscription to continue</a>' : '') +
+                    '</div>';
+                status('');
+            }
             function dateText(value) { var date = new Date(value); return isNaN(date.getTime()) ? '' : date.toLocaleString([], { dateStyle:'medium', timeStyle:'short' }); }
             function render(messages) {
                 messagesEl.textContent = '';
@@ -147,7 +156,10 @@
                     var data = await apiRequest('/messages/booking/' + encodeURIComponent(bookingId), { auth:true });
                     document.getElementById('bookingMeta').textContent = (data.booking.subject || []).join(', ') || 'Tutoring session';
                     render(data.messages || []); status('');
-                } catch (err) { status(err.message); input.disabled = true; sendButton.disabled = true; }
+                } catch (err) {
+                    if (err.renewalUrl || err.paymentStatus === 'expired') showSubscriptionLock(err);
+                    else { status(err.message); input.disabled = true; sendButton.disabled = true; }
+                }
             }
             document.getElementById('attachButton').addEventListener('click', function () { imageInput.click(); });
             imageInput.addEventListener('change', function () {

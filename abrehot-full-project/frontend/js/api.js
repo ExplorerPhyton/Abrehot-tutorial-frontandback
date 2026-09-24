@@ -56,7 +56,9 @@ async function apiRequest(path, { method = 'GET', body, auth = false } = {}) {
     /* no JSON body */
   }
   if (!res.ok) {
-    throw new Error((data && data.message) || 'Request failed (' + res.status + ')');
+    const error = new Error((data && data.message) || 'Request failed (' + res.status + ')');
+    if (data) Object.assign(error, data);
+    throw error;
   }
   return data;
 }

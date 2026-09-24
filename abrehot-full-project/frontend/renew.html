@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renew Subscription | Abrehot</title>
+    <link rel="stylesheet" href="css/abrehot-theme.css">
+    <style>
+        main { max-width:760px; margin:48px auto; padding:28px; background:#fffdf9; border:1px solid #d5e2dc; border-radius:12px; box-shadow:0 10px 30px rgba(40,50,48,.08); }
+        h1 { color:#173f4d; margin-top:0; }
+        .summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin:22px 0; }
+        .summary div { padding:13px; background:#e6efe9; border-radius:8px; }
+        label { display:block; margin:14px 0 6px; font-weight:600; color:#173f4d; }
+        select, input[type=text], input[type=file] { width:100%; padding:11px; border:1px solid #cbd9d2; border-radius:7px; background:white; }
+        button { margin-top:20px; padding:12px 18px; border:0; border-radius:7px; background:#235e65; color:white; font-weight:700; cursor:pointer; }
+        button:disabled { opacity:.6; cursor:wait; }
+        #preview { display:none; max-width:100%; max-height:260px; margin-top:12px; border-radius:8px; }
+        #message { min-height:24px; color:#a23c2b; font-weight:600; }
+    </style>
+</head>
+<body>
+    <header class="topbar"><a class="brand" href="index.html">Abrehot</a></header>
+    <main>
+        <h1>Renew your subscription</h1>
+        <p>Pay for the same tutor, package, study days, and session duration.</p>
+        <section class="summary" id="summary"><div>Loading booking...</div></section>
+        <form id="renewForm">
+            <label for="method">Payment method</label>
+            <select id="method" required><option value="">Choose a method</option><option value="CBE">CBE</option><option value="Telebirr">Telebirr</option></select>
+            <label for="transaction">Transaction / reference number</label>
+            <input id="transaction" type="text" maxlength="100" placeholder="Optional">
+            <label for="screenshot">Payment screenshot</label>
+            <input id="screenshot" type="file" accept="image/png,image/jpeg,image/webp" required>
+            <img id="preview" alt="Payment screenshot preview">
+            <p id="message" role="status"></p>
+            <button id="submit" type="submit">Submit renewal payment</button>
+        </form>
+    </main>
+    <script src="js/api.js"></script>
+    <script>
+        (function () {
+            var bookingId = new URLSearchParams(location.search).get('bookingId');
+            var screenshotData = '';
+            var summary = document.getElementById('summary');
+            var message = document.getElementById('message');
+            function text(value) { return value == null || value === '' ? '-' : String(value); }
+            function compressImage(file) {
+                return new Promise(function (resolve, reject) {
+                    var image = new Image();
+                    var url = URL.createObjectURL(file);
+                    image.onload = function () {
+                        var scale = Math.min(1, 1400 / Math.max(image.width, image.height));
+                        var canvas = document.createElement('canvas');
+                        canvas.width = Math.round(image.width * scale); canvas.height = Math.round(image.height * scale);
+                        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+                        URL.revokeObjectURL(url); resolve(canvas.toDataURL('image/jpeg', .8));
+                    };
+                    image.onerror = function () { URL.revokeObjectURL(url); reject(new Error('Could not read that image.')); };
+                    image.src = url;
+                });
+            }
+            async function load() {
+                if (!getToken() || !bookingId) { location.href = 'login.html'; return; }
+                try {
+                    var booking = await apiRequest('/bookings/' + encodeURIComponent(bookingId), { auth:true });
+                    var tutor = booking.tutor && booking.tutor.fullname ? booking.tutor.fullname : 'Tutor';
+                    var days = (booking.selectedDays || []).join(', ') || '-';
+                    summary.innerHTML = '';
+                    [['Tutor', tutor], ['Package', booking.packageClassSize || booking.packageId], ['Plan', booking.subscriptionFrequency], ['Study days', days], ['Time', text(booking.time)], ['Duration', text(booking.duration)], ['Amount', text(booking.subscriptionAmount) + ' ETB']].forEach(function (item) {
+                        var cell = document.createElement('div'); cell.innerHTML = '<strong>' + item[0] + '</strong><br>' + item[1]; summary.appendChild(cell);
+                    });
+                } catch (err) { message.textContent = err.message; document.getElementById('renewForm').style.display = 'none'; }
+            }
+            document.getElementById('screenshot').addEventListener('change', async function () {
+                if (!this.files[0]) return;
+                try { screenshotData = await compressImage(this.files[0]); document.getElementById('preview').src = screenshotData; document.getElementById('preview').style.display = 'block'; }
+                catch (err) { message.textContent = err.message; screenshotData = ''; }
+            });
+            document.getElementById('renewForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
+                if (!screenshotData) { message.textContent = 'Please upload a payment screenshot.'; return; }
+                var button = document.getElementById('submit'); button.disabled = true; message.textContent = '';
+                try {
+                    await apiRequest('/bookings/' + encodeURIComponent(bookingId) + '/renew', { method:'PATCH', auth:true, body:{ paymentMethod:document.getElementById('method').value, transactionId:document.getElementById('transaction').value.trim(), paymentScreenshot:screenshotData } });
+                    alert('Renewal submitted. Chat will unlock after admin approval.'); location.href = 'chat.html?bookingId=' + encodeURIComponent(bookingId);
+                } catch (err) { message.textContent = err.message; button.disabled = false; }
+            });
+            load();
+        }());
+    </script>
+</body>
+</html>
