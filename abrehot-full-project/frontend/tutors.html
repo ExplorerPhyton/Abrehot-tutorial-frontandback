@@ -510,7 +510,7 @@
             <label for="search">Search Tutor</label><br>
             <div class="search-input-section">
                 <i class="bx bx-search"></i><input type="text" id="search"
-                    placeholder="Search by tutor name, subject, grade-level, location, teaching-mode, price or language "><br><br>
+                    placeholder="Search by tutor name, subject, grade-level, location, teaching-mode or language"><br><br>
             </div>
         </div>
         <div class="filter-section">
@@ -597,19 +597,6 @@
                     <option>1+ Years</option>
                     <option>3+ Years</option>
                     <option>5+ Years</option>
-                </select><br><br>
-            </div>
-
-            <!-- Price -->
-            <div>
-                <label for="price">Price Range</label><br>
-                <select id="price">
-                    <option value="">Any Price</option>
-                    <option>Below 200 ETB/hour</option>
-                    <option>200 - 300 ETB/hour</option>
-                    <option>300 - 500 ETB/hour</option>
-                    <option>500 - 700 ETB/hour</option>
-                    <option>700+ ETB/hour</option>
                 </select><br><br>
             </div>
 
@@ -814,7 +801,6 @@
             var onlineEl = document.getElementById('online');
             var inpersonEl = document.getElementById('inperson');
             var experienceEl = document.getElementById('experience');
-            var priceEl = document.getElementById('price');
 
             document.getElementById('applyFilters').addEventListener('click', loadTutors);
             document.getElementById('clearFilters').addEventListener('click', function () {
@@ -826,7 +812,6 @@
                 onlineEl.checked = false;
                 inpersonEl.checked = false;
                 experienceEl.value = '';
-                priceEl.value = '';
                 loadTutors();
             });
 
@@ -856,20 +841,11 @@
                 var online = onlineEl.checked;
                 var inperson = inpersonEl.checked;
                 var experience = experienceEl.value;
-                var price = priceEl.value;
-
                 var expMap = { 'Less than 1 Year': 0, '1-2 Years': 1, '3-5 Years': 3, 'More than 5 Years': 6 };
-                var priceBands = {
-                    'Below 200 ETB/hour': [0, 200],
-                    '200 - 300 ETB/hour': [200, 300],
-                    '300 - 500 ETB/hour': [300, 500],
-                    '500 - 700 ETB/hour': [500, 700],
-                    '700+ ETB/hour': [700, Infinity],
-                };
 
                 return tutors.filter(function (t) {
                     if (search) {
-                        var haystack = norm([t.fullname, (t.subjects || []).join(' '), (t.grades || []).join(' '), t.city, t.mode, t.price, (t.languages || []).join(' ')].join(' '));
+                        var haystack = norm([t.fullname, (t.subjects || []).join(' '), (t.grades || []).join(' '), t.city, t.mode, (t.languages || []).join(' ')].join(' '));
                         if (haystack.indexOf(search) === -1) return false;
                     }
                     if (grade && !(t.grades || []).some(function (g) { return norm(g) === grade; })) return false;
@@ -878,10 +854,6 @@
                     if (experience) {
                         var minYears = parseInt(experience, 10);
                         if ((expMap[t.experience] || 0) < minYears) return false;
-                    }
-                    if (price && t.price != null) {
-                        var band = priceBands[price];
-                        if (band && (t.price < band[0] || t.price > band[1])) return false;
                     }
                     return true;
                 });
@@ -907,10 +879,7 @@
                         + '<p><strong>Languages:</strong> ' + escapeHtml((t.languages || []).join(', ') || '-') + '</p>'
                         + '<p><strong>Mode:</strong> ' + escapeHtml(t.mode || '-') + ' &nbsp; <strong>City:</strong> ' + escapeHtml(t.city || '-') + '</p>'
                         + '<p><strong>Rating:</strong> <span class="tutor-rating-summary">' + (t.ratingCount ? ('\u2b50 ' + t.averageRating + ' (' + t.ratingCount + ' rating' + (t.ratingCount === 1 ? '' : 's') + ')') : 'No ratings yet') + '</span></p>'
-                        + (t.price ? '<p><strong>Hourly Rate:</strong> ' + escapeHtml(t.price) + ' ETB/hr</p>' : '')
-                        + (t.monthlyPrice ? '<p><strong>Monthly Plan:</strong> ' + escapeHtml(t.monthlyPrice) + ' ETB/month</p>' : '')
                         + (t.availableDays && t.availableDays.length ? '<p><strong>Available Days:</strong> ' + escapeHtml(t.availableDays.join(', ')) + '</p>' : '')
-                        + (t.price ? '<p style="font-size:12px;color:#555;">Group sessions split the rate equally among attending students.</p>' : '')
                         + (t.bio ? '<p>' + escapeHtml(t.bio) + '</p>' : '')
                         + (viewerIsTutor ? '' : '<a href="book.html?tutorId=' + encodeURIComponent(t._id) + '&tutorName=' + encodeURIComponent(t.fullname) + '"><button>Schedule a Session</button></a>')
                         + '<br><br>'

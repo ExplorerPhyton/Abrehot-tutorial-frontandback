@@ -559,10 +559,8 @@
                 <p><strong>Experience:</strong> <span id="displayExperience">-</span></p>
                 <p><strong>Languages:</strong> <span id="displayLanguages">-</span></p>
                 <p><strong>Mode:</strong> <span id="displayMode">-</span></p>
-                <p><strong>Hourly Rate:</strong> <span id="displayPrice">-</span> ETB/hr</p>
-                <p><strong>Monthly Plan:</strong> <span id="displayMonthlyPrice">-</span> ETB/month</p>
                 <br>
-                <button class="edit" id="updateTeachingBtn">Update Teaching Info & Rates</button>
+                <button class="edit" id="updateTeachingBtn">Update Teaching Info</button>
             </div>
             <div class="card">
                 <h3>Biography</h3>
@@ -950,10 +948,6 @@
                 if (languages === null) return;
                 var mode = prompt('Mode (Online, In-Person, or Both)', currentProfile.mode || '');
                 if (mode === null) return;
-                var price = prompt('Hourly rate in ETB/hr', currentProfile.price != null ? currentProfile.price : '');
-                if (price === null) return;
-                var monthlyPrice = prompt('Monthly Plan fee in ETB/month', currentProfile.monthlyPrice != null ? currentProfile.monthlyPrice : '');
-                if (monthlyPrice === null) return;
                 try {
                     currentProfile = await apiRequest('/tutors/me', {
                         method: 'PATCH', auth: true,
@@ -961,8 +955,6 @@
                             experience: experience,
                             languages: languages.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
                             mode: mode,
-                            price: price !== '' ? Number(price) : undefined,
-                            monthlyPrice: monthlyPrice !== '' ? Number(monthlyPrice) : undefined,
                         },
                     });
                     applyTutorProfile(currentProfile);
@@ -1009,10 +1001,7 @@
                 document.getElementById('displayExperience').textContent = profile.experience || '-';
                 document.getElementById('displayLanguages').textContent = (profile.languages || []).join(', ') || '-';
                 document.getElementById('displayMode').textContent = profile.mode || '-';
-                document.getElementById('displayPrice').textContent = profile.price != null ? profile.price : '-';
                 document.getElementById('displayBio').textContent = profile.bio || '-';
-                const mPriceEl = document.getElementById('displayMonthlyPrice');
-                if (mPriceEl) mPriceEl.textContent = profile.monthlyPrice != null ? profile.monthlyPrice : 'Not set';
                 document.getElementById('profileTitle').textContent = (profile.subjects || []).join(', ') + ' Tutor';
                 document.getElementById('profileStatus').textContent = profile.status === 'approved' ? 'Approved & Listed' : (profile.status === 'pending' ? 'Pending Review' : 'Not Approved');
                 var availText = (profile.availableDays && profile.availableDays.length ? 'Days: ' + profile.availableDays.join(', ') + ' — ' : '') + (profile.availability || 'Not set yet');

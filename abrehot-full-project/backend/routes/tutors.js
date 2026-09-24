@@ -27,7 +27,7 @@ router.post('/apply', requireAuth, async (req, res) => {
       fullname, gender, dob, phone, email,
       education, institution, experience, certificateUrl,
       subject, grade, language, mode,
-      city, address, price, availability, bio,
+      city, address, availability, bio,
     } = req.body;
 
     if (!fullname || !phone || !email || !city || !String(availability || '').trim()) {
@@ -43,7 +43,6 @@ router.post('/apply', requireAuth, async (req, res) => {
       languages: toArray(language),
       mode,
       city, address,
-      price: price ? Number(price) : undefined,
       availability, bio,
     });
 
@@ -56,9 +55,12 @@ router.post('/apply', requireAuth, async (req, res) => {
         `Review and approve it on your admin page.`
     );
 
+    const profileData = profile.toObject();
+    delete profileData.price;
+    delete profileData.monthlyPrice;
     res.status(201).json({
       message: 'Application submitted. It will be reviewed before appearing in search.',
-      profile,
+      profile: profileData,
     });
   } catch (err) {
     res.status(500).json({ message: 'Could not submit application', error: err.message });
@@ -72,7 +74,10 @@ router.get('/me', requireAuth, async (req, res) => {
   if (!profile) {
     return res.status(404).json({ message: 'No tutor application found for this account yet. Submit one via becomeatutor.html.' });
   }
-  res.json(profile);
+  const profileData = profile.toObject();
+  delete profileData.price;
+  delete profileData.monthlyPrice;
+  res.json(profileData);
 });
 
 // PATCH /api/tutors/me — used by the "Update Profile / Pricing / Availability" buttons
@@ -81,15 +86,21 @@ router.patch('/me', requireAuth, async (req, res) => {
   if (!profile) return res.status(404).json({ message: 'No tutor profile found for this account' });
 
   const editable = [
-    'subjects', 'grades', 'languages', 'mode', 'price', 'monthlyPrice',
+    'subjects', 'grades', 'languages', 'mode',
     'bio', 'availability', 'availableDays', 'availableTimeSlots',
     'experience', 'education', 'institution', 'city', 'address', 'profilePhotoUrl',
   ];
   editable.forEach((field) => {
     if (req.body[field] !== undefined) profile[field] = req.body[field];
   });
+  // Keep legacy pricing out of tutor profiles and API responses.
+  profile.price = undefined;
+  profile.monthlyPrice = undefined;
   await profile.save();
-  res.json(profile);
+  const profileData = profile.toObject();
+  delete profileData.price;
+  delete profileData.monthlyPrice;
+  res.json(profileData);
 });
 
 // GET /api/tutors — matches the "Find Your Tutor" search on tutors.html
@@ -105,7 +116,7 @@ router.get('/', async (req, res) => {
     if (mode) filter.mode = mode;
     if (city) filter.city = { $regex: city, $options: 'i' };
 
-    const tutors = await TutorProfile.find(filter).sort({ createdAt: -1 });
+    const tutors = await TutorProfile.find(filter).select('-price -monthlyPrice').sort({ createdAt: -1 });
     res.json(tutors);
   } catch (err) {
     res.status(500).json({ message: 'Could not fetch tutors', error: err.message });
@@ -118,7 +129,7 @@ router.get('/', async (req, res) => {
 // Must come BEFORE /:id or Express will treat "recommended" as an id.
 router.get('/recommended', async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 4, 10);
-  const tutors = await TutorProfile.find({ status: 'approved' })
+  const tutors = await TutorProfile.find({ status: 'approved' }).select('-price -monthlyPrice')
     .sort({ averageRating: -1, ratingCount: -1, createdAt: -1 })
     .limit(limit);
   res.json(tutors);
@@ -191,7 +202,7 @@ router.get('/:id/reviews', async (req, res) => {
 // GET /api/tutors/:id — a single tutor's public profile (must come LAST among /:id routes)
 router.get('/:id', async (req, res) => {
   try {
-    const tutor = await TutorProfile.findById(req.params.id);
+    const tutor = await TutorProfile.findById(req.params.id).select('-price -monthlyPrice');
     if (!tutor) return res.status(404).json({ message: 'Tutor not found' });
     res.json(tutor);
   } catch (err) {

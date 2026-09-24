@@ -14,7 +14,7 @@ router.use(requireAdmin);
 router.get('/tutors', async (req, res) => {
   const status = req.query.status || 'pending';
   const filter = status === 'all' ? {} : { status };
-  const tutors = await TutorProfile.find(filter).sort({ createdAt: -1 });
+  const tutors = await TutorProfile.find(filter).select('-price -monthlyPrice').sort({ createdAt: -1 });
   res.json(tutors);
 });
 
