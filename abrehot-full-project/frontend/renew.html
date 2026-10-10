@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Renew Subscription | Abrehot</title>
     <link rel="stylesheet" href="css/abrehot-theme.css">
+    <link rel="stylesheet" href="css/mobile.css">
     <style>
         main { max-width:760px; margin:48px auto; padding:28px; background:#fffdf9; border:1px solid #d5e2dc; border-radius:12px; box-shadow:0 10px 30px rgba(40,50,48,.08); }
         h1 { color:#173f4d; margin-top:0; }
@@ -66,7 +67,7 @@
                     var tutor = booking.tutor && booking.tutor.fullname ? booking.tutor.fullname : 'Tutor';
                     var days = (booking.selectedDays || []).join(', ') || '-';
                     summary.innerHTML = '';
-                    [['Tutor', tutor], ['Package', booking.packageClassSize || booking.packageId], ['Plan', booking.subscriptionFrequency], ['Study days', days], ['Time', text(booking.time)], ['Duration', text(booking.duration)], ['Amount', text(booking.subscriptionAmount) + ' ETB']].forEach(function (item) {
+                    [['Tutor', tutor], ['Package', booking.packageClassSize || booking.packageId], ['Package fee', text(booking.packageFee)], ['Plan', booking.subscriptionFrequency], ['Study days', days], ['Time', text(booking.time)], ['Duration', text(booking.duration)]].forEach(function (item) {
                         var cell = document.createElement('div'); cell.innerHTML = '<strong>' + item[0] + '</strong><br>' + item[1]; summary.appendChild(cell);
                     });
                 } catch (err) { message.textContent = err.message; document.getElementById('renewForm').style.display = 'none'; }

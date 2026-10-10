@@ -189,63 +189,533 @@
             color: white;
         }
 
+        /* ===== Redesigned tutor finder (filter feature) ===== */
         .find {
-            padding: 20px;
-            background-color: var(--success);
+            text-align: center;
+            padding: clamp(22px, 4vw, 34px);
         }
 
-        .filter-section {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-gap: 10px;
-            background-color: var(--secondary);
-            padding: 20px;
+        .find p {
+            color: var(--ink-500);
         }
 
-        .search-input-section {
-            margin: 10px 50px;
-            font-size: 20px;
-
-        }
-
-        input[type=text] {
-            border: 1.5px solid #ccc;
-            padding: 10px;
-            margin-left: 16px;
-            width: 30%;
-            transition: width 1s ease-in-out, border .3s ease-in-out;
-        }
-
-        .bx-search {
-            margin-right: 16px;
-        }
-
-        input[type=text]:focus {
-            width: 90%;
-            border-color: #999;
-            outline: none;
-        }
-
-        input[type="text"],
-        select {
-            width: 135px;
-            padding: 8px;
-            margin: 5px 0;
-        }
-
-        input[type="checkbox"] {
-            margin-top: 16px;
-            margin-right: 5px;
-        }
-
-        .checking-section {
-            width: 200px;
-        }
-
-        .the-two {
+        .tf-searchbar {
             display: flex;
-            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            max-width: 720px;
+            margin: 20px auto 4px;
+            padding: 4px 8px 4px 18px;
+            background: var(--surface);
+            border: 1px solid var(--sand-300);
+            border-radius: 999px;
+            box-shadow: var(--shadow-paper);
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .tf-searchbar:focus-within {
+            border-color: var(--terracotta);
+            box-shadow: 0 0 0 4px rgba(200, 90, 50, .13);
+        }
+
+        .tf-searchbar > i {
+            color: var(--terracotta);
+            font-size: 22px;
+        }
+
+        .tf-searchbar input {
+            flex: 1;
+            min-width: 0;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 10px 0 !important;
+            min-height: 40px;
+            width: 100%;
+            color: var(--ink-900);
+        }
+
+        .tf-searchbar input:focus {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .tf-search-clear {
+            border: none !important;
+            background: var(--sand-100) !important;
+            color: var(--ink-500) !important;
+            box-shadow: none !important;
+            border-radius: 50% !important;
+            width: 34px;
+            height: 34px;
+            min-height: 34px;
+            padding: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .tf-search-clear:hover {
+            transform: none;
+            color: var(--terracotta) !important;
+        }
+
+        .tf-quick {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .tf-chip {
+            border: 1px solid var(--sand-300) !important;
+            background: var(--surface) !important;
+            color: var(--ink-700) !important;
+            box-shadow: none !important;
+            border-radius: 999px !important;
+            padding: 7px 14px !important;
+            min-height: 34px;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: background .2s, color .2s, border-color .2s;
+        }
+
+        .tf-chip:hover {
+            transform: none;
+            border-color: var(--terracotta) !important;
+            color: var(--terracotta) !important;
+        }
+
+        .tf-chip.active {
+            background: var(--grad-terracotta) !important;
+            border-color: transparent !important;
+            color: #fff !important;
+            box-shadow: var(--shadow-glow) !important;
+        }
+
+        .tf-panel {
+            max-width: 1180px;
+            margin: 18px auto 0;
+            padding: 18px clamp(14px, 3vw, 26px);
+            background: var(--grad-card-bg);
+            border: 1px solid var(--sand-200);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-paper);
+        }
+
+        .tf-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .tf-panel-head h3 {
+            margin: 0;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tf-panel-head h3 i {
+            color: var(--terracotta);
+        }
+
+        .tf-collapse {
+            background: transparent !important;
+            border: 1px solid var(--sand-300) !important;
+            color: var(--ink-700) !important;
+            box-shadow: none !important;
+            border-radius: 999px !important;
+            padding: 6px 14px !important;
+            min-height: 34px;
+            font-size: 13px;
+        }
+
+        .tf-collapse:hover {
+            transform: none;
+            border-color: var(--terracotta) !important;
+            color: var(--terracotta) !important;
+        }
+
+        .tf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px 16px;
+        }
+
+        .tf-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+        }
+
+        .tf-field > span {
+            font-size: 13px;
+        }
+
+        .tf-field select {
+            margin: 0 !important;
+            min-height: 42px;
+            padding: 8px 10px !important;
+        }
+
+        .tf-modes .the-two {
+            gap: 8px;
+        }
+
+        .tf-pill {
+            position: relative;
+            display: inline-flex;
+        }
+
+        .tf-pill input {
+            position: absolute;
+            opacity: 0;
+            width: 1px !important;
+            min-height: 1px !important;
+            margin: 0 !important;
+            padding: 0;
+            pointer-events: none;
+        }
+
+        .tf-pill span {
+            padding: 9px 16px;
+            border: 1px solid var(--sand-300);
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--ink-700);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all .2s;
+            user-select: none;
+        }
+
+        .tf-pill span:hover {
+            border-color: var(--terracotta);
+            color: var(--terracotta);
+        }
+
+        .tf-pill input:checked + span {
+            background: var(--grad-terracotta);
+            border-color: transparent;
+            color: #fff;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .tf-pill input:focus-visible + span {
+            outline: 3px solid rgba(200, 90, 50, .35);
+            outline-offset: 2px;
+        }
+
+        .tf-bar {
+            max-width: 1180px;
+            margin: 18px auto 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tf-count {
+            color: var(--ink-500);
+            font-size: 14.5px;
+        }
+
+        .tf-count strong {
+            color: var(--ink-900);
+        }
+
+        .tf-sort-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tf-sort-wrap select {
+            margin: 0 !important;
+            width: auto !important;
+            min-height: 38px;
+            padding: 6px 10px !important;
+        }
+
+        .tf-active {
+            max-width: 1180px;
+            margin: 12px auto 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tf-active:empty {
+            display: none;
+        }
+
+        .tf-rm {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid var(--terracotta) !important;
+            background: rgba(200, 90, 50, .08) !important;
+            color: var(--terracotta) !important;
+            box-shadow: none !important;
+            border-radius: 999px !important;
+            padding: 6px 12px !important;
+            min-height: 32px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tf-rm i {
+            font-size: 15px;
+        }
+
+        .tf-rm:hover {
+            transform: none;
+            background: rgba(200, 90, 50, .16) !important;
+        }
+
+        #tutorResults.tf-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            max-width: 1180px;
+            margin: 16px auto 0;
+            padding: 0 0 8px;
+            background: transparent !important;
+        }
+
+        .tf-card-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .tf-card-head h3 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .tf-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0;
+        }
+
+        .tf-tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--sand-100);
+            border: 1px solid var(--sand-200);
+            color: var(--ink-700);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tf-meta {
+            font-size: 13.5px;
+            color: var(--ink-500);
+            margin: 6px 0;
+        }
+
+        .tf-meta strong {
+            color: var(--ink-700);
+        }
+
+        .tf-bio {
+            font-size: 13.5px;
+            color: var(--ink-700);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+            margin: 8px 0 4px;
+        }
+
+        .tf-bio-preview:empty {
+            display: none;
+        }
+
+        .tf-bio-button {
+            margin: 0;
+            padding: 4px 0;
+            border: 0;
+            background: transparent;
+            color: var(--terracotta);
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .tutor-details-modal {
+            width: min(920px, calc(100vw - 32px));
+            max-width: none;
+            max-height: min(760px, calc(100dvh - 32px));
+            margin: auto;
+            padding: 0;
+            border: 1px solid var(--sand-300);
+            border-radius: 18px;
+            color: var(--ink-900);
+            background: var(--sand-50);
+            box-shadow: 0 24px 80px rgba(30, 20, 10, .3);
+            overflow: auto;
+        }
+
+        .tutor-details-modal::backdrop {
+            background: rgba(22, 18, 14, .68);
+            backdrop-filter: blur(3px);
+        }
+
+        .tf-detail-head {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--sand-200);
+            background: var(--sand-50);
+        }
+
+        .tf-detail-head h2 { margin: 0; font-size: 20px; }
+        .tf-detail-close {
+            flex: 0 0 auto;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .tf-detail-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 22px;
+            padding: 22px;
+        }
+
+        .tf-detail-bio {
+            margin: 0;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: 1.75;
+        }
+
+        .tf-detail-video-wrap { min-width: 0; }
+        .tf-detail-video {
+            display: block;
+            width: 100%;
+            max-height: 440px;
+            aspect-ratio: 9 / 16;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #171411;
+        }
+
+        .tf-detail-no-video {
+            display: grid;
+            min-height: 200px;
+            place-items: center;
+            padding: 18px;
+            border: 1px dashed var(--sand-300);
+            border-radius: 12px;
+            color: var(--ink-500);
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .tf-detail-grid { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+            .tf-detail-head { padding: 14px 18px; }
+            .tf-detail-video { max-height: 55vh; }
+        }
+
+        .tf-book a {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .tf-book button {
+            width: 100%;
+        }
+
+        .tf-rate-box {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--sand-300);
+        }
+
+        .tf-rate-box > div:first-child {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .tf-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .tf-empty i {
+            font-size: 46px;
+            color: var(--sand-300);
+        }
+
+        .tf-empty h3 {
+            margin: 10px 0 4px;
+        }
+
+        .tf-empty p {
+            color: var(--ink-500);
+            margin-bottom: 14px;
+        }
+
+        #tutorResults > .tf-skel {
+            min-height: 200px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(90deg, var(--sand-100) 25%, var(--sand-200) 37%, var(--sand-100) 63%) !important;
+            background-size: 400% 100% !important;
+            animation: tf-shimmer 1.3s ease infinite;
+            border: 1px solid var(--sand-200);
+            box-shadow: none;
+        }
+
+        @keyframes tf-shimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: 0 0; }
+        }
+
+        @media (max-width: 700px) {
+            .tf-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .tf-panel.collapsed .tf-grid {
+                display: none;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .tf-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         button {
@@ -325,8 +795,6 @@
                 font-size: 16px;
             }
 
-            /*COPY TO EVERY PAGE BUT LEAVE OUT THE CLASS search-input-section*/
-
             .head-buttons {
                 display: flex;
                 gap: 10px;
@@ -334,47 +802,8 @@
 
             }
 
-            /*COPY TO EVERY PAGE*/
             .footer-links {
                 grid-template-columns: repeat(2, 1fr);
-            }
-
-            /*COPY TO EVERY PAGE*/
-            .filter-section {
-                grid-template-columns: repeat(2, 1fr);
-                grid-gap: 16px;
-            }
-
-            select {
-                max-width: 165px;
-            }
-
-            .search-input-section {
-                margin: 10px 20px;
-            }
-
-            input[type=text] {
-                border: 1.5px solid #ccc;
-                margin: 10px;
-                padding: 10px;
-                width: 30%;
-                transition: width 1s ease-in-out, border .3s ease-in-out;
-            }
-
-            input[type=text]:focus {
-                width: 90%;
-                border-color: #999;
-                outline: none;
-            }
-
-            .the-two {
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .checking-section {
-                max-width: 160px;
             }
 
             .mob-hide {
@@ -505,122 +934,158 @@
         <div class="find">
             <h2>Find Your Tutor</h2>
             <p>Search for qualified tutors based on your learning needs/requirements.</p>
-            <!-- Search --><!--THS IS SUPOSSED TO BE DONE USING BACKEND AND DATABASE INTEEGRRATION-->
-            <br>
-            <label for="search">Search Tutor</label><br>
-            <div class="search-input-section">
-                <i class="bx bx-search"></i><input type="text" id="search"
-                    placeholder="Search by tutor name, subject, grade-level, location, teaching-mode or language"><br><br>
+            <!-- Search -->
+            <div class="tf-searchbar">
+                <i class="bx bx-search"></i>
+                <input type="text" id="search"
+                    placeholder="Search by tutor name, subject, grade, location, mode or language…"
+                    aria-label="Search tutors" autocomplete="off">
+                <button type="button" class="tf-search-clear" id="searchClear" aria-label="Clear search" hidden>
+                    <i class="bx bx-x"></i>
+                </button>
             </div>
+            <!-- One-tap subject chips: the fastest way to narrow down -->
+            <div class="tf-quick" id="quickSubjects" role="group" aria-label="Quick subject filters">
+                <!-- chips rendered by js below -->
+            </div>
+            <p id="subjectCatalogStatus" class="tf-count" role="status" aria-live="polite"></p>
         </div>
-        <div class="filter-section">
-            <!-- Grade Level -->
-            <div>
-                <label for="grade">Grade Level</label><br>
-                <select id="grade">
-                    <option value="">All Grades</option>
-                    <option>KG</option>
-                    <option>Grade 1 - 6</option>
-                    <option>Grade 7 - 8</option>
-                    <option>Grade 9 - 10</option>
-                    <option>Grade 11 - 12</option>
-                </select><br><br>
-            </div>
 
-            <!-- Subject -->
-            <div>
-                <label for="subject">Subject</label><br>
-                <select id="subject">
-                    <option value="">All Subjects</option>
-                    <option>Mathematics</option>
-                    <option>English</option>
-                    <option>Physics</option>
-                    <option>Chemistry</option>
-                    <option>Biology</option>
-                    <option>ICT</option>
-                    <option>History</option>
-                    <option>Geography</option>
-                    <option>Economics</option>
-                    <option>general science</option>
-                    <option>Social studies</option>
-                    <option>Amharic</option>
-                    <option>Affan Oromo</option>
-                    <option>Tigirigna</option>
-                    <option>Programming</option>
-                </select><br><br>
+        <section class="tf-panel" id="filterPanel" aria-label="Tutor filters">
+            <div class="tf-panel-head">
+                <h3><i class="bx bx-slider-alt"></i> Filters</h3>
+                <button type="button" class="tf-collapse" id="collapseFilters" aria-expanded="true"
+                    aria-controls="filterGrid">Hide</button>
             </div>
+            <div class="tf-grid" id="filterGrid">
+                <div class="tf-field">
+                    <label for="grade">Grade Level</label>
+                    <select id="grade">
+                        <option value="">All Grades</option>
+                        <option>KG</option>
+                        <option>Grade 1 - 6</option>
+                        <option>Grade 7 - 8</option>
+                        <option>Grade 9 - 10</option>
+                        <option>Grade 11 - 12</option>
+                    </select>
+                </div>
 
-            <!-- Language -->
-            <div>
-                <label for="language">Language</label><br>
-                <select id="language">
-                    <option value="">All Languages</option>
-                    <option>English</option>
-                    <option>Amharic</option>
-                    <option>Afaan Oromo</option>
-                    <option>Tigrinya</option>
-                </select><br><br>
-            </div>
-            <!-- Location -->
-            <div>
-                <label for="location">Location</label><br>
-                <select id="location">
-                    <option value="">All Locations</option>
-                    <option>Addis Ababa</option>
-                    <option>Adama</option>
-                    <option>Bahir Dar</option>
-                    <option>Hawassa</option>
-                    <option>Mekelle</option>
-                </select><br><br>
-            </div>
+                <div class="tf-field">
+                    <label for="subject">Subject</label>
+                    <select id="subject">
+                        <option value="">All Subjects</option>
+                        <option>Mathematics</option>
+                        <option>English</option>
+                        <option>Physics</option>
+                        <option>Chemistry</option>
+                        <option>Biology</option>
+                        <option>ICT</option>
+                        <option>History</option>
+                        <option>Geography</option>
+                        <option>Economics</option>
+                        <option>general science</option>
+                        <option>Social studies</option>
+                        <option>Amharic</option>
+                        <option>Affan Oromo</option>
+                        <option>Tigirigna</option>
+                        <option>Programming</option>
+                    </select>
+                </div>
 
-            <!-- Teaching Mode -->
-            <div class="checking-section">
-                <label>Teaching Mode</label><br>
-                <div class="the-two">
-                    <div>
-                        <input type="checkbox" id="online">
-                        <label for="online">Online</label>
+                <div class="tf-field">
+                    <label for="language">Language</label>
+                    <select id="language">
+                        <option value="">All Languages</option>
+                        <option>English</option>
+                        <option>Amharic</option>
+                        <option>Afaan Oromo</option>
+                        <option>Tigrinya</option>
+                    </select>
+                </div>
+
+                <div class="tf-field">
+                    <label for="location">Location</label>
+                    <select id="location">
+                        <option value="">All Locations</option>
+                        <option>Addis Ababa</option>
+                        <option>Adama</option>
+                        <option>Bahir Dar</option>
+                        <option>Hawassa</option>
+                        <option>Mekelle</option>
+                    </select>
+                </div>
+
+                <div class="tf-field">
+                    <label for="experience">Experience</label>
+                    <select id="experience">
+                        <option value="">Any Experience</option>
+                        <option>1+ Years</option>
+                        <option>3+ Years</option>
+                        <option>5+ Years</option>
+                    </select>
+                </div>
+
+                <div class="tf-field">
+                    <label for="rating">Minimum Rating</label>
+                    <select id="rating">
+                        <option value="">Any Rating</option>
+                        <option value="4">⭐ 4.0+</option>
+                        <option value="4.5">⭐ 4.5+</option>
+                        <option value="5">⭐ 5.0</option>
+                    </select>
+                </div>
+
+                <div class="tf-field tf-modes">
+                    <span id="modeLabel">Teaching Mode</span>
+                    <div class="the-two" role="group" aria-labelledby="modeLabel">
+                        <label class="tf-pill">
+                            <input type="checkbox" id="online" aria-label="Online lessons">
+                            <span>💻 Online</span>
+                        </label>
+                        <label class="tf-pill">
+                            <input type="checkbox" id="inperson" aria-label="In-person lessons">
+                            <span>🏫 In-Person</span>
+                        </label>
                     </div>
-                    <div>
-                        <input type="checkbox" id="inperson">
-                        <label for="inperson">In-Person</label>
-                    </div><br>
                 </div>
             </div>
+        </section>
 
-            <!-- Experience -->
-            <div>
-                <label for="experience">Experience</label><br>
-                <select id="experience">
-                    <option value="">Any Experience</option>
-                    <option>1+ Years</option>
-                    <option>3+ Years</option>
-                    <option>5+ Years</option>
-                </select><br><br>
-            </div>
-
-            <!-- Rating -->
-            <div>
-                <label for="rating">Minimum Rating</label><br>
-                <select id="rating">
-                    <option value="">Any Rating</option>
-                    <option>⭐ 4.0+</option>
-                    <option>⭐ 4.5+</option>
-                    <option>⭐ 5.0</option>
-                </select><br><br>
+        <div class="tf-bar">
+            <div class="tf-count" id="resultCount" aria-live="polite">Loading tutors…</div>
+            <div class="tf-sort-wrap">
+                <button type="button" class="tf-collapse" id="clearFilters" hidden>Clear all</button>
+                <label for="sortBy">Sort by</label>
+                <select id="sortBy">
+                    <option value="recommended">Recommended</option>
+                    <option value="rating">Top Rated</option>
+                    <option value="newest">Newest</option>
+                    <option value="name">Name (A–Z)</option>
+                </select>
             </div>
         </div>
+        <div class="tf-active" id="activeChips" aria-label="Active filters"></div>
+
+        <div id="tutorResults" class="tf-results">
+            <!-- Tutor cards are rendered here -->
+        </div>
+        <dialog class="tutor-details-modal" id="tutorDetailsModal" aria-labelledby="tutorDetailsTitle">
+            <div class="tf-detail-head">
+                <h2 id="tutorDetailsTitle"></h2>
+                <button class="tf-detail-close" id="tutorDetailsClose" type="button" aria-label="Close tutor details">&times;</button>
+            </div>
+            <div class="tf-detail-grid">
+                <section>
+                    <h3>About the tutor</h3>
+                    <p class="tf-detail-bio" id="tutorDetailsBio"></p>
+                </section>
+                <section class="tf-detail-video-wrap" id="tutorDetailsVideoSection">
+                    <h3>Introduction video</h3>
+                    <video class="tf-detail-video" id="tutorDetailsVideo" controls playsinline preload="metadata"></video>
+                </section>
+            </div>
+        </dialog>
     </div>
-    <div style=" padding:24px;display: flex;
-            gap: 16px; justify-content: center; ">
-        <button id="applyFilters">Apply Filters</button>
-        <button id="clearFilters">Clear Filters</button>
-    </div>
-    <div id="tutorResults" style="background-color: var(--sand-50); display: flex; flex-wrap: wrap; padding: 12px; gap: 4px;">
-        <!--Tutor cards are rendered here by js/tutors-search.js-->
-    </div>
-    <!--TO BE DONE WITH JAVASCRIPT! BUT NEEDS BACKEND AND DATABASE INTEGRATION.-->
     <div class="footer">
         <div class="footer-links">
             <div>
@@ -781,19 +1246,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var resultsEl = document.getElementById('tutorResults');
-            var viewerIsTutor = false;
-            if (getToken()) {
-                apiRequest('/auth/me', { auth: true }).then(function (u) {
-                    viewerIsTutor = u.role === 'Tutor';
-                    if (viewerIsTutor) {
-                        // Re-render with the already-loaded results now that we know
-                        // the viewer is a tutor, so the Book button gets stripped out.
-                        renderTutors(lastRenderedTutors);
-                    }
-                }).catch(function () { /* not logged in / expired token — ignore */ });
-            }
-            var lastRenderedTutors = [];
+            var countEl = document.getElementById('resultCount');
+            var chipsEl = document.getElementById('activeChips');
+            var quickEl = document.getElementById('quickSubjects');
             var searchEl = document.getElementById('search');
+            var searchClearEl = document.getElementById('searchClear');
             var gradeEl = document.getElementById('grade');
             var subjectEl = document.getElementById('subject');
             var languageEl = document.getElementById('language');
@@ -801,10 +1258,145 @@
             var onlineEl = document.getElementById('online');
             var inpersonEl = document.getElementById('inperson');
             var experienceEl = document.getElementById('experience');
+            var ratingEl = document.getElementById('rating');
+            var sortEl = document.getElementById('sortBy');
+            var panelEl = document.getElementById('filterPanel');
+            var collapseEl = document.getElementById('collapseFilters');
+            var tutorDetailsModal = document.getElementById('tutorDetailsModal');
+            var tutorDetailsVideo = document.getElementById('tutorDetailsVideo');
 
-            document.getElementById('applyFilters').addEventListener('click', loadTutors);
-            document.getElementById('clearFilters').addEventListener('click', function () {
+            var viewerIsTutor = false;
+            var allTutors = [];
+            var lastRenderedTutors = [];
+            var searchTimer = null;
+
+            if (getToken()) {
+                apiRequest('/auth/me', { auth: true }).then(function (u) {
+                    viewerIsTutor = u.role === 'Tutor';
+                    if (viewerIsTutor) renderTutors(lastRenderedTutors);
+                }).catch(function () { /* not logged in / expired token — ignore */ });
+            }
+
+            function norm(s) {
+                return (s || '').toLowerCase().replace(/[\s-]+/g, '');
+            }
+
+            /* ---- quick subject chips (kept in sync with the Subject select) ---- */
+            var QUICK_SUBJECTS = ['Mathematics', 'English', 'Physics', 'Chemistry', 'Biology', 'ICT', 'Amharic', 'Programming'];
+            var subjectCatalogStatus = document.getElementById('subjectCatalogStatus');
+            function renderQuickChips() {
+                var current = subjectEl.value;
+                var subjects = QUICK_SUBJECTS.slice();
+                if (current && subjects.indexOf(current) === -1) subjects.unshift(current);
+                quickEl.innerHTML = ['<button type="button" class="tf-chip' + (current ? '' : ' active') + '" data-subject="">All Subjects</button>']
+                    .concat(subjects.map(function (s) {
+                        return '<button type="button" class="tf-chip' + (current === s ? ' active' : '') + '" data-subject="' + escapeHtml(s) + '">' + escapeHtml(s) + '</button>';
+                    })).join('');
+            }
+            apiRequest('/tutors/subjects').then(function (catalog) {
+                var existingSubjects = new Set(Array.from(subjectEl.options).map(function (option) {
+                    return option.value.trim().toLowerCase();
+                }));
+                (catalog.subjects || []).forEach(function (name) {
+                    if (typeof name !== 'string' || existingSubjects.has(name.trim().toLowerCase())) return;
+                    var option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    subjectEl.appendChild(option);
+                    existingSubjects.add(name.trim().toLowerCase());
+                });
+                (catalog.customSubjects || []).forEach(function (name) {
+                    if (typeof name === 'string' && QUICK_SUBJECTS.indexOf(name) === -1) QUICK_SUBJECTS.push(name);
+                });
+                renderQuickChips();
+            }).catch(function (err) {
+                subjectCatalogStatus.textContent = 'Could not load newly added subjects.';
+                console.error('Could not load subject catalog:', err);
+            });
+            quickEl.addEventListener('click', function (e) {
+                var chip = e.target.closest('.tf-chip');
+                if (!chip) return;
+                var value = chip.dataset.subject || '';
+                subjectEl.value = (subjectEl.value === value) ? '' : value;
+                applyFilters();
+            });
+
+            /* ---- active filter pills: each one can be removed with a tap ---- */
+            function activeFilterList() {
+                var list = [];
+                if (searchEl.value.trim()) list.push({ key: 'search', label: '“' + searchEl.value.trim() + '”' });
+                if (gradeEl.value) list.push({ key: 'grade', label: gradeEl.value });
+                if (subjectEl.value) list.push({ key: 'subject', label: subjectEl.value });
+                if (languageEl.value) list.push({ key: 'language', label: languageEl.value });
+                if (locationEl.value) list.push({ key: 'location', label: locationEl.value });
+                if (experienceEl.value) list.push({ key: 'experience', label: experienceEl.value });
+                if (ratingEl.value) list.push({ key: 'rating', label: '⭐ ' + ratingEl.value + '+ rating' });
+                if (onlineEl.checked) list.push({ key: 'online', label: 'Online' });
+                if (inpersonEl.checked) list.push({ key: 'inperson', label: 'In-Person' });
+                return list;
+            }
+
+            var clearAllEl = document.getElementById('clearFilters');
+            function renderActiveChips() {
+                var list = activeFilterList();
+                clearAllEl.hidden = !list.length;
+                if (!list.length) { chipsEl.innerHTML = ''; return; }
+                chipsEl.innerHTML = list.map(function (f) {
+                    return '<button type="button" class="tf-rm" data-key="' + f.key + '" title="Remove this filter">'
+                        + escapeHtml(f.label) + ' <i class="bx bx-x"></i></button>';
+                }).join('')
+                    + '<button type="button" class="tf-rm" data-key="__all" title="Clear all filters"><i class="bx bx-reset"></i> Clear all</button>';
+            }
+
+            chipsEl.addEventListener('click', function (e) {
+                var btn = e.target.closest('.tf-rm');
+                if (!btn) return;
+                var key = btn.dataset.key;
+                if (key === '__all') { clearFilters(); return; }
+                if (key === 'search') searchEl.value = '';
+                else if (key === 'grade') gradeEl.value = '';
+                else if (key === 'subject') subjectEl.value = '';
+                else if (key === 'language') languageEl.value = '';
+                else if (key === 'location') locationEl.value = '';
+                else if (key === 'experience') experienceEl.value = '';
+                else if (key === 'rating') ratingEl.value = '';
+                else if (key === 'online') onlineEl.checked = false;
+                else if (key === 'inperson') inpersonEl.checked = false;
+                applyFilters();
+            });
+
+            /* ---- collapse/expand (auto-collapsed on small screens) ---- */
+            collapseEl.addEventListener('click', function () {
+                var collapsed = panelEl.classList.toggle('collapsed');
+                collapseEl.textContent = collapsed ? 'Show' : 'Hide';
+                collapseEl.setAttribute('aria-expanded', String(!collapsed));
+            });
+            if (window.matchMedia('(max-width: 700px)').matches) {
+                panelEl.classList.add('collapsed');
+                collapseEl.textContent = 'Show';
+                collapseEl.setAttribute('aria-expanded', 'false');
+            }
+
+            /* ---- live filtering: no Apply button needed ---- */
+            searchEl.addEventListener('input', function () {
+                searchClearEl.hidden = !searchEl.value;
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(applyFilters, 250);
+            });
+            searchClearEl.addEventListener('click', function () {
                 searchEl.value = '';
+                searchClearEl.hidden = true;
+                searchEl.focus();
+                applyFilters();
+            });
+            [gradeEl, subjectEl, languageEl, locationEl, onlineEl, inpersonEl, experienceEl, ratingEl, sortEl]
+                .forEach(function (el) { el.addEventListener('change', applyFilters); });
+
+            document.getElementById('clearFilters').addEventListener('click', clearFilters);
+
+            function clearFilters() {
+                searchEl.value = '';
+                searchClearEl.hidden = true;
                 gradeEl.value = '';
                 subjectEl.value = '';
                 languageEl.value = '';
@@ -812,38 +1404,39 @@
                 onlineEl.checked = false;
                 inpersonEl.checked = false;
                 experienceEl.value = '';
-                loadTutors();
-            });
-
-            function norm(s) {
-                return (s || '').toLowerCase().replace(/[\s-]+/g, '');
+                ratingEl.value = '';
+                applyFilters();
             }
 
             async function loadTutors() {
-                resultsEl.innerHTML = '<p style="padding:16px;">Loading tutors...</p>';
+                resultsEl.innerHTML = '<div class="tf-skel"></div><div class="tf-skel"></div><div class="tf-skel"></div>';
+                countEl.textContent = 'Loading tutors…';
                 try {
-                    var params = new URLSearchParams();
-                    if (subjectEl.value) params.set('subject', subjectEl.value);
-                    if (locationEl.value) params.set('city', locationEl.value);
-                    if (languageEl.value) params.set('language', languageEl.value);
-
-                    var tutors = await apiRequest('/tutors' + (params.toString() ? '?' + params.toString() : ''));
-                    tutors = clientFilter(tutors);
-                    renderTutors(tutors);
+                    allTutors = await apiRequest('/tutors');
+                    applyFilters();
                 } catch (err) {
-                    resultsEl.innerHTML = '<p style="padding:16px;color:#c0392b;">Could not load tutors: ' + err.message + '</p>';
+                    countEl.textContent = '';
+                    resultsEl.innerHTML = '<div class="tf-empty"><i class="bx bx-error-circle"></i>'
+                        + '<h3>Could not load tutors</h3><p>' + escapeHtml(err.message) + '</p>'
+                        + '<button type="button" id="retryLoad">Try Again</button></div>';
+                    var retry = document.getElementById('retryLoad');
+                    if (retry) retry.addEventListener('click', loadTutors);
                 }
             }
 
-            function clientFilter(tutors) {
+            function applyFilters() {
+                renderQuickChips();
+                renderActiveChips();
+
                 var search = norm(searchEl.value);
                 var grade = norm(gradeEl.value);
                 var online = onlineEl.checked;
                 var inperson = inpersonEl.checked;
                 var experience = experienceEl.value;
+                var minRating = parseFloat(ratingEl.value) || 0;
                 var expMap = { 'Less than 1 Year': 0, '1-2 Years': 1, '3-5 Years': 3, 'More than 5 Years': 6 };
 
-                return tutors.filter(function (t) {
+                var tutors = allTutors.filter(function (t) {
                     if (search) {
                         var haystack = norm([t.fullname, (t.subjects || []).join(' '), (t.grades || []).join(' '), t.city, t.mode, (t.languages || []).join(' ')].join(' '));
                         if (haystack.indexOf(search) === -1) return false;
@@ -855,45 +1448,115 @@
                         var minYears = parseInt(experience, 10);
                         if ((expMap[t.experience] || 0) < minYears) return false;
                     }
+                    if (minRating && (t.averageRating || 0) < minRating) return false;
                     return true;
                 });
+
+                if (sortEl.value === 'rating') {
+                    tutors.sort(function (a, b) {
+                        return (b.averageRating || 0) - (a.averageRating || 0) || (b.ratingCount || 0) - (a.ratingCount || 0);
+                    });
+                } else if (sortEl.value === 'newest') {
+                    tutors.sort(function (a, b) { return new Date(b.createdAt || 0) - new Date(a.createdAt || 0); });
+                } else if (sortEl.value === 'name') {
+                    tutors.sort(function (a, b) { return (a.fullname || '').localeCompare(b.fullname || ''); });
+                }
+
+                renderTutors(tutors);
             }
 
             function renderTutors(tutors) {
                 lastRenderedTutors = tutors;
+                var total = allTutors.length;
+                var activeCount = activeFilterList().length;
+                if (total && !tutors.length && activeCount) {
+                    countEl.textContent = 'No tutors match your filters';
+                } else {
+                    countEl.innerHTML = '<strong>' + tutors.length + '</strong> tutor' + (tutors.length === 1 ? '' : 's')
+                        + (activeCount ? ' match' + (total ? ' (out of ' + total + ')' : '') : ' available');
+                }
                 if (!tutors.length) {
-                    resultsEl.innerHTML = '<p style="padding:16px;">No tutors match your filters yet. Try adjusting them, or check back soon.</p>';
+                    resultsEl.innerHTML = '<div class="tf-empty"><i class="bx bx-search-alt-2"></i>'
+                        + '<h3>No tutors found</h3>'
+                        + '<p>Try a different search, or remove some filters.</p>'
+                        + (activeCount ? '<button type="button" id="emptyClear">Clear All Filters</button>' : '')
+                        + '</div>';
+                    var emptyClear = document.getElementById('emptyClear');
+                    if (emptyClear) emptyClear.addEventListener('click', clearFilters);
                     return;
                 }
                 resultsEl.innerHTML = tutors.map(function (t) {
                     var photoSrc = t.profilePhotoUrl
-                        ? '<img src="' + escapeHtml(t.profilePhotoUrl) + '" alt="' + escapeHtml(t.fullname) + '" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-light,#AED6F1);">'
-                        : '<div style="width:80px;height:80px;border-radius:50%;background:var(--primary,#1A5276);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:700;border:2px solid var(--primary-light,#AED6F1);">' + escapeHtml((t.fullname || 'T').charAt(0).toUpperCase()) + '</div>';
-                    return '<div class="tutor-card" data-tutor-id="' + escapeHtml(t._id) + '" style="background:#fff;border-radius:8px;padding:16px;margin:12px;box-shadow:0 1px 4px rgba(0,0,0,0.15);width:280px;">'
-                        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">'
+                        ? '<img src="' + escapeHtml(t.profilePhotoUrl) + '" alt="' + escapeHtml(t.fullname) + '" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--sand-300);">'
+                        : '<div style="width:80px;height:80px;border-radius:50%;background:var(--grad-terracotta);display:flex;align-items:center;justify-content:center;color:white;font-size:28px;font-weight:700;border:2px solid var(--sand-300);">' + escapeHtml((t.fullname || 'T').charAt(0).toUpperCase()) + '</div>';
+                    var bio = String(t.bio || '').trim();
+                    var bioSummary = bio.length > 150 ? bio.slice(0, 150).trimEnd() + '…' : bio;
+                    var hasDetails = Boolean(bio || t.introVideoUrl);
+                    return '<div class="tutor-card" data-tutor-id="' + escapeHtml(t._id) + '">'
+                        + '<div class="tf-card-head">'
                         + photoSrc
-                        + '<h3 style="margin:0;">' + escapeHtml(t.fullname) + '</h3>'
+                        + '<div><h3>' + escapeHtml(t.fullname) + '</h3>'
+                        + '<div class="tutor-rating-summary tf-meta">' + (t.ratingCount ? ('\u2b50 ' + t.averageRating + ' (' + t.ratingCount + ' rating' + (t.ratingCount === 1 ? '' : 's') + ')') : 'No ratings yet') + '</div>'
+                        + '<div class="tf-meta">' + escapeHtml(t.mode || '-') + ' &middot; ' + escapeHtml(t.city || '-') + '</div></div>'
                         + '</div>'
-                        + '<p><strong>Subjects:</strong> ' + escapeHtml((t.subjects || []).join(', ') || '-') + '</p>'
-                        + '<p><strong>Grades:</strong> ' + escapeHtml((t.grades || []).join(', ') || '-') + '</p>'
-                        + '<p><strong>Languages:</strong> ' + escapeHtml((t.languages || []).join(', ') || '-') + '</p>'
-                        + '<p><strong>Mode:</strong> ' + escapeHtml(t.mode || '-') + ' &nbsp; <strong>City:</strong> ' + escapeHtml(t.city || '-') + '</p>'
-                        + '<p><strong>Rating:</strong> <span class="tutor-rating-summary">' + (t.ratingCount ? ('\u2b50 ' + t.averageRating + ' (' + t.ratingCount + ' rating' + (t.ratingCount === 1 ? '' : 's') + ')') : 'No ratings yet') + '</span></p>'
-                        + (t.availableDays && t.availableDays.length ? '<p><strong>Available Days:</strong> ' + escapeHtml(t.availableDays.join(', ')) + '</p>' : '')
-                        + (t.bio ? '<p>' + escapeHtml(t.bio) + '</p>' : '')
-                        + (viewerIsTutor ? '' : '<a href="book.html?tutorId=' + encodeURIComponent(t._id) + '&tutorName=' + encodeURIComponent(t.fullname) + '"><button>Schedule a Session</button></a>')
-                        + '<br><br>'
-                        + '<div style="font-weight:500;">Rate this Tutor</div>'
+                        + (t.subjects && t.subjects.length ? '<div class="tf-tags">' + t.subjects.map(function (s) { return '<span class="tf-tag">' + escapeHtml(s) + '</span>'; }).join('') + '</div>' : '')
+                        + '<p class="tf-meta"><strong>Grades:</strong> ' + escapeHtml((t.grades || []).join(', ') || '-') + '</p>'
+                        + '<p class="tf-meta"><strong>Languages:</strong> ' + escapeHtml((t.languages || []).join(', ') || '-') + '</p>'
+                        + (t.availableDays && t.availableDays.length ? '<p class="tf-meta"><strong>Available:</strong> ' + escapeHtml(t.availableDays.join(', ')) + '</p>' : '')
+                        + (bioSummary ? '<p class="tf-bio tf-bio-preview">' + escapeHtml(bioSummary) + '</p>' : '')
+                        + (hasDetails ? '<button class="tf-bio-button" type="button" data-tutor-details="' + escapeHtml(t._id) + '">Read more</button>' : '')
+                        + (viewerIsTutor ? '' : '<div class="tf-book"><a href="book.html?tutorId=' + encodeURIComponent(t._id) + '&tutorName=' + encodeURIComponent(t.fullname) + '"><button>Schedule a Session</button></a></div>')
+                        + '<div class="tf-rate-box">'
+                        + '<div>Rate this Tutor</div>'
                         + '<div class="rating">'
                         + [1, 2, 3, 4, 5].map(function (n) {
                             return '<span class="star" data-value="' + n + '">\u2605</span>';
                         }).join('')
                         + '<div class="ratingText" style="font-size:13px;color:#555;">No rating yet.</div>'
-                        + '</div>'
+                        + '</div></div>'
                         + '</div>';
                 }).join('');
             }
 
+            function closeTutorDetails() {
+                if (tutorDetailsVideo) {
+                    tutorDetailsVideo.pause();
+                    tutorDetailsVideo.removeAttribute('src');
+                    tutorDetailsVideo.load();
+                }
+                if (tutorDetailsModal.open) tutorDetailsModal.close();
+            }
+
+            resultsEl.addEventListener('click', function (event) {
+                var button = event.target.closest('[data-tutor-details]');
+                if (!button) return;
+                var tutor = allTutors.find(function (item) { return String(item._id) === button.dataset.tutorDetails; });
+                if (!tutor) return;
+                document.getElementById('tutorDetailsTitle').textContent = tutor.fullname || 'Tutor';
+                document.getElementById('tutorDetailsBio').textContent = String(tutor.bio || '').trim() || 'This tutor has not added a biography yet.';
+                var videoSection = document.getElementById('tutorDetailsVideoSection');
+                if (tutor.introVideoUrl) {
+                    tutorDetailsVideo.src = /^https?:\/\//i.test(tutor.introVideoUrl)
+                        ? tutor.introVideoUrl
+                        : API_BASE.replace(/\/api\/?$/, '') + tutor.introVideoUrl;
+                    videoSection.hidden = false;
+                } else {
+                    tutorDetailsVideo.removeAttribute('src');
+                    videoSection.hidden = true;
+                }
+                tutorDetailsModal.showModal();
+            });
+            document.getElementById('tutorDetailsClose').addEventListener('click', closeTutorDetails);
+            tutorDetailsModal.addEventListener('click', function (event) {
+                if (event.target === tutorDetailsModal) closeTutorDetails();
+            });
+            tutorDetailsModal.addEventListener('close', function () {
+                tutorDetailsVideo.pause();
+                tutorDetailsVideo.removeAttribute('src');
+                tutorDetailsVideo.load();
+            });
+
+            renderQuickChips();
             loadTutors();
         });
     </script>

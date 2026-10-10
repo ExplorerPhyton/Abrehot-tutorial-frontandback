@@ -167,6 +167,14 @@
         '  box-shadow: 0 8px 20px rgba(0,0,0,.12) !important; transition: transform .2s ease, border-color .2s ease;',
         '}',
         '.abrehot-theme-cluster .btn-icon-toggle:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,.12) !important; }',
+        '.abrehot-nav-dark-toggle {',
+        '  width: 38px !important; height: 38px !important; min-height: 38px !important; flex: 0 0 38px;',
+        '  display: inline-flex; align-items: center; justify-content: center; padding: 0 !important;',
+        '  border: 1px solid var(--sand-300, #D8C5B0) !important; border-radius: 50% !important;',
+        '  background: var(--sand-100, #F5EFE6) !important; color: var(--ink-900, #191615) !important;',
+        '  box-shadow: none !important; font-size: 1.15rem !important; cursor: pointer;',
+        '}',
+        '.abrehot-nav-dark-toggle:hover { border-color: var(--terracotta, #C85A32) !important; }',
         '.abrehot-theme-cluster .theme-select-wrapper {',
         '  display: inline-flex; align-items: center; gap: 6px; height: 46px; padding: 0 14px;',
         '  background: var(--sand-100, #F5EFE6); border: 1px solid var(--sand-300, #D8C5B0);',
@@ -464,6 +472,16 @@
         document.head.appendChild(style);
     }
 
+    function injectMobileStylesheet() {
+        if (/\/admin-site\//.test(window.location.pathname) || /\/admin\.html$/.test(window.location.pathname)) return;
+        if (document.getElementById('abrehot-mobile-style')) return;
+        var link = document.createElement('link');
+        link.id = 'abrehot-mobile-style';
+        link.rel = 'stylesheet';
+        link.href = THEME_SCRIPT_SRC.replace(/js\/theme\.js[^\/]*$/, 'css/mobile.css');
+        document.head.appendChild(link);
+    }
+
     function removeGoogleTranslate() {
         var widget = document.getElementById('google_translate_element');
         if (widget) widget.remove();
@@ -484,6 +502,7 @@
             '<ul class="nav-links">',
             '<li><a href="' + pagePrefix + 'index.html" data-en="Home" data-am="መነሻ">Home</a></li>',
             '<li><a href="' + pagePrefix + 'tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a></li>',
+            '<li><a href="' + pagePrefix + 'pricing.html" data-en="Pricing" data-am="ዋጋዎች">Pricing</a></li>',
             '<li><a href="' + pagePrefix + 'book.html" data-en="Schedule" data-am="ቀጠሮ ይያዙ">Schedule</a></li>',
             '<li><a href="' + pagePrefix + 'books.html" data-en="Books" data-am="መጻሕፍት">Books</a></li>',
             '<li><a href="' + pagePrefix + 'becomeatutor.html" data-en="Teach" data-am="ያስተምሩ">Teach</a></li>',
@@ -498,6 +517,7 @@
             '<details class="nav-menu"><summary aria-label="Open navigation menu"><i class="bx bx-menu"></i></summary><div class="nav-menu-panel">',
             '<a href="' + pagePrefix + 'index.html" data-en="Home" data-am="መነሻ">Home</a>',
             '<a href="' + pagePrefix + 'tutors.html" data-en="Tutors" data-am="አስተማሪዎች">Tutors</a>',
+            '<a href="' + pagePrefix + 'pricing.html" data-en="Pricing" data-am="ዋጋዎች">Pricing</a>',
             '<a href="' + pagePrefix + 'book.html" data-en="Schedule a Class" data-am="ቀጠሮ ይያዙ">Schedule a Class</a>',
             '<a href="' + pagePrefix + 'books.html" data-en="Books &amp; Materials" data-am="መጻሕፍት">Books &amp; Materials</a>',
             '<a href="' + pagePrefix + 'becomeatutor.html" data-en="Become a Tutor" data-am="አስተማሪ ይሁኑ">Become a Tutor</a>',
@@ -578,9 +598,10 @@
 
         var darkBtn = document.createElement('button');
         darkBtn.type = 'button';
-        darkBtn.className = 'btn-icon-toggle';
+        darkBtn.className = 'abrehot-nav-dark-toggle';
         darkBtn.id = 'btn-dark-toggle';
         darkBtn.title = 'Toggle Dark/Light Mode';
+        darkBtn.setAttribute('aria-label', 'Toggle dark mode');
         var icon = document.createElement('i');
         icon.className = 'bx bx-moon';
         icon.id = 'dark-icon';
@@ -588,9 +609,15 @@
         darkBtn.addEventListener('click', function (event) {
             window.toggleDarkMode(event);
         });
+        var navRight = document.querySelector('.abrehot-site-navbar .nav-right, .navbar .nav-right');
+        if (navRight) {
+            navRight.insertBefore(darkBtn, navRight.querySelector('.nav-menu'));
+        } else {
+            var header = document.querySelector('.abrehot-site-navbar, .navbar, body > header');
+            if (header) header.insertBefore(darkBtn, header.firstChild);
+        }
 
         cluster.appendChild(wrapper);
-        cluster.appendChild(darkBtn);
         document.body.appendChild(cluster);
         syncControls();
         syncLangButtons();
@@ -615,6 +642,7 @@
             removeGoogleTranslate();
             createSiteNavbar();
             injectControls();
+            injectMobileStylesheet();
         });
     } else {
         applyLangClasses();
@@ -622,5 +650,6 @@
         removeGoogleTranslate();
         createSiteNavbar();
         injectControls();
+        injectMobileStylesheet();
     }
 })();

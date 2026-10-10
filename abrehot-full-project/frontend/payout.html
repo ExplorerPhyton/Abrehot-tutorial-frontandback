@@ -251,73 +251,24 @@
             <!-- Tutoring Packages -->
             <fieldset>
                 <legend>Select Tutoring Package</legend>
+                <input type="hidden" id="packageId" name="packageId">
                 <div class="package-options">
-                    <label class="package-option">
-                        <input type="radio" name="packageId" value="starter" required>
+                    <div class="package-option selected">
                         <div class="package-info">
-                            <h4>Starter / Recorded Lessons</h4>
-                            <p>Class size: Self-paced</p>
-                            <div class="package-fee">Free</div>
+                            <h4 id="selectedPlanName">Loading selected tutoring plan...</h4>
+                            <p id="selectedPlanSize"></p>
+                            <div class="package-fee" id="selectedPlanPrice" aria-live="polite"></div>
                         </div>
-                    </label>
-
-                    <label class="package-option">
-                        <input type="radio" name="packageId" value="group-basic">
-                        <div class="package-info">
-                            <h4>Group Basic</h4>
-                            <p>Class size: 6–10 students</p>
-                            <div class="package-fee">450–600 ETB/student/hour</div>
-                        </div>
-                    </label>
-
-                    <label class="package-option">
-                        <input type="radio" name="packageId" value="small-group">
-                        <div class="package-info">
-                            <h4>Small Group</h4>
-                            <p>Class size: 4–5 students</p>
-                            <div class="package-fee">550–700 ETB/student/hour</div>
-                        </div>
-                    </label>
-
-                    <label class="package-option">
-                        <input type="radio" name="packageId" value="mini-group">
-                        <div class="package-info">
-                            <h4>Mini Group</h4>
-                            <p>Class size: 3 students</p>
-                            <div class="package-fee">800 ETB/student/hour</div>
-                        </div>
-                    </label>
-
-                    <label class="package-option">
-                        <input type="radio" name="packageId" value="duo">
-                        <div class="package-info">
-                            <h4>Duo Tutoring</h4>
-                            <p>Class size: 2 students</p>
-                            <div class="package-fee">1,000 ETB/student/hour</div>
-                        </div>
-                    </label>
-
-                    <label class="package-option">
-                        <input type="radio" name="packageId" value="premium-one-to-one">
-                        <div class="package-info">
-                            <h4>Premium 1-to-1</h4>
-                            <p>Class size: 1 student</p>
-                            <div class="package-fee">1,800 ETB/hour</div>
-                        </div>
-                    </label>
-
-                    <label class="package-option">
-                        <input type="radio" name="packageId" value="vip-one-to-one">
-                        <div class="package-info">
-                            <h4>VIP 1-to-1</h4>
-                            <p>Class size: 1 student</p>
-                            <div class="package-fee">2,300 ETB/hour</div>
-                        </div>
-                    </label>
+                    </div>
                 </div>
+                <p id="priceChangeWarning" role="status" style="display:none;"></p>
+                <label id="confirmUpdatedPriceLabel" style="display:none;">
+                    <input type="checkbox" id="confirmUpdatedPrice">
+                    I have checked the updated rate and will pay this amount.
+                </label>
             </fieldset>
 
-            <!-- Payment proof (hidden for the free Starter package) -->
+            <!-- Current tutoring plans are paid; payment proof is required. -->
             <fieldset id="proofSection">
                 <legend>Payment Proof</legend>
                 <div class="proof-box">
@@ -355,17 +306,8 @@
     </div>
 
     <script src="js/api.js"></script>
+    <script src="js/pricing.js"></script>
     <script>
-        const tutoringPackages = {
-            starter: { label: 'Starter / Recorded Lessons', size: 'Self-paced', fee: 'Free' },
-            'group-basic': { label: 'Group Basic', size: '6-10 students', fee: '450-600 ETB/student/hour' },
-            'small-group': { label: 'Small Group', size: '4-5 students', fee: '550-700 ETB/student/hour' },
-            'mini-group': { label: 'Mini Group', size: '3 students', fee: '800 ETB/student/hour' },
-            duo: { label: 'Duo Tutoring', size: '2 students', fee: '1,000 ETB/student/hour' },
-            'premium-one-to-one': { label: 'Premium 1-to-1', size: '1 student', fee: '1,800 ETB/hour' },
-            'vip-one-to-one': { label: 'VIP 1-to-1', size: '1 student', fee: '2,300 ETB/hour' }
-        };
-
         // Resize + re-encode the screenshot so the JSON body stays well under the server's 5 MB limit.
         function compressImage(file, maxSide, quality) {
             return new Promise(function (resolve, reject) {
@@ -388,7 +330,7 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async function () {
             const rawDraft = localStorage.getItem('pendingBookingDraft');
             if (!rawDraft) {
                 alert('No pending booking details found. Please schedule a session first.');
@@ -397,16 +339,37 @@
             }
 
             const draft = JSON.parse(rawDraft);
-            const durationHours = draft.duration && draft.duration.indexOf('1.5') !== -1 ? 1.5 : (draft.duration && draft.duration.indexOf('2 +') !== -1 ? 2.5 : (draft.duration && draft.duration.indexOf('2') !== -1 ? 2 : 1));
-            const selectedDaysCount = Array.isArray(draft.selectedDays) ? draft.selectedDays.length : 0;
-            const studentHourlyRate = draft.session === 'group' && Number(draft.groupSize) > 0 ? Number(draft.tutorRate || 0) / Number(draft.groupSize) : Number(draft.tutorRate || 0);
-            const estimatedSubscription = draft.planType === 'weekly' ? studentHourlyRate * durationHours * selectedDaysCount : (draft.planType === 'monthly' ? studentHourlyRate * durationHours * selectedDaysCount * 4 : null);
-            const proofSection = document.getElementById('proofSection');
-            const pendingNote = document.getElementById('pendingNote');
             const submitBtn = document.getElementById('submitBtn');
+            const selectedPlanName = document.getElementById('selectedPlanName');
+            const selectedPlanSize = document.getElementById('selectedPlanSize');
+            const selectedPlanPrice = document.getElementById('selectedPlanPrice');
+            const packageIdInput = document.getElementById('packageId');
+            const priceChangeWarning = document.getElementById('priceChangeWarning');
+            const confirmUpdatedPriceLabel = document.getElementById('confirmUpdatedPriceLabel');
+            const confirmUpdatedPrice = document.getElementById('confirmUpdatedPrice');
             const screenshotInput = document.getElementById('screenshot');
             const screenshotPreview = document.getElementById('screenshotPreview');
             let screenshotData = '';
+            let priceQuote = null;
+            try {
+                const prices = await getPricingRates();
+                priceQuote = getPricingQuote(draft, prices);
+                selectedPlanName.textContent = priceQuote.planLabel;
+                selectedPlanSize.textContent = priceQuote.classSize + ' · ' + draft.grade + ' · ' + (Array.isArray(draft.subject) ? draft.subject.join(', ') : draft.subject);
+                selectedPlanPrice.textContent = priceQuote.formattedAmount + ' ETB (' + priceQuote.perLabel + ')';
+                packageIdInput.value = priceQuote.packageId;
+                const rateChanged = draft.pricingPlanId !== priceQuote.planId || Number(draft.quotedPrice) !== priceQuote.amount;
+                if (rateChanged) {
+                    priceChangeWarning.textContent = 'The rate changed after you completed the booking details. Review and pay the updated amount shown above.';
+                    priceChangeWarning.style.display = 'block';
+                    confirmUpdatedPriceLabel.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Could not load the selected tutoring price:', err);
+                selectedPlanName.textContent = 'Price unavailable';
+                selectedPlanPrice.textContent = err.message;
+                submitBtn.disabled = true;
+            }
 
             // Populate Summary
             const summaryEl = document.getElementById('summaryDetails');
@@ -418,24 +381,10 @@
                 <div><strong>Duration:</strong> ${draft.duration || '-'}</div>
                 <div><strong>Plan Type:</strong> ${draft.planType === 'weekly' ? 'Weekly Subscription' : (draft.planType === 'monthly' ? 'Monthly Subscription' : 'Hourly Session')}</div>
                 ${draft.selectedDays && draft.selectedDays.length ? `<div><strong>Study Days:</strong> ${draft.selectedDays.join(', ')}</div>` : ''}
-                ${estimatedSubscription != null ? `<div><strong>Estimated subscription:</strong> ${estimatedSubscription.toFixed(2)} ETB</div>` : ''}
                 <div><strong>Session Type:</strong> ${draft.session || '-'}</div>
                 <div><strong>Language:</strong> ${draft.language || '-'}</div>
                 ${draft.tutorName ? `<div><strong>Tutor:</strong> ${draft.tutorName}</div>` : ''}
             `;
-
-            // Highlight selected package + hide payment proof for the free package
-            document.querySelectorAll('input[name="packageId"]').forEach(radio => {
-                radio.addEventListener('change', function () {
-                    document.querySelectorAll('.package-option').forEach(opt => opt.classList.remove('selected'));
-                    if (this.checked) {
-                        this.closest('.package-option').classList.add('selected');
-                        const isFree = this.value === 'starter';
-                        proofSection.style.display = isFree ? 'none' : 'block';
-                        pendingNote.style.display = isFree ? 'none' : 'block';
-                    }
-                });
-            });
 
             // Screenshot chosen -> compress + preview
             screenshotInput.addEventListener('change', async function () {
@@ -461,37 +410,36 @@
             document.getElementById('payoutForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
 
-                const selectedPackageRadio = document.querySelector('input[name="packageId"]:checked');
-                if (!selectedPackageRadio) {
-                    alert('Please select a package plan.');
+                if (!priceQuote) {
+                    alert('The selected tutoring price is unavailable. Please try again later.');
                     return;
                 }
-
-                const packageId = selectedPackageRadio.value;
-                const isFree = packageId === 'starter';
-                const pkgMeta = tutoringPackages[packageId];
+                if (priceChangeWarning.style.display !== 'none' && !confirmUpdatedPrice.checked) {
+                    alert('Please confirm that you reviewed the updated rate.');
+                    return;
+                }
                 const methodInput = document.querySelector('input[name="paymentMethod"]:checked');
 
-                if (!isFree) {
-                    if (!methodInput) {
-                        alert('Please select the payment method you used (CBE or Telebirr).');
-                        return;
-                    }
-                    if (!screenshotData) {
-                        alert('Please upload a screenshot of your payment.');
-                        screenshotInput.focus();
-                        return;
-                    }
+                if (!methodInput) {
+                    alert('Please select the payment method you used (CBE or Telebirr).');
+                    return;
+                }
+                if (!screenshotData) {
+                    alert('Please upload a screenshot of your payment.');
+                    screenshotInput.focus();
+                    return;
                 }
 
                 // Build complete API payload
                 const finalPayload = {
                     ...draft,
-                    packageId: packageId,
-                    packageClassSize: pkgMeta ? pkgMeta.size : undefined,
-                    paymentMethod: isFree ? undefined : methodInput.value,
+                    packageId: priceQuote.packageId,
+                    packageClassSize: priceQuote.classSize,
+                    pricingPlanId: priceQuote.planId,
+                    quotedPrice: priceQuote.amount,
+                    paymentMethod: methodInput.value,
                     transactionId: document.getElementById('transactionId').value.trim() || undefined,
-                    paymentScreenshot: isFree ? undefined : screenshotData
+                    paymentScreenshot: screenshotData
                 };
 
                 submitBtn.disabled = true;
@@ -499,7 +447,7 @@
                 submitBtn.textContent = 'Submitting...';
 
                 try {
-                    const response = await apiRequest('/bookings', {
+                    await apiRequest('/bookings', {
                         method: 'POST',
                         body: finalPayload,
                         auth: !!getToken()
@@ -507,9 +455,7 @@
 
                     // Clear draft on success
                     localStorage.removeItem('pendingBookingDraft');
-                    alert(isFree
-                        ? (response.message || 'Booking completed successfully!')
-                        : 'Booking submitted! It is now pending payment verification. Your subscription timer starts after the admin approves your payment.');
+                    alert('Booking submitted! It is now pending payment verification. Your subscription timer starts after the admin approves your payment.');
 
                     const user = getUser();
                     window.location.href = user ? dashboardPathForRole(user.role) : 'index.html';

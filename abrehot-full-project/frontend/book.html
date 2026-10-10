@@ -484,7 +484,7 @@
                 
                 <div id="groupSection" style="display:none;">
                     <div class="main-label"><label for="groupSize">Group Size (number of students)</label></div>
-                    <input type="number" id="groupSize" name="groupSize" min="2" max="30" placeholder="eg. 4">
+                    <input type="number" id="groupSize" name="groupSize" min="2" max="10" placeholder="eg. 4">
                     <p style="font-size:13px;color:#666;margin:-10px 0 16px;">
                         Enter the exact number of students who will participate in this group session.
                     </p>
@@ -560,6 +560,7 @@
                 <div><span class="main-label">Date:</span> <span id="summaryDate">-</span></div>
                 <div><span class="main-label">Time:</span> <span id="summaryTime">-</span></div>
                 <div><span class="main-label">Duration:</span> <span id="summaryDuration">-</span></div>
+                <div><span class="main-label">Estimated Price:</span> <span id="summaryPrice" aria-live="polite">Loading current prices...</span></div>
                 <div><span class="main-label">Online Tutoring Platform:</span> <span id="summaryOnline">-</span></div>
                 <div><span class="main-label">Location:</span> <span id="summaryLocation">-</span></div>
                 <div><span class="main-label">Note:</span> <span id="summaryNote">-</span></div>
@@ -608,8 +609,6 @@
     </div>
 
     <script>
-        var tutorPrice = null;
-        var tutorMonthlyPrice = null;
         var tutorAvailableDays = [];
         var tutorSubjects = [];
 
@@ -710,6 +709,7 @@
         }
     </script>
     <script src="js/api.js"></script>
+    <script src="js/pricing.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             var form = document.querySelector('form');
@@ -758,8 +758,6 @@
             try {
                 var tutorProfile = await apiRequest('/tutors/' + tutorId);
                 if (tutorProfile) {
-                    tutorPrice = tutorProfile.price != null ? Number(tutorProfile.price) : null;
-                    tutorMonthlyPrice = tutorProfile.monthlyPrice != null ? Number(tutorProfile.monthlyPrice) : null;
                     tutorAvailableDays = tutorProfile.availableDays || [];
                     tutorSubjects = Array.isArray(tutorProfile.subjects) ? tutorProfile.subjects : [];
                     var subjectSelect = document.getElementById('subject');
@@ -838,6 +836,48 @@
             syncSessionTypeSections();
             syncPlanTypeSection();
 
+            var pricingRates = null;
+            var priceSummary = document.getElementById('summaryPrice');
+            try {
+                pricingRates = await getPricingRates();
+            } catch (err) {
+                console.error('Could not load booking prices:', err);
+                priceSummary.textContent = 'Current prices are unavailable. Please try again later.';
+            }
+
+            function currentPriceDetails() {
+                var selectedPlan = form.querySelector('input[name="planType"]:checked');
+                var selectedSession = form.querySelector('input[name="session"]:checked');
+                return {
+                    grade: document.getElementById('grade').value,
+                    subject: document.getElementById('subject').value,
+                    session: selectedSession ? selectedSession.value : '',
+                    groupSize: document.getElementById('groupSize').value,
+                    planType: selectedPlan ? selectedPlan.value : 'hourly',
+                    selectedDays: Array.from(form.querySelectorAll('input[name="selectedDays"]:checked')).map(function (el) { return el.value; }),
+                    duration: document.getElementById('duration').value,
+                };
+            }
+
+            function currentPriceQuote() {
+                if (!pricingRates) throw new Error('Current prices are unavailable. Please try again later.');
+                return getPricingQuote(currentPriceDetails(), pricingRates);
+            }
+
+            function updatePriceEstimate() {
+                try {
+                    var quote = currentPriceQuote();
+                    priceSummary.textContent = quote.formattedAmount + ' ETB (' + quote.perLabel + ')';
+                } catch (err) {
+                    priceSummary.textContent = err.message;
+                }
+            }
+
+            ['change', 'input'].forEach(function (eventName) {
+                form.addEventListener(eventName, updatePriceEstimate);
+            });
+            updatePriceEstimate();
+
             var user = getUser();
             var isParent = user && user.role === 'Parent' && !!getToken();
             var childSelectorWrapper = document.getElementById('childSelectorWrapper');
@@ -910,6 +950,14 @@
                     return;
                 }
 
+                var priceQuote;
+                try {
+                    priceQuote = currentPriceQuote();
+                } catch (err) {
+                    alert(err.message);
+                    return;
+                }
+
                 var goals = Array.from(form.querySelectorAll('input[name="goal"]:checked')).map(function (el) { return el.value; });
 
                 var bookingDraft = {
@@ -930,7 +978,10 @@
                     notes: document.getElementById('notes').value,
                     planType: isRecurringPlan ? planTypeInput.value : 'hourly',
                     selectedDays: isRecurringPlan ? selectedDaysArr : [],
-                    tutorRate: tutorPrice,
+                    pricingPlanId: priceQuote.planId,
+                    quotedPrice: priceQuote.amount,
+                    packageId: priceQuote.packageId,
+                    packageClassSize: priceQuote.classSize,
                     tutorId: tutorId || undefined,
                     tutorName: tutorName || undefined,
                     childId: isParent ? childSelect.value : undefined,

@@ -9,74 +9,366 @@
     <meta name="robots" content="noindex, nofollow">
     <title>Abrehot Admin — Tutor Approvals</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 24px; }
-        h1 { color: #1a3c6e; }
-        #gate { max-width: 400px; margin: 80px auto; background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        #gate input { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
-        #gate button, .card button { background: #1a3c6e; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-        #gate button:hover, .card button:hover { background: #14315a; }
-        #app { display: none; max-width: 900px; margin: 0 auto; }
-        .tabs { margin-bottom: 16px; }
-        .tabs button { background: #ddd; color: #333; margin-right: 8px; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
-        .tabs button.active { background: #1a3c6e; color: #fff; }
-        .card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-        .card h3 { margin: 0 0 8px; color: #1a3c6e; }
-        .card p { margin: 4px 0; font-size: 14px; }
-        .card .actions { margin-top: 12px; }
-        .card .actions button { margin-right: 8px; }
-        .reject-btn { background: #c0392b !important; }
-        .reject-btn:hover { background: #a93226 !important; }
-        #message { color: #c0392b; margin-top: 8px; }
-        .empty { color: #666; font-style: italic; }
-        .ad-form { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-        .ad-form h3 { margin: 0 0 12px; color: #1a3c6e; }
-        .ad-form label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
-        .ad-form input, .ad-form textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
-        .ad-form textarea { min-height: 60px; resize: vertical; }
-        .ad-form button { margin-top: 14px; }
-        .ad-card { display: flex; gap: 14px; }
-        .ad-card img { width: 90px; height: 120px; object-fit: cover; border-radius: 4px; background: #eee; flex-shrink: 0; }
+        :root {
+            --primary: #1a3c6e;
+            --primary-hover: #14315a;
+            --bg-main: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #e2e8f0;
+            --danger: #c0392b;
+            --danger-hover: #a93226;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: Arial, sans-serif; 
+            background: var(--bg-main); 
+            margin: 0; 
+            padding: 0; 
+            color: var(--text-main);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Gate / Login Screen Styling */
+        #gate-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #gate { 
+            max-width: 400px; 
+            width: 90%;
+            background: var(--card-bg); 
+            padding: 32px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08); 
+            border: 1px solid var(--border-color);
+        }
+        #gate h1 { color: var(--primary); margin-top: 0; font-size: 24px; }
+        #gate input { width: 100%; padding: 10px; margin: 12px 0; border: 1px solid #ccc; border-radius: 4px; }
+        #gate button { width: 100%; background: var(--primary); color: #fff; border: none; padding: 10px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #gate button:hover { background: var(--primary-hover); }
+
+        /* Dashboard Layout */
+        #app {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--bg-main);
+            z-index: 999;
+            grid-template-columns: 260px 1fr;
+            grid-template-rows: 70px minmax(0, 1fr);
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar main";
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            grid-area: sidebar;
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            height: 100%;
+            min-height: 0;
+        }
+        .sidebar-brand {
+            padding: 0 20px 20px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tabs { 
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 16px 12px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .tabs button { 
+            background: transparent; 
+            color: var(--text-muted); 
+            text-align: left;
+            padding: 10px 14px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+        }
+        .tabs button:hover {
+            background: #f0f4f8;
+            color: var(--primary);
+        }
+        .tabs button.active { 
+            background: var(--primary); 
+            color: #fff; 
+        }
+        #logoutBtn {
+            margin: 12px;
+            background: #e2e8f0 !important;
+            color: #4a5568 !important;
+            text-align: center;
+        }
+        #logoutBtn:hover {
+            background: #cbd5e1 !important;
+        }
+
+        /* Top Header */
+        .admin-header {
+            grid-area: header;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+        .admin-header h1 { 
+            color: var(--primary); 
+            font-size: 20px; 
+            margin: 0; 
+        }
+        .admin-user-info {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Main Content Area */
+        .admin-main {
+            grid-area: main;
+            min-width: 0;
+            min-height: 0;
+            padding: clamp(20px, 3vw, 36px);
+            overflow-y: auto;
+            background: var(--bg-main);
+        }
+        .admin-main > * { max-width: 1280px; margin-left: auto; margin-right: auto; }
+        .admin-main > .payment-filters { margin-left: 0; margin-right: 0; }
+
+        /* Generic Components */
+        .card { background: var(--card-bg); border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color); max-width: 1100px; }
+        .card h3 { margin: 0 0 10px; color: var(--primary); font-size: 16px; }
+        .card p { margin: 6px 0; font-size: 14px; }
+        .card .actions { margin-top: 16px; display: flex; gap: 8px; }
+        .card button, .ad-form button, #pricingForm button { background: var(--primary); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; }
+        .card button:hover, .ad-form button:hover, #pricingForm button:hover { background: var(--primary-hover); }
+        
+        .reject-btn { background: var(--danger) !important; }
+        .reject-btn:hover { background: var(--danger-hover) !important; }
+
+        .payment-filters { margin-bottom: 20px; display: flex; gap: 8px; }
+        .payment-filters button { background: #e2e8f0; color: var(--text-main); padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; }
+        .payment-filters button.active { background: var(--primary); color: #fff; }
+        
+        .payment-screenshot { display: block; max-width: 100%; max-height: 520px; margin-top: 12px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .payment-error { color: var(--danger); margin: 8px 0; }
+        #message { color: var(--danger); margin-top: 8px; font-size: 13px; }
+        .empty { color: var(--text-muted); font-style: italic; }
+        .request-error { max-width: 760px; padding: 20px 22px; border: 1px solid #f0c6c2; border-left: 4px solid var(--danger); border-radius: 8px; background: #fff8f7; color: #692b25; }
+        .request-error h2 { margin: 0 0 8px; font-size: 17px; }
+        .request-error p { margin: 0; line-height: 1.55; }
+        .book-review-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+        .book-review-card {
+            width: 100%;
+            max-width: none;
+            min-width: 0;
+            margin: 0;
+            padding: 22px;
+            overflow-wrap: anywhere;
+        }
+        .book-review-card .actions { flex-wrap: wrap; }
+        .book-review-card .actions button { flex: 1 1 100px; }
+        .book-review-card .book-status { display: inline-block; margin-left: 8px; padding: 3px 9px; border-radius: 999px; background: #fff1d6; color: #865d16; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+        .book-review-card .book-status.approved { background: #e1f4e8; color: #246b3b; }
+        .book-review-card .book-status.rejected { background: #fde7e5; color: #a33128; }
+        #bookReviewMessage { margin: 0 0 16px; padding: 12px 16px; border-radius: 6px; background: #fff1d6; color: #674b15; }
+        #bookReviewMessage:empty { display: none; }
+
+        /* Forms & Grid elements */
+        .ad-form { background: var(--card-bg); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color); max-width: 1100px; }
+        .ad-form h3 { margin: 0 0 12px; color: var(--primary); }
+        .ad-form label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; color: var(--text-main); }
+        .ad-form input, .ad-form textarea { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+        .ad-form textarea { min-height: 80px; resize: vertical; }
+        .ad-form button { margin-top: 16px; }
+        
+        .ad-card { display: flex; gap: 16px; }
+        .ad-card img { width: 100px; height: 130px; object-fit: cover; border-radius: 4px; background: #eee; flex-shrink: 0; }
         .ad-card .ad-body { flex: 1; }
-        .inactive-badge { background: #999; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+        .inactive-badge { background: #999; color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 10px; margin-left: 8px; font-weight: normal; }
+        
+        .price-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 12px; }
+        .price-field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .price-field input { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; }
+        #pricingForm button { margin-top: 20px; padding: 10px 20px; font-size: 14px; }
+
+        #pricingForm { max-width: 1100px; }
     </style>
     <link rel="stylesheet" href="css/abrehot-theme.css">
+    <style id="admin-layout-overrides">
+        body.admin-portal { margin: 0 !important; padding: 0 !important; min-height: 100vh; overflow-x: hidden; }
+        body.admin-portal > .abrehot-site-navbar { display: none !important; }
+        body.admin-portal #app {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100vw !important;
+            max-width: none !important;
+            height: 100vh;
+            height: 100dvh;
+            margin: 0 !important;
+            padding: 0 !important;
+            grid-template-columns: 260px minmax(0, 1fr);
+            grid-template-rows: 70px minmax(0, 1fr);
+            grid-template-areas: "sidebar header" "sidebar main";
+            overflow: hidden;
+        }
+        body.admin-portal #app[style*="display: grid"] { display: grid !important; }
+        body.admin-portal .admin-sidebar { min-width: 0; min-height: 0; height: 100%; }
+        body.admin-portal .admin-main { min-width: 0; min-height: 0; overflow-y: auto; }
+        body.admin-portal .admin-main > * { max-width: 1280px; margin-left: auto; margin-right: auto; }
+        body.admin-portal .admin-main > .payment-filters { margin-left: 0; margin-right: 0; }
+        body.admin-portal .book-review-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+            gap: 16px;
+            align-items: start;
+        }
+        body.admin-portal .book-review-card { width: 100%; max-width: none; min-width: 0; margin: 0; overflow-wrap: anywhere; }
+        body.admin-portal .book-review-card .actions { flex-wrap: wrap; }
+        body.admin-portal .book-review-card .actions button { flex: 1 1 100px; }
+        body.admin-portal #overviewDashboard { max-width: 1280px; }
+        body.admin-portal .subject-admin-form { max-width: 760px; }
+        body.admin-portal .subject-admin-form input {
+            width: min(100%, 520px);
+            padding: 10px 12px;
+            margin: 8px 10px 8px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        body.admin-portal .subject-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+        body.admin-portal .subject-item { margin: 0; padding: 14px 16px; }
+        body.admin-portal .subject-item small { display: block; margin-top: 4px; color: var(--text-muted); }
+        body.admin-portal .overview-intro { margin: 0 0 22px; }
+        body.admin-portal .overview-revenue,
+        body.admin-portal .overview-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
+        body.admin-portal .overview-metric { min-width: 0; margin: 0; max-width: none; padding: 22px; }
+        body.admin-portal .overview-metric .metric-label { margin: 0 0 8px; font-size: 13px; }
+        body.admin-portal .overview-metric .metric-value { margin: 0; font-size: clamp(24px, 3vw, 34px); overflow-wrap: anywhere; }
+        body.admin-portal .overview-section-title { margin: 28px 0 14px; }
+        body.admin-portal .overview-error { padding: 14px 18px; border-radius: 8px; }
+        @media (max-width: 760px) {
+            body.admin-portal #app[style*="display: grid"] {
+                position: relative;
+                inset: auto;
+                width: 100% !important;
+                height: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: auto auto minmax(50vh, 1fr);
+                grid-template-areas: "sidebar" "header" "main";
+                overflow: visible;
+            }
+            body.admin-portal .admin-sidebar { width: 100%; min-width: 0; height: auto; padding: 14px 12px 0; border-right: 0; border-bottom: 1px solid var(--border-color); }
+            body.admin-portal .sidebar-brand { padding: 0 6px 12px; }
+            body.admin-portal .tabs { width: 100%; min-width: 0; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; padding: 12px 0; }
+            body.admin-portal .tabs button { flex: 0 0 auto; }
+            body.admin-portal #logoutBtn { align-self: flex-end; margin: 0 0 12px; }
+            body.admin-portal .admin-header { min-height: 64px; padding: 0 20px; }
+            body.admin-portal .admin-main { overflow: visible; padding: 20px 16px 36px; }
+            body.admin-portal .book-review-list,
+            body.admin-portal .overview-revenue,
+            body.admin-portal .overview-stats { grid-template-columns: minmax(0, 1fr); }
+        }
+    </style>
 </head>
 
-<body>
+<body class="admin-portal">
 
-    <div id="gate">
-        <h1>Admin Login</h1>
-        <p>Enter the admin secret from your backend's <code>.env</code> file.</p>
-        <input type="password" id="secretInput" placeholder="Admin secret">
-        <button id="unlockBtn">Unlock</button>
-        <p id="message"></p>
+    <div id="gate-wrapper">
+        <div id="gate">
+            <h1>Admin Login</h1>
+            <p>Enter the admin secret from your backend's <code>.env</code> file.</p>
+            <input type="password" id="secretInput" placeholder="Admin secret">
+            <button id="unlockBtn">Unlock Panel</button>
+            <p id="message"></p>
+        </div>
     </div>
 
     <div id="app">
-        <h1>Abrehot Admin</h1>
-        <div class="tabs">
-            <button id="tabPending" class="active">Pending Tutors</button>
-            <button id="tabApproved">Approved Tutors</button>
-            <button id="tabBookings">Bookings</button>
-            <button id="tabContact">Contact Messages</button>
-            <button id="tabBookAds">Book Ads</button>
-            <button id="logoutBtn" style="float:right; background:#888;">Log Out</button>
-        </div>
-        <div id="content"></div>
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-brand">Abrehot Admin</div>
+            <div class="tabs">
+                <button id="tabOverview" class="active">Overview</button>
+                <button id="tabPending">Pending Tutors</button>
+                <button id="tabApproved">Approved Tutors</button>
+                <button id="tabBookings">Bookings</button>
+                <button id="tabPayments">Payments</button>
+                <button id="tabContact">Contact Messages</button>
+                <button id="tabBookAds">Book Ads</button>
+                <button id="tabTutorBooks">Tutor Books</button>
+                <button id="tabPricing">Pricing</button>
+                <button id="tabSubjects">Subjects</button>
+            </div>
+            <button id="logoutBtn">Log Out</button>
+        </aside>
+
+        <!-- Top Header Bar -->
+        <header class="admin-header">
+            <h1 id="headerTitle">Tutor Approvals</h1>
+            <div class="admin-user-info">Staff Portal</div>
+        </header>
+
+        <!-- Main Content Wrapper -->
+        <main class="admin-main" id="content"></main>
     </div>
 
     <script>
-        // Local dev on this machine hits the local backend; anything else
-        // (the live admin subdomain, or opening the file from disk) uses the
-        // Railway-hosted API. If you switch back to the Plesk api subdomain,
-        // point the production URL at https://api.abrehottutoring.com.et/api
+        // Local dev hits the local backend; deployed pages use the Render API.
         const API_BASE = ['localhost', '127.0.0.1'].includes(location.hostname)
             ? 'http://localhost:5000/api'
-            : 'https://abrehot-tutorial-frontandback-production.up.railway.app/api';
-        const gate = document.getElementById('gate');
+            : 'https://abrehot-tutorial-frontandback.onrender.com/api';
+        const gateWrapper = document.getElementById('gate-wrapper');
         const app = document.getElementById('app');
         const content = document.getElementById('content');
         const messageEl = document.getElementById('message');
+        const headerTitle = document.getElementById('headerTitle');
 
         function getSecret() { return sessionStorage.getItem('abrehot_admin_secret'); }
         function setSecret(s) { sessionStorage.setItem('abrehot_admin_secret', s); }
@@ -90,7 +382,13 @@
             });
             let data = null;
             try { data = await res.json(); } catch (e) {}
-            if (!res.ok) throw new Error((data && data.message) || 'Request failed');
+            if (!res.ok) {
+                const message = data && data.message;
+                if (res.status === 404 && path.indexOf('/tutor-books') !== -1) {
+                    throw new Error('Tutor-book API is not available on the deployed backend yet. Deploy the updated backend, then try again.');
+                }
+                throw new Error(message || 'Request failed (' + res.status + '): ' + path);
+            }
             return data;
         }
 
@@ -102,13 +400,24 @@
 
         document.getElementById('unlockBtn').addEventListener('click', async function () {
             const secret = document.getElementById('secretInput').value;
+            const btn = document.getElementById('unlockBtn');
             setSecret(secret);
+
+            // Added loading state to indicate backend server wake-up on Render free tier
+            btn.disabled = true;
+            btn.textContent = 'Connecting (waking up server)...';
+            messageEl.style.color = '#666';
+            messageEl.textContent = 'Please wait, backend is starting up...';
+
             try {
                 await adminRequest('/admin/tutors?status=pending');
-                gate.style.display = 'none';
-                app.style.display = 'block';
-                showTab('pending');
+                gateWrapper.style.display = 'none';
+                app.style.display = 'grid';
+                showTab('overview');
             } catch (err) {
+                btn.disabled = false;
+                btn.textContent = 'Unlock Panel';
+                messageEl.style.color = '#c0392b';
                 messageEl.textContent = 'Incorrect secret, or backend not reachable at ' + API_BASE;
             }
         });
@@ -117,10 +426,47 @@
             if (!window.confirm('Are you sure you want to log out?')) return;
             clearSecret();
             app.style.display = 'none';
-            gate.style.display = 'block';
+            gateWrapper.style.display = 'flex';
         });
 
-        const tabs = { pending: 'tabPending', approved: 'tabApproved', bookings: 'tabBookings', contact: 'tabContact', bookAds: 'tabBookAds' };
+        const tabs = { overview: 'tabOverview', pending: 'tabPending', approved: 'tabApproved', bookings: 'tabBookings', payments: 'tabPayments', contact: 'tabContact', bookAds: 'tabBookAds', tutorBooks: 'tabTutorBooks', pricing: 'tabPricing', subjects: 'tabSubjects' };
+        const tabTitles = { 
+            overview: 'Admin Overview',
+            pending: 'Pending Tutors', 
+            approved: 'Approved Tutors', 
+            bookings: 'Bookings Management', 
+            payments: 'Payment Verifications', 
+            contact: 'Contact Messages', 
+            bookAds: 'Book Advertisements',
+            tutorBooks: 'Tutor Book Reviews',
+            pricing: 'Pricing Configuration',
+            subjects: 'Subject Management'
+        };
+
+        const priceGroups = [
+            { title: 'Local hourly plans', plans: [
+                ['local-1on1', '1-to-1 Tutoring', 1500], ['local-minigroup', 'Mini Group', 850],
+                ['local-smallgroup', 'Small Group', 500], ['local-largegroup', 'Large Group', 400],
+            ] },
+            { title: 'Local monthly exam prep', plans: [
+                ['prep-g15-1on1', 'Grades 1–5 · 1-to-1', 18000], ['prep-g15-2to3', 'Grades 1–5 · 2–3 students', 12000],
+                ['prep-g15-4to5', 'Grades 1–5 · 4–5 students', 8000], ['prep-g15-6to10', 'Grades 1–5 · 6–10 students', 5000],
+                ['prep-g6-1on1', 'Grade 6 · 1-to-1', 20000], ['prep-g6-2to3', 'Grade 6 · 2–3 students', 10000],
+                ['prep-g6-4to5', 'Grade 6 · 4–5 students', 5000], ['prep-g6-6to10', 'Grade 6 · 6–10 students', 4000],
+                ['prep-g8-1on1', 'Grade 8 · 1-to-1', 21000], ['prep-g8-2to3', 'Grade 8 · 2–3 students', 12000],
+                ['prep-g8-4to5', 'Grade 8 · 4–5 students', 7000], ['prep-g8-6to10', 'Grade 8 · 6–10 students', 6000],
+                ['prep-g12-1on1', 'Grade 12 · 1-to-1', 24000], ['prep-g12-2to3', 'Grade 12 · 2–3 students', 14000],
+                ['prep-g12-4to5', 'Grade 12 · 4–5 students', 9000], ['prep-g12-6to10', 'Grade 12 · 6–10 students', 8000],
+            ] },
+            { title: 'International hourly plans', plans: [
+                ['intl-1on1', '1-to-1 Tutoring', 2500], ['intl-minigroup', 'Mini Group', 1500],
+                ['intl-smallgroup', 'Small Group', 1000], ['intl-largegroup', 'Large Group', 700],
+            ] },
+            { title: 'International monthly exam prep', plans: [
+                ['intl-prep-1on1', '1-to-1', 30000], ['intl-prep-2to3', '2–3 students', 20000],
+                ['intl-prep-4to5', '4–5 students', 10500], ['intl-prep-6to10', '6–10 students', 5000],
+            ] },
+        ];
         Object.keys(tabs).forEach(function (key) {
             document.getElementById(tabs[key]).addEventListener('click', function () { showTab(key); });
         });
@@ -129,26 +475,70 @@
             Object.keys(tabs).forEach(function (k) {
                 document.getElementById(tabs[k]).classList.toggle('active', k === key);
             });
+            if (tabTitles[key]) {
+                headerTitle.textContent = tabTitles[key];
+            }
         }
 
         async function showTab(key) {
             setActiveTab(key);
             content.innerHTML = '<p>Loading...</p>';
             try {
-                if (key === 'pending') await renderTutorList('pending');
+                if (key === 'overview') await renderOverview();
+                else if (key === 'pending') await renderTutorList('pending');
                 else if (key === 'approved') await renderTutorList('approved');
                 else if (key === 'bookings') await renderBookings();
+                else if (key === 'payments') await renderPayments('pending');
                 else if (key === 'contact') await renderContact();
                 else if (key === 'bookAds') await renderBookAds();
+                else if (key === 'tutorBooks') await renderTutorBooks('pending');
+                else if (key === 'pricing') await renderPricing();
+                else if (key === 'subjects') await renderSubjects();
             } catch (err) {
-                content.innerHTML = '<p style="color:#c0392b;">' + escapeHtml(err.message) + '</p>';
+                content.innerHTML = '<section class="request-error" role="alert"><h2>Could not load ' + escapeHtml(tabTitles[key] || 'this section') + '</h2><p>' + escapeHtml(err.message) + '</p></section>';
             }
+        }
+
+        function formatETB(amount) {
+            return new Intl.NumberFormat('en-ET', {
+                style: 'currency',
+                currency: 'ETB',
+                maximumFractionDigits: 2,
+            }).format(Number(amount) || 0);
+        }
+
+        async function renderOverview() {
+            const summary = await adminRequest('/admin/overview');
+            const revenue = summary.revenue || {};
+            const stats = summary.stats || {};
+            const revenueCards = [
+                ['Today', revenue.today],
+                ['This month', revenue.month],
+                ['All time', revenue.allTime],
+            ];
+            const statCards = [
+                ['Total users', stats.users],
+                ['Approved tutors', stats.approvedTutors],
+                ['Total bookings', stats.bookings],
+                ['Payments awaiting review', stats.pendingPayments],
+                ['Books awaiting review', stats.pendingBooks],
+            ];
+            content.innerHTML = '<section id="overviewDashboard">'
+                + '<p class="overview-intro">Revenue totals include payments approved by an admin. Today and this month use East Africa Time.</p>'
+                + '<h2 class="overview-section-title">Verified revenue</h2>'
+                + '<div class="overview-revenue">' + revenueCards.map(function (item) {
+                    return '<article class="card overview-metric"><p class="metric-label">' + escapeHtml(item[0]) + '</p><h2 class="metric-value">' + escapeHtml(formatETB(item[1])) + '</h2></article>';
+                }).join('') + '</div>'
+                + '<h2 class="overview-section-title">Basic statistics</h2>'
+                + '<div class="overview-stats">' + statCards.map(function (item) {
+                    return '<article class="card overview-metric"><p class="metric-label">' + escapeHtml(item[0]) + '</p><h2 class="metric-value">' + escapeHtml(Number(item[1]) || 0) + '</h2></article>';
+                }).join('') + '</div></section>';
         }
 
         async function renderTutorList(status) {
             const tutors = await adminRequest('/admin/tutors?status=' + status);
             if (!tutors.length) {
-                content.innerHTML = '<p class="empty">No ' + status + ' tutors.</p>';
+                content.innerHTML = '<p class="empty">No ' + status + ' tutors found.</p>';
                 return;
             }
             content.innerHTML = tutors.map(function (t) {
@@ -198,6 +588,83 @@
             }).join('');
         }
 
+        async function renderPayments(status) {
+            const payments = await adminRequest('/admin/payments?status=' + encodeURIComponent(status));
+            const statuses = ['pending', 'approved', 'rejected'];
+            const filters = '<div class="payment-filters">'
+                + statuses.map(function (item) {
+                    return '<button class="' + (item === status ? 'active' : '') + '" onclick="showPaymentStatus(\'' + item + '\')">'
+                        + escapeHtml(item.charAt(0).toUpperCase() + item.slice(1)) + '</button>';
+                }).join('')
+                + '</div>';
+            const cards = !payments.length
+                ? '<p class="empty">No ' + escapeHtml(status) + ' payments.</p>'
+                : payments.map(function (payment) {
+                    const requesterName = payment.requestedBy && payment.requestedBy.fullname
+                        ? payment.requestedBy.fullname
+                        : 'Guest';
+                    const tutorName = payment.tutor && payment.tutor.fullname
+                        ? payment.tutor.fullname
+                        : 'Unassigned';
+                    const screenshot = typeof payment.paymentScreenshot === 'string'
+                        && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(payment.paymentScreenshot)
+                        ? '<img class="payment-screenshot" src="' + escapeHtml(payment.paymentScreenshot) + '" alt="Payment receipt screenshot">'
+                        : '<p class="empty">No payment screenshot was submitted.</p>';
+                    return '<div class="card">'
+                        + '<h3>' + escapeHtml(payment.grade) + ' — '
+                        + escapeHtml((Array.isArray(payment.subject) ? payment.subject : []).join(', ') || payment.otherSubject || 'No subject')
+                        + ' (Tutor: ' + escapeHtml(tutorName) + ')</h3>'
+                        + '<p><strong>Student:</strong> ' + escapeHtml(requesterName)
+                        + (payment.requestedBy && payment.requestedBy.email ? ' (' + escapeHtml(payment.requestedBy.email) + ')' : '') + '</p>'
+                        + '<p><strong>Payment method:</strong> ' + escapeHtml(payment.paymentMethod || '-')
+                        + ' &nbsp; <strong>Transaction/reference:</strong> ' + escapeHtml(payment.transactionId || '-') + '</p>'
+                        + '<p><strong>Payment status:</strong> ' + escapeHtml(payment.paymentStatus || status) + '</p>'
+                        + '<p><strong>Session:</strong> ' + escapeHtml(payment.session || '-')
+                        + ' &nbsp; <strong>Date/Time:</strong> ' + escapeHtml(payment.date ? new Date(payment.date).toLocaleDateString() : '-')
+                        + ' ' + escapeHtml(payment.time || '') + '</p>'
+                        + '<p><strong>Receipt:</strong></p>' + screenshot
+                        + (payment.paymentNote ? '<p><strong>Review note:</strong> ' + escapeHtml(payment.paymentNote) + '</p>' : '')
+                        + (status === 'pending'
+                            ? '<div class="actions">'
+                                + '<button onclick="reviewPayment(\'' + payment._id + '\', \'approve\', this)">Approve</button>'
+                                + '<button class="reject-btn" onclick="reviewPayment(\'' + payment._id + '\', \'reject\', this)">Reject</button>'
+                                + '</div>'
+                            : '')
+                        + '</div>';
+                }).join('');
+            content.innerHTML = filters + cards;
+        }
+
+        async function showPaymentStatus(status) {
+            content.innerHTML = '<p>Loading...</p>';
+            try {
+                await renderPayments(status);
+            } catch (err) {
+                content.innerHTML = '<p class="payment-error">' + escapeHtml(err.message) + '</p>';
+            }
+        }
+
+        async function reviewPayment(id, action, button) {
+            const body = { action: action };
+            if (action === 'reject') {
+                const note = window.prompt('Please give a reason for rejecting this payment:');
+                if (note === null) return;
+                if (!note.trim()) {
+                    window.alert('A rejection reason is required.');
+                    return;
+                }
+                body.note = note.trim();
+            }
+            button.disabled = true;
+            try {
+                await adminRequest('/admin/payments/' + encodeURIComponent(id), { method: 'PATCH', body: body });
+                await renderPayments('pending');
+            } catch (err) {
+                button.disabled = false;
+                window.alert('Could not ' + action + ' payment: ' + err.message);
+            }
+        }
+
         async function renderContact() {
             const messages = await adminRequest('/admin/contact');
             if (!messages.length) {
@@ -215,7 +682,75 @@
             }).join('');
         }
 
-        // --- Book Ads: the admin's "advertise a book, set a price" section ---
+        async function renderTutorBooks(status) {
+            const books = await adminRequest('/admin/tutor-books?status=' + encodeURIComponent(status));
+            const filters = ['pending', 'approved', 'rejected', 'all'];
+            const filterHtml = '<div class="payment-filters">' + filters.map(function (filter) {
+                return '<button type="button" data-book-filter="' + filter + '"' + (filter === status ? ' class="active"' : '') + '>'
+                    + filter.charAt(0).toUpperCase() + filter.slice(1) + '</button>';
+            }).join('') + '</div>';
+            const cardsHtml = books.length ? '<div class="book-review-list">' + books.map(function (book) {
+                const tutorName = book.tutor && book.tutor.fullname ? book.tutor.fullname : 'Tutor';
+                return '<article class="card book-review-card">'
+                    + '<h3>' + escapeHtml(book.title) + ' <span class="book-status ' + escapeHtml(book.status) + '">' + escapeHtml(book.status) + '</span></h3>'
+                    + '<p><strong>Submitted by:</strong> ' + escapeHtml(tutorName) + '</p>'
+                    + (book.author ? '<p><strong>Author:</strong> ' + escapeHtml(book.author) + '</p>' : '')
+                    + (book.description ? '<p>' + escapeHtml(book.description) + '</p>' : '')
+                    + (book.subject || book.grade ? '<p><strong>Subject / Grade:</strong> ' + escapeHtml([book.subject, book.grade].filter(Boolean).join(' · ')) + '</p>' : '')
+                    + '<p><strong>File:</strong> PDF · ' + (Number(book.fileSize) / (1024 * 1024)).toFixed(1) + ' MB</p>'
+                    + '<div class="actions"><button type="button" data-book-preview="' + escapeHtml(book._id) + '">Review PDF</button>'
+                    + (book.status === 'pending'
+                        ? '<button type="button" data-book-review="approve" data-book-id="' + escapeHtml(book._id) + '">Approve</button>'
+                            + '<button type="button" class="reject-btn" data-book-review="reject" data-book-id="' + escapeHtml(book._id) + '">Reject</button>'
+                        : '')
+                    + '</div></article>';
+            }).join('') + '</div>' : '<p class="empty">No ' + escapeHtml(status === 'all' ? '' : status + ' ') + 'tutor books found.</p>';
+            content.innerHTML = filterHtml + '<p id="bookReviewMessage" role="status" aria-live="polite"></p>' + cardsHtml;
+
+            content.querySelectorAll('[data-book-filter]').forEach(function (button) {
+                button.addEventListener('click', function () { renderTutorBooks(button.dataset.bookFilter); });
+            });
+            content.querySelectorAll('[data-book-preview]').forEach(function (button) {
+                button.addEventListener('click', function () { previewTutorBook(button.dataset.bookPreview); });
+            });
+            content.querySelectorAll('[data-book-review]').forEach(function (button) {
+                button.addEventListener('click', async function () {
+                    const action = button.dataset.bookReview;
+                    button.disabled = true;
+                    try {
+                        await adminRequest('/admin/tutor-books/' + encodeURIComponent(button.dataset.bookId) + '/' + action, { method: 'POST' });
+                        await renderTutorBooks(status);
+                    } catch (err) {
+                        button.disabled = false;
+                        const message = document.getElementById('bookReviewMessage');
+                        if (message) message.textContent = 'Could not ' + action + ' book: ' + err.message;
+                    }
+                });
+            });
+        }
+
+        async function previewTutorBook(id) {
+            const preview = window.open('about:blank', '_blank');
+            if (!preview) {
+                window.alert('Allow pop-ups to review this PDF.');
+                return;
+            }
+            preview.document.body.textContent = 'Loading PDF…';
+            try {
+                const response = await fetch(API_BASE + '/admin/tutor-books/' + encodeURIComponent(id) + '/file', {
+                    headers: { 'x-admin-secret': getSecret() },
+                });
+                if (!response.ok) {
+                    let result = null;
+                    try { result = await response.json(); } catch (err) {}
+                    throw new Error((result && result.message) || 'Could not load PDF.');
+                }
+                preview.location.href = URL.createObjectURL(await response.blob());
+            } catch (err) {
+                preview.close();
+                window.alert('Could not open this book: ' + err.message);
+            }
+        }
 
         async function renderBookAds() {
             content.innerHTML = '<p>Loading...</p>';
@@ -263,6 +798,7 @@
                     msgEl.textContent = 'Title and price are required.';
                     return;
                 }
+
                 try {
                     await adminRequest('/admin/book-ads', {
                         method: 'POST',
@@ -280,6 +816,90 @@
                     msgEl.textContent = err.message;
                 }
             });
+        }
+
+        async function renderPricing() {
+            const result = await adminRequest('/admin/pricing');
+            const prices = result.prices || {};
+            content.innerHTML = '<form id="pricingForm"><h2>Edit tutoring prices (ETB)</h2>'
+                + '<p>Saved prices are shown on the public Pricing page immediately.</p>'
+                + priceGroups.map(function (group) {
+                    return '<section class="card"><h3>' + escapeHtml(group.title) + '</h3><div class="price-grid">'
+                        + group.plans.map(function (plan) {
+                            const price = Number.isSafeInteger(prices[plan[0]]) ? prices[plan[0]] : plan[2];
+                            return '<div class="price-field"><label for="price-' + plan[0] + '">' + escapeHtml(plan[1]) + '</label>'
+                                + '<input id="price-' + plan[0] + '" name="' + plan[0] + '" type="number" min="0" step="1" required value="' + price + '"></div>';
+                        }).join('')
+                        + '</div></section>';
+                }).join('')
+                + '<button type="submit">Save all prices</button><p id="pricingMessage" role="status"></p></form>';
+            document.getElementById('pricingForm').addEventListener('submit', savePricing);
+        }
+
+        async function renderSubjects() {
+            const result = await adminRequest('/admin/subjects');
+            const subjects = result.subjects || [];
+            content.innerHTML = '<form id="subjectForm" class="card subject-admin-form">'
+                + '<h2>Add a subject</h2>'
+                + '<p>New subjects will be available in tutor applications and tutor search filters.</p>'
+                + '<label for="subjectName">Subject name</label><br>'
+                + '<input id="subjectName" name="name" maxlength="120" required placeholder="e.g. Art and Design">'
+                + '<button type="submit">Add subject</button>'
+                + '<p id="subjectMessage" role="status" aria-live="polite"></p>'
+                + '</form>'
+                + '<h2>Available subjects (' + subjects.length + ')</h2>'
+                + (subjects.length ? '<div class="subject-list">' + subjects.map(function (subject) {
+                    return '<article class="card subject-item"><strong>' + escapeHtml(subject.name) + '</strong>'
+                        + '<small>' + (subject.isDefault ? 'Standard subject' : 'Added by admin') + '</small></article>';
+                }).join('') + '</div>' : '<p class="empty">No subjects have been added yet.</p>');
+            document.getElementById('subjectForm').addEventListener('submit', saveSubject);
+        }
+
+        async function saveSubject(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const input = form.elements.namedItem('name');
+            const message = document.getElementById('subjectMessage');
+            const button = form.querySelector('button[type="submit"]');
+            button.disabled = true;
+            message.textContent = 'Saving subject…';
+            message.style.color = '';
+            try {
+                await adminRequest('/admin/subjects', { method: 'POST', body: { name: input.value.trim() } });
+                await renderSubjects();
+                const successMessage = document.getElementById('subjectMessage');
+                successMessage.style.color = '#267a3e';
+                successMessage.textContent = 'Subject added and available to tutors.';
+            } catch (err) {
+                button.disabled = false;
+                message.style.color = '#c0392b';
+                message.textContent = err.message;
+            }
+        }
+
+        async function savePricing(event) {
+            event.preventDefault();
+            const form = event.currentTarget;
+            const message = document.getElementById('pricingMessage');
+            const prices = {};
+            priceGroups.forEach(function (group) {
+                group.plans.forEach(function (plan) {
+                    const input = form.elements.namedItem(plan[0]);
+                    prices[plan[0]] = Number(input.value);
+                });
+            });
+            if (Object.values(prices).some(function (price) { return !Number.isSafeInteger(price) || price < 0; })) {
+                message.textContent = 'Enter a valid non-negative whole-number price for every plan.';
+                return;
+            }
+            try {
+                await adminRequest('/admin/pricing', { method: 'PUT', body: { prices: prices } });
+                message.style.color = '#267a3e';
+                message.textContent = 'All prices saved.';
+            } catch (err) {
+                message.style.color = '#c0392b';
+                message.textContent = 'Could not save prices: ' + err.message;
+            }
         }
 
         async function toggleAdActive(id, nextActive) {

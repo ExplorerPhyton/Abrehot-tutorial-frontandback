@@ -220,6 +220,12 @@
             font-size: 14px;
         }
 
+        .subject-catalog-status {
+            margin-top: 10px;
+            color: var(--danger);
+            font-size: 13px;
+        }
+
         .subject-group-title {
             margin: 16px 0 8px;
             color: var(--primary);
@@ -677,6 +683,11 @@
                             <label class="subject-option"><input type="checkbox" name="subject" value="AP Exams"> AP Exams</label>
                             <label class="subject-option"><input type="checkbox" name="subject" value="International Baccalaureate (IB)"> International Baccalaureate (IB)</label>
                         </div>
+                        <div id="additionalSubjectGroup" hidden>
+                            <div class="subject-group-title">Additional Subjects</div>
+                            <div class="subject-options" id="additionalSubjectOptions"></div>
+                        </div>
+                        <p id="subjectCatalogStatus" class="subject-catalog-status" role="status" aria-live="polite"></p>
                     </fieldset>
 
 
@@ -938,6 +949,31 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var form = document.querySelector('form');
+            var subjectCatalogStatus = document.getElementById('subjectCatalogStatus');
+            apiRequest('/tutors/subjects').then(function (result) {
+                var existing = new Set(Array.from(form.querySelectorAll('input[name="subject"]')).map(function (input) {
+                    return input.value.trim().toLowerCase();
+                }));
+                var additional = (result.subjects || []).filter(function (name) {
+                    return typeof name === 'string' && !existing.has(name.trim().toLowerCase());
+                });
+                var options = document.getElementById('additionalSubjectOptions');
+                additional.forEach(function (name) {
+                    var label = document.createElement('label');
+                    label.className = 'subject-option';
+                    var checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = 'subject';
+                    checkbox.value = name;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(' ' + name));
+                    options.appendChild(label);
+                });
+                document.getElementById('additionalSubjectGroup').hidden = additional.length === 0;
+            }).catch(function (err) {
+                subjectCatalogStatus.textContent = 'The latest subject list could not be loaded. Standard subjects are still available.';
+                console.error('Could not load subject catalog:', err);
+            });
 
             // Applications require an account: approval promotes that account's
             // role to Tutor, so there has to be one to promote.

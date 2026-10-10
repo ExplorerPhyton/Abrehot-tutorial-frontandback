@@ -313,6 +313,16 @@
         .table-scroll {
             overflow-x: auto
         }
+        .book-upload-form { display: grid; gap: 12px; max-width: 760px; }
+        .book-upload-form label { display: grid; gap: 5px; font-weight: 500; }
+        .book-upload-form input, .book-upload-form textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+        .book-upload-form textarea { min-height: 90px; resize: vertical; }
+        .book-upload-form button { justify-self: start; background: #c66b4e; color: white; }
+        .book-status-list { display: grid; gap: 10px; margin-top: 18px; }
+        .book-status-item { padding: 12px; border: 1px solid #eadfd4; border-radius: 8px; }
+        .book-status-badge { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 12px; background: #fff1d6; color: #865d16; font-size: 12px; text-transform: capitalize; }
+        .book-status-badge.approved { background: #e1f4e8; color: #246b3b; }
+        .book-status-badge.rejected { background: #fde7e5; color: #a33128; }
 
         .modal {
             display: none;
@@ -498,6 +508,36 @@
         table td { border-color: #eadfd4; }
         [data-theme="dark"] body { background: #16130f; }
         [data-theme="dark"] .profile, [data-theme="dark"] .section, [data-theme="dark"] .card, [data-theme="dark"] .stat, [data-theme="dark"] table { background: var(--surface); }
+        .abrehot-site-navbar .nav-user-badge {
+            flex: 0 0 auto !important;
+            gap: 6px !important;
+            margin-right: 0 !important;
+            white-space: nowrap !important;
+        }
+        .abrehot-site-navbar .nav-user-badge > span,
+        .abrehot-site-navbar .nav-user-badge > span > span:first-child {
+            min-width: max-content;
+            white-space: nowrap !important;
+            overflow-wrap: normal !important;
+        }
+        @media (max-width: 600px) {
+            .abrehot-site-navbar .nav-inner { gap: 4px !important; padding-left: 8px !important; padding-right: 8px !important; }
+            .abrehot-site-navbar .brand-logo { width: 94px !important; flex: 0 0 94px !important; }
+            .abrehot-site-navbar .brand-mark { max-width: 94px !important; }
+            .abrehot-site-navbar .nav-right { gap: 4px !important; }
+            .abrehot-site-navbar .nav-user-badge { gap: 4px !important; font-size: 12px !important; }
+            .abrehot-site-navbar .nav-user-badge > i { font-size: 21px !important; }
+            .abrehot-site-navbar .nav-user-badge > span > span:last-child { display: none; }
+            .abrehot-site-navbar .lang-switch { gap: 1px !important; padding: 2px !important; }
+            .abrehot-site-navbar .lang-btn { min-height: 26px !important; padding: 3px 6px !important; }
+            .abrehot-site-navbar .abrehot-nav-dark-toggle { width: 32px !important; height: 32px !important; min-height: 32px !important; flex-basis: 32px !important; }
+            .abrehot-site-navbar .nav-menu summary { min-width: 36px !important; width: 36px !important; min-height: 36px !important; }
+        }
+        @media (max-width: 360px) {
+            .abrehot-site-navbar .brand-logo { width: 82px !important; flex-basis: 82px !important; }
+            .abrehot-site-navbar .brand-mark { max-width: 82px !important; }
+            .abrehot-site-navbar .nav-user-badge > span { display: none !important; }
+        }
     </style>
 </head>
 
@@ -568,6 +608,16 @@
                 <br>
                 <button class="edit" id="updateBioBtn">Update Bio</button>
             </div>
+            <div class="card">
+                <h3>Introduction Video</h3>
+                <p>Upload a short MP4 or WebM video introducing yourself. Maximum 30 seconds and 15 MB. It will appear beside your biography on your tutor profile.</p>
+                <form id="introVideoForm" enctype="multipart/form-data">
+                    <label for="introVideoFile">Choose a video</label>
+                    <input id="introVideoFile" name="videoFile" type="file" accept="video/mp4,video/webm,.mp4,.webm" required>
+                    <button type="submit" id="introVideoSubmit">Upload / Replace Video</button>
+                    <p id="introVideoMessage" role="status" aria-live="polite"></p>
+                </form>
+            </div>
         </div>
         <br>
         <div class="stats">
@@ -594,13 +644,41 @@
                         <th>Time</th>
                         <th>Subject</th>
                         <th>Mode</th>
-                        <th>Price</th>
                         <th>Full Information</th>
                         <th>Actions</th>
                     </tr>
                 </table>
             </div>
         </div>
+        <br>
+        <section class="section" id="tutorBooksSection">
+            <h2>My Books</h2>
+            <p>Upload a PDF study book you authored or have permission to share. It will appear on the public Books page after admin approval. Maximum file size: 8 MB.</p>
+            <form id="tutorBookForm" class="book-upload-form" enctype="multipart/form-data">
+                <label>Book title *
+                    <input name="title" maxlength="160" required>
+                </label>
+                <label>Author
+                    <input name="author" maxlength="160" placeholder="Leave blank to use your tutor profile name">
+                </label>
+                <label>Subject
+                    <input name="subject" maxlength="120" placeholder="e.g. Mathematics">
+                </label>
+                <label>Grade
+                    <input name="grade" maxlength="80" placeholder="e.g. Grade 10">
+                </label>
+                <label>Description
+                    <textarea name="description" maxlength="1500" placeholder="Briefly describe this book"></textarea>
+                </label>
+                <label>PDF book *
+                    <input name="bookFile" type="file" accept=".pdf,application/pdf" required>
+                </label>
+                <button type="submit" id="tutorBookSubmit">Submit book for review</button>
+                <p id="tutorBookMessage" role="status" aria-live="polite"></p>
+            </form>
+            <h3 style="margin-top:24px;">Your submissions</h3>
+            <div id="tutorBooksList" class="book-status-list" aria-live="polite">Loading your books…</div>
+        </section>
         <br>
         <div class="stats">
             <div class="card">
@@ -638,8 +716,8 @@
             <br>
             <p>Use our contact page: <a href="../contact.html"><strong>Contact Us</strong></a></p>
             <p><strong>Email:</strong> <a
-                    href="mailto:support@abrehotonlinetutorials.com">support@abrehotonlinetutorials.com</a></p>
-            <p><strong>Phone:</strong> <a href="tel:+251911234567">+251 911 234 567</a></p>
+                    href="mailto:admin@abrehottutorials.com.et">admin@abrehottutorials.com.et</a></p>
+            <p><strong>Phone:</strong> <a href="tel:+251985471532">+251 98 547 1532</a></p>
         </div>
     </main>
     <div class="modal" id="bookingModal">
@@ -882,6 +960,143 @@
 
             var currentProfile = null;
 
+            function readVideoDuration(file) {
+                return new Promise(function (resolve, reject) {
+                    var video = document.createElement('video');
+                    var objectUrl = URL.createObjectURL(file);
+                    video.preload = 'metadata';
+                    video.onloadedmetadata = function () {
+                        var duration = video.duration;
+                        URL.revokeObjectURL(objectUrl);
+                        if (!Number.isFinite(duration) || duration <= 0) {
+                            reject(new Error('Could not read the video duration.'));
+                        } else {
+                            resolve(duration);
+                        }
+                    };
+                    video.onerror = function () {
+                        URL.revokeObjectURL(objectUrl);
+                        reject(new Error('Choose a playable MP4 or WebM video.'));
+                    };
+                    video.src = objectUrl;
+                });
+            }
+
+            document.getElementById('introVideoForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
+                var form = event.currentTarget;
+                var file = form.elements.videoFile.files[0];
+                var message = document.getElementById('introVideoMessage');
+                var button = document.getElementById('introVideoSubmit');
+                message.style.color = '';
+                if (!file) {
+                    message.textContent = 'Choose an MP4 or WebM video.';
+                    return;
+                }
+                if (file.size > 15 * 1024 * 1024) {
+                    message.textContent = 'Intro videos must be 15 MB or smaller.';
+                    return;
+                }
+                if (!/\.mp4$/i.test(file.name) && !/\.webm$/i.test(file.name)) {
+                    message.textContent = 'Upload an MP4 or WebM video.';
+                    return;
+                }
+                var token = getToken();
+                if (!token) {
+                    message.textContent = 'Your login expired. Please log in again.';
+                    return;
+                }
+                button.disabled = true;
+                message.textContent = 'Checking video duration…';
+                try {
+                    var duration = await readVideoDuration(file);
+                    if (duration > 30) throw new Error('Intro videos must be 30 seconds or shorter.');
+                    message.textContent = 'Uploading your video…';
+                    var response = await fetch(API_BASE + '/tutors/me/intro-video', {
+                        method: 'POST',
+                        headers: { Authorization: 'Bearer ' + token },
+                        body: new FormData(form),
+                    });
+                    var result = null;
+                    try { result = await response.json(); } catch (err) {}
+                    if (!response.ok) throw new Error((result && result.message) || 'Could not upload the video.');
+                    message.style.color = '#267a3e';
+                    message.textContent = 'Introduction video uploaded (' + Math.ceil(duration) + ' seconds). Upload another video to replace it.';
+                    form.reset();
+                } catch (err) {
+                    message.style.color = '#c0392b';
+                    message.textContent = err.message;
+                } finally {
+                    button.disabled = false;
+                }
+            });
+
+            async function loadTutorBooks() {
+                var list = document.getElementById('tutorBooksList');
+                try {
+                    var books = await apiRequest('/tutor-books/mine', { auth: true });
+                    if (!books.length) {
+                        list.textContent = 'You have not submitted any books yet.';
+                        return;
+                    }
+                    list.innerHTML = books.map(function (book) {
+                        var submitted = book.createdAt ? new Date(book.createdAt).toLocaleDateString() : '';
+                        return '<div class="book-status-item"><strong>' + escapeHtml(book.title) + '</strong>'
+                            + '<span class="book-status-badge ' + escapeHtml(book.status) + '">' + escapeHtml(book.status) + '</span>'
+                            + (book.subject || book.grade ? '<p>' + escapeHtml([book.subject, book.grade].filter(Boolean).join(' · ')) + '</p>' : '')
+                            + '<p>' + (submitted ? 'Submitted ' + escapeHtml(submitted) + ' · ' : '') + (Number(book.fileSize) ? (Number(book.fileSize) / (1024 * 1024)).toFixed(1) + ' MB PDF' : 'PDF') + '</p>'
+                            + '</div>';
+                    }).join('');
+                } catch (err) {
+                    list.textContent = 'Could not load your books: ' + err.message;
+                }
+            }
+
+            document.getElementById('tutorBookForm').addEventListener('submit', async function (event) {
+                event.preventDefault();
+                var form = event.currentTarget;
+                var file = form.elements.bookFile.files[0];
+                var message = document.getElementById('tutorBookMessage');
+                var submitButton = document.getElementById('tutorBookSubmit');
+                if (!file) {
+                    message.textContent = 'Choose a PDF book to upload.';
+                    return;
+                }
+                if (file.size > 8 * 1024 * 1024) {
+                    message.textContent = 'PDF files must be 8 MB or smaller.';
+                    return;
+                }
+                if (!/\.pdf$/i.test(file.name) || (file.type && file.type !== 'application/pdf')) {
+                    message.textContent = 'Upload a PDF file.';
+                    return;
+                }
+                var token = getToken();
+                if (!token) {
+                    message.textContent = 'Your login expired. Please log in again.';
+                    return;
+                }
+
+                submitButton.disabled = true;
+                message.textContent = 'Uploading your PDF…';
+                try {
+                    var response = await fetch(API_BASE + '/tutor-books', {
+                        method: 'POST',
+                        headers: { Authorization: 'Bearer ' + token },
+                        body: new FormData(form),
+                    });
+                    var result = null;
+                    try { result = await response.json(); } catch (err) { /* API may return an empty response */ }
+                    if (!response.ok) throw new Error((result && result.message) || 'Upload failed (' + response.status + ').');
+                    form.reset();
+                    message.textContent = 'Book submitted. It will be listed after admin approval.';
+                    await loadTutorBooks();
+                } catch (err) {
+                    message.textContent = 'Could not submit your book: ' + err.message;
+                } finally {
+                    submitButton.disabled = false;
+                }
+            });
+
             document.getElementById('editProfileBtn').addEventListener('click', async function () {
                 var name = prompt('Full name', document.getElementById('profileName').textContent);
                 if (name === null) return;
@@ -1039,23 +1254,6 @@
                 return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
             }
 
-            // For group sessions the tutor's hourly rate is split equally between the
-            // students — show both what each student pays and the total the group
-            // collectively pays; private sessions just show the flat hourly rate.
-            function bookingPrice(b) {
-                if (b.session === 'group' && b.groupSize) {
-                    var per = b.perPersonPrice != null ? b.perPersonPrice :
-                        (b.tutorRate != null ? Math.round((b.tutorRate / b.groupSize) * 100) / 100 : null);
-                    var total = b.groupTotalPrice != null ? b.groupTotalPrice : (b.tutorRate != null ? b.tutorRate : null);
-                    var parts = [];
-                    if (per != null) parts.push(per + ' ETB/person');
-                    if (total != null) parts.push(total + ' ETB total');
-                    if (parts.length) return parts.join(' \u00b7 ');
-                    return 'Group of ' + b.groupSize;
-                }
-                return b.tutorRate != null ? b.tutorRate + ' ETB/hr' : '-';
-            }
-
             function groupLabel(b) {
                 if (b.session !== 'group') return '-';
                 var label = b.groupSize ? b.groupSize + ' students' : 'group';
@@ -1088,7 +1286,6 @@
                     email,
                     b.notes || '-',
                     groupLabel(b),
-                    bookingPrice(b),
                 ].map(function (v) { return "'" + String(v).replace(/'/g, "\\'") + "'"; }).join(',\n');
             }
 
@@ -1150,10 +1347,15 @@
                 try {
                     currentProfile = await apiRequest('/tutors/me', { auth: true });
                     applyTutorProfile(currentProfile);
+                    if (currentProfile.introVideoUrl) {
+                        document.getElementById('introVideoMessage').textContent =
+                            'You have an introduction video uploaded. Upload another video to replace it.';
+                    }
                 } catch (err) {
                     document.getElementById('profileStatus').textContent = 'No tutor application yet';
                     document.getElementById('profileTitle').textContent = 'Submit your application on becomeatutor.html';
                 }
+                await loadTutorBooks();
 
                 var bookings = [];
                 try {
@@ -1175,7 +1377,7 @@
                 var upcomingRows = upcomingTable.querySelectorAll('tr');
                 for (var j = 1; j < upcomingRows.length; j++) upcomingRows[j].remove();
                 if (!upcoming.length) {
-                    upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="8" style="text-align:center;color:#666;">No upcoming sessions yet.</td></tr>');
+                    upcomingTable.insertAdjacentHTML('beforeend', '<tr><td colspan="7" style="text-align:center;color:#666;">No upcoming sessions yet.</td></tr>');
                 } else {
                     upcoming.forEach(function (b) {
                         var studentName = (b.child && b.child.name) ? b.child.name : ((b.requestedBy && b.requestedBy.fullname) ? b.requestedBy.fullname : 'Guest');
@@ -1186,7 +1388,6 @@
                             + '<td>' + escapeHtml(b.time || '-') + '</td>'
                             + '<td>' + escapeHtml((b.subject || []).join(', ') || b.otherSubject || '-') + '</td>'
                             + '<td>' + escapeHtml(b.session || '-') + '</td>'
-                            + '<td>' + escapeHtml(bookingPrice(b)) + '</td>'
                             + '<td><button onclick="openBooking(' + bookingArgs(b) + ')">View More</button> <a href="../' + (b.subscriptionEndsAt && new Date(b.subscriptionEndsAt) <= new Date() ? 'renew.html' : 'chat.html') + '?bookingId=' + encodeURIComponent(b._id) + '">' + (b.subscriptionEndsAt && new Date(b.subscriptionEndsAt) <= new Date() ? 'Pay subscription' : 'Chat') + '</a></td>'
                             + '<td><button onclick="completeBooking(\'' + b._id + '\')">Mark Completed</button> '
                             + '<button onclick="cancelBooking(\'' + b._id + '\')">Cancel</button></td>'

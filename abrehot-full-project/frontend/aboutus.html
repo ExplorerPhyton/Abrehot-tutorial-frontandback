@@ -213,10 +213,40 @@
         }
 
         .why-section {
-            background-color: var(--primary);
-            color: white;
-            padding: 20px;
+            background: var(--background) !important;
+            color: var(--text) !important;
+            padding: 32px !important;
+            border-radius: 16px !important;
+        }
 
+        .why-section > h2 {
+            color: var(--primary-dark);
+            text-align: center;
+        }
+
+        .why-section .why > div {
+            min-width: 0;
+            padding: 24px;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px;
+            background: var(--surface) !important;
+            color: var(--text) !important;
+            box-shadow: var(--shadow);
+        }
+
+        .why-section .why h3 {
+            margin: 0 0 12px;
+            color: var(--primary);
+        }
+
+        .why-section .why p {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent !important;
+            color: var(--text-secondary) !important;
+            line-height: 1.7;
         }
 
         .why {

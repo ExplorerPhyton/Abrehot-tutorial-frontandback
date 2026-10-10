@@ -602,6 +602,7 @@
                 <button class="track-btn active" onclick="switchTrack('local')" id="track-local-btn" data-en="Local Students" data-am="የሀገር ውስጥ ተማሪዎች">Local Students</button>
                 <button class="track-btn" onclick="switchTrack('international')" id="track-intl-btn" data-en="International Students" data-am="የዓለም አቀፍ ተማሪዎች">International Students</button>
             </div>
+            <p id="pricingStatus" role="status" hidden></p>
         </div>
     </section>
 
@@ -914,6 +915,8 @@
         </div>
     </footer>
 
+    <script src="js/api.js"></script>
+    <script src="js/pricing.js"></script>
     <script>
         function switchTrack(track) {
             const localTrack = document.getElementById('local-track');
@@ -943,6 +946,28 @@
 
             document.getElementById(`prep-${grade}`).style.display = 'block';
             document.getElementById(`${grade}-btn`).classList.add('active');
+        }
+
+        async function loadPricing() {
+            const status = document.getElementById('pricingStatus');
+            try {
+                const prices = await getPricingRates();
+                document.querySelectorAll('.pricing-card').forEach(card => {
+                    const amount = card.querySelector('.amount');
+                    const planLink = card.querySelector('a[href*="package="]');
+                    if (!amount || !planLink) return;
+                    const planId = new URL(planLink.href, location.href).searchParams.get('package');
+                    const price = prices[planId];
+                    if (Number.isSafeInteger(price) && price >= 0) {
+                        amount.textContent = formatPricingRate(planId, price);
+                    }
+                });
+                status.hidden = true;
+            } catch (err) {
+                console.error('Could not load current pricing:', err);
+                status.textContent = 'Current prices could not be loaded. The listed prices may be out of date.';
+                status.hidden = false;
+            }
         }
 
         function setLanguage(lang) {
@@ -976,6 +1001,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('abrehot_lang') || 'en';
             setLanguage(savedLang);
+            loadPricing();
         });
     </script>
 </body>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="js/theme.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abrehot | Cinematic Credits</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --terracotta: #E17C50;
+            --terracotta-glow: #FF6B35;
+            --gold-leaf: #F3B700;
+            --font-cinematic: 'Cinzel', serif;
+            --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #030203;
+            color: #F5EFE6;
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Prevent site-wide navbars from conflicting */
+        header:not(#credits-controls-layer), 
+        nav:not(.credits-btn-group), 
+        .navbar, 
+        .site-header {
+            display: none !important;
+        }
+
+        /* Force Control Overlay to Top Layer */
+        #credits-controls-layer {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100vw !important;
+            padding: 24px 40px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            z-index: 2147483647 !important;
+            background: linear-gradient(180deg, rgba(3,2,3,0.95) 0%, rgba(3,2,3,0) 100%) !important;
+            pointer-events: auto !important;
+        }
+
+        .credits-brand-mark {
+            height: 52px !important;
+            width: auto !important;
+            filter: brightness(0) invert(1) drop-shadow(0 0 12px rgba(225, 124, 80, 0.5)) !important;
+        }
+
+        .credits-btn-group {
+            display: flex !important;
+            gap: 14px !important;
+            align-items: center !important;
+        }
+
+        .credits-btn {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border: 1px solid rgba(225, 124, 80, 0.5) !important;
+            color: #F5EFE6 !important;
+            padding: 12px 24px !important;
+            border-radius: 30px !important;
+            cursor: pointer !important;
+            font-size: 0.9rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            backdrop-filter: blur(12px) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
+        }
+
+        .credits-btn:hover, .credits-btn.active {
+            background: var(--terracotta) !important;
+            border-color: var(--terracotta-glow) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 0 25px rgba(225, 124, 80, 0.7) !important;
+        }
+
+        /* Reactive Glow Cursor Follower */
+        .cursor-glow {
+            position: fixed;
+            width: 700px;
+            height: 700px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(225, 124, 80, 0.15) 0%, rgba(243, 183, 0, 0.04) 45%, transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 4;
+            transition: transform 0.05s linear;
+        }
+
+        /* Particle Space Dust Canvas */
+        #dustCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Stage Container */
+        .stage-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        /* Continuous Endless Looping Container */
+        .scroll-track {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+            animation: infiniteLoop 42s linear infinite;
+        }
+
+        .scroll-track.paused { animation-play-state: paused; }
+        .scroll-track.fast { animation-duration: 16s; }
+
+        @keyframes infiniteLoop {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-50%);
+            }
+        }
+
+        .credits-wrapper {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            text-align: center;
+            padding-top: 100vh;
+        }
+
+        /* Typography */
+        .logo-header { 
+            margin-bottom: 140px; 
+            padding-top: 50px;
+        }
+
+        .epic-badge {
+            display: inline-block;
+            font-size: 1.1rem;
+            letter-spacing: 0.45em;
+            text-transform: uppercase;
+            color: var(--gold-leaf);
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(243, 183, 0, 0.6);
+            font-weight: 700;
+        }
+
+        .main-title {
+            font-family: var(--font-cinematic);
+            font-size: 6rem;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            background: linear-gradient(180deg, #FFFFFF 0%, #D8C5B0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+            margin-bottom: 16px;
+            line-height: 1.1;
+        }
+
+        .sub-title {
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.45em;
+            color: var(--terracotta);
+            font-weight: 800;
+        }
+
+        .credits-section { 
+            margin-bottom: 110px; 
+        }
+
+        .section-heading {
+            font-family: var(--font-cinematic);
+            font-size: 1.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.35em;
+            color: var(--gold-leaf);
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            font-weight: 700;
+        }
+
+        .section-heading::before, .section-heading::after {
+            content: '';
+            width: 100px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-leaf), transparent);
+        }
+
+        /* Standard Credit Card Hover Effect */
+        .credit-card {
+            margin-bottom: 65px;
+            padding: 15px;
+            border-radius: 16px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .credit-card:hover {
+            transform: scale(1.04);
+        }
+
+        .credit-card:hover .player-name {
+            color: var(--terracotta);
+            text-shadow: 0 0 25px rgba(225, 124, 80, 0.7);
+        }
+
+        .role-title {
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: #A3988E;
+            margin-bottom: 10px;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .player-name {
+            font-family: var(--font-cinematic);
+            font-size: 3.4rem;
+            color: #FFFFFF;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            margin-bottom: 18px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transition: all 0.4s ease;
+        }
+
+        /* Special VIP Hover Effect for Executive Engineering */
+        .credit-card.special-lead {
+            position: relative;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .credit-card.special-lead:hover {
+            transform: scale(1.09);
+        }
+
+        .credit-card.special-lead:hover .player-name {
+            color: #FFE600;
+            font-size: 3.8rem;
+            letter-spacing: 0.08em;
+            text-shadow: 0 0 25px rgba(255, 230, 0, 0.9),
+                         0 0 50px rgba(243, 183, 0, 0.6),
+                         0 0 80px rgba(225, 124, 80, 0.4);
+        }
+
+        .credit-card.special-lead:hover .role-title {
+            color: var(--gold-leaf);
+            letter-spacing: 0.35em;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .social-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(225, 124, 80, 0.4);
+            border-radius: 30px;
+            color: #EADECF;
+            text-decoration: none;
+            font-size: 1.05rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .social-chip:hover {
+            color: #FFFFFF;
+            background: var(--terracotta);
+            border-color: var(--terracotta-glow);
+            box-shadow: 0 0 25px rgba(225, 124, 80, 0.8);
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .social-chip i { font-size: 1.3rem; }
+
+        .thanks-note {
+            font-family: var(--font-cinematic);
+            font-size: 2rem;
+            color: #D8C5B0;
+            margin: 140px 0 200px;
+            line-height: 1.8;
+            letter-spacing: 0.06em;
+        }
+
+        /* Vignette Masks */
+        .fade-mask-top {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 22vh;
+            background: linear-gradient(180deg, #030203 0%, rgba(3,2,3,0) 100%);
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .fade-mask-bottom {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100%; height: 25vh;
+            background: linear-gradient(0deg, #030203 0%, rgba(3,2,3,0) 100%);
+            z-index: 20;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Reactive Glow Follower -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- Space Dust Canvas -->
+    <canvas id="dustCanvas"></canvas>
+
+    <!-- Edge Masks -->
+    <div class="fade-mask-top"></div>
+    <div class="fade-mask-bottom"></div>
+
+    <!-- Non-Royalty Piano Outro Audio -->
+    <audio id="pianoAudio" loop preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=sad-soul-piano-114127.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Isolated High-Priority Control Header -->
+    <div id="credits-controls-layer">
+        <a href="index.html">
+            <img src="Abrehot-removebg-preview.png" alt="Abrehot Logo" class="credits-brand-mark">
+        </a>
+        <div class="credits-btn-group">
+            <button class="credits-btn" id="soundToggle"><i class="bx bx-volume-mute" id="soundIcon"></i> Piano Music</button>
+            <button class="credits-btn" id="toggleScroll"><i class="bx bx-pause" id="playPauseIcon"></i> Pause</button>
+            <button class="credits-btn" id="speedUp"><i class="bx bx-fast-forward"></i> Fast</button>
+            <button class="credits-btn" id="restartScroll"><i class="bx bx-refresh"></i> Restart</button>
+        </div>
+    </div>
+
+    <!-- Stage Area -->
+    <div class="stage-container">
+        <div class="scroll-track" id="scrollTrack">
+            
+            <!-- Block 1: Main Content -->
+            <main class="credits-wrapper" id="primaryBlock">
+                <div class="logo-header">
+                    <span class="epic-badge">An Educational Masterpiece</span>
+                    <h1 class="main-title">ABREHOT</h1>
+                    <p class="sub-title">System Creators & Hall of Fame</p>
+                </div>
+
+                <!-- Executive Engineering -->
+                <div class="credits-section">
+                    <div class="section-heading">Executive Engineering</div>
+                    
+                    <div class="credit-card special-lead">
+                        <div class="role-title">Full Stack Development</div>
+                        <div class="player-name">Tsegazeab Kibrom</div>
+                        <div class="social-links">
+                            <a href="https://t.me/itztsegaa" target="_blank" class="social-chip"><i class="bx bxl-telegram"></i> @itztsegaa</a>
+                            <a href="https://github.com/Nasalclock" target="_blank" class="social-chip"><i class="bx bxl-github"></i> Nasalclock</a>
+                        </div>
+                    </div>
+
+                    <div class="credit-card special-lead">
+                        <div class="role-title">Backend & Database Development</div>
+                        <div class="player-name">Yonathan Leulseged</div>
+                        <div class="social-links">
+                            <a href="https://t.me/rare_under2" target="_blank" class="social-chip"><i class="bx bxl-telegram"></i> @rare_under2</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layout/Navigation Team -->
+                <div class="credits-section">
+                    <div class="section-heading">Layout/Navigation Team</div>
+
+                    <div class="credit-card">
+                        <div class="role-title">Layout Designer</div>
+                        <div class="player-name">Tinbit</div>
+                    </div>
+
+                    <div class="credit-card">
+                        <div class="role-title">Layout Designer</div>
+                        <div class="player-name">Leyu Henok</div>
+                    </div>
+
+                    <div class="credit-card">
+                        <div class="role-title">Layout Designer</div>
+                        <div class="player-name">Hildana</div>
+                    </div>
+                </div>
+
+                <!-- Project Leadership -->
+                <div class="credits-section">
+                    <div class="section-heading">Project Leadership</div>
+                    
+                    <div class="credit-card">
+                        <div class="role-title">Curriculum Planning & Owner</div>
+                        <div class="player-name">Mr. Abreham</div>
+                    </div>
+                </div>
+
+                <!-- Outro Note -->
+                <div class="thanks-note">
+                    Special thanks to our early supporters, tutors, and the entire Abrehot student community.<br><br>
+                    PRODUCED IN ADDIS ABABA, ETHIOPIA &bull; 2026
+                </div>
+            </main>
+
+            <!-- Block 2: Clone for Seamless Endless Loop -->
+            <main class="credits-wrapper" id="cloneBlock" aria-hidden="true"></main>
+
+        </div>
+    </div>
+
+    <script>
+        // Clone primary block content into cloneBlock for dynamic endless loop
+        const primaryBlock = document.getElementById('primaryBlock');
+        const cloneBlock = document.getElementById('cloneBlock');
+        cloneBlock.innerHTML = primaryBlock.innerHTML;
+
+        // Mouse Glow Follower
+        const cursorGlow = document.getElementById('cursorGlow');
+        window.addEventListener('mousemove', (e) => {
+            cursorGlow.style.left = `${e.clientX}px`;
+            cursorGlow.style.top = `${e.clientY}px`;
+        });
+
+        // Ambient Particle Dust
+        const dustCanvas = document.getElementById('dustCanvas');
+        const dustCtx = dustCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeDust() {
+            dustCanvas.width = window.innerWidth;
+            dustCanvas.height = window.innerHeight;
+            particles = Array.from({ length: 90 }, () => ({
+                x: Math.random() * dustCanvas.width,
+                y: Math.random() * dustCanvas.height,
+                radius: Math.random() * 2 + 0.5,
+                color: Math.random() > 0.4 ? '#E17C50' : '#F3B700',
+                speedY: Math.random() * 0.4 + 0.1,
+                alpha: Math.random()
+            }));
+        }
+
+        function drawDust() {
+            dustCtx.clearRect(0, 0, dustCanvas.width, dustCanvas.height);
+            particles.forEach(p => {
+                p.y -= p.speedY;
+                if (p.y < 0) p.y = dustCanvas.height;
+
+                dustCtx.beginPath();
+                dustCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                dustCtx.fillStyle = p.color;
+                dustCtx.globalAlpha = p.alpha;
+                dustCtx.shadowBlur = 10;
+                dustCtx.shadowColor = p.color;
+                dustCtx.fill();
+            });
+            requestAnimationFrame(drawDust);
+        }
+        window.addEventListener('resize', resizeDust);
+        resizeDust();
+        drawDust();
+
+        // Piano Audio Controller
+        const pianoAudio = document.getElementById('pianoAudio');
+        const soundBtn = document.getElementById('soundToggle');
+        const soundIcon = document.getElementById('soundIcon');
+
+        function setAudioState(isPlaying) {
+            if (isPlaying) {
+                soundBtn.classList.add('active');
+                soundIcon.className = 'bx bx-volume-full';
+            } else {
+                soundBtn.classList.remove('active');
+                soundIcon.className = 'bx bx-volume-mute';
+            }
+        }
+
+        function tryPlayAudio() {
+            pianoAudio.muted = false;
+            const promise = pianoAudio.play();
+            if (promise !== undefined) {
+                promise.then(() => {
+                    setAudioState(true);
+                    removeListeners();
+                }).catch(() => {
+                    setAudioState(false);
+                });
+            }
+        }
+
+        function removeListeners() {
+            ['click', 'pointerdown', 'keydown', 'touchstart'].forEach(evt => {
+                window.removeEventListener(evt, tryPlayAudio, true);
+            });
+        }
+
+        // Add listeners for any click/tap on the page to immediately start audio
+        ['click', 'pointerdown', 'keydown', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, tryPlayAudio, { capture: true, once: false });
+        });
+
+        // Attempt on load
+        tryPlayAudio();
+
+        // Manual Sound Toggle Control
+        soundBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (pianoAudio.paused) {
+                pianoAudio.play().then(() => {
+                    setAudioState(true);
+                }).catch(() => {
+                    setAudioState(false);
+                });
+            } else {
+                pianoAudio.pause();
+                setAudioState(false);
+            }
+        });
+
+        // Track Controls
+        const scrollTrack = document.getElementById('scrollTrack');
+        const toggleBtn = document.getElementById('toggleScroll');
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        const speedBtn = document.getElementById('speedUp');
+        const restartBtn = document.getElementById('restartScroll');
+
+        toggleBtn.addEventListener('click', () => {
+            scrollTrack.classList.toggle('paused');
+            const isPaused = scrollTrack.classList.contains('paused');
+            playPauseIcon.className = isPaused ? 'bx bx-play' : 'bx bx-pause';
+            toggleBtn.childNodes[1].nodeValue = isPaused ? ' Resume' : ' Pause';
+        });
+
+        speedBtn.addEventListener('click', () => {
+            scrollTrack.classList.toggle('fast');
+            speedBtn.classList.toggle('active');
+        });
+
+        restartBtn.addEventListener('click', () => {
+            scrollTrack.style.animation = 'none';
+            scrollTrack.offsetHeight; // Reflow trigger
+            scrollTrack.style.animation = null;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+@media (max-width: 900px) {
+    .ver-nav {
+        box-sizing: border-box !important;
+        width: min(82vw, 282px) !important;
+        max-width: none !important;
+        height: 100dvh !important;
+        padding: 84px 16px 24px !important;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .field-container,
+    .cards,
+    .actionButtons,
+    .social-grid,
+    .how,
+    .why,
+    .faq,
+    .hero-highlights {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    main,
+    .main-container,
+    .content-wrapper,
+    .field-container,
+    .filter-section,
+    .footer-links {
+        max-width: 100%;
+    }
+
+    .header,
+    .right-header,
+    .head-buttons,
+    .buttons,
+    .actionButtons,
+    .tabs,
+    .actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 600px) {
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        min-width: 0;
+    }
+
+    img,
+    video,
+    iframe,
+    canvas {
+        max-width: 100%;
+    }
+
+    main,
+    .main-container,
+    .content-wrapper,
+    .section,
+    .panel,
+    .about,
+    .mission,
+    .vision,
+    .find,
+    .filter-section,
+    .book-session,
+    .become-tutor,
+    .donate,
+    .booking-summary {
+        min-width: 0;
+        width: 100%;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .header,
+    header.navbar,
+    body > header:not(.navbar) {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .abrehot-site-navbar .nav-inner,
+    .navbar .nav-inner {
+        gap: 8px;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    .abrehot-site-navbar .brand-mark,
+    .navbar .brand-mark {
+        height: 38px !important;
+        max-width: min(38vw, 120px) !important;
+    }
+
+    .abrehot-site-navbar .nav-right,
+    .navbar .nav-right {
+        gap: 6px;
+        flex: 0 1 auto;
+    }
+
+    .navbar .lang-switch {
+        gap: 2px;
+        padding: 2px;
+    }
+
+    .navbar .lang-btn {
+        min-height: 32px !important;
+        padding: 4px 7px !important;
+    }
+
+    .navbar .notification > button {
+        width: 38px !important;
+        min-width: 38px;
+        min-height: 38px !important;
+        padding: 0 !important;
+    }
+
+    .abrehot-nav-dark-toggle {
+        width: 34px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        flex-basis: 34px;
+    }
+
+    .navbar .nav-menu summary,
+    .abrehot-site-navbar .nav-menu summary {
+        min-width: 44px;
+        width: 44px;
+        min-height: 44px;
+        display: grid;
+        place-items: center;
+        padding: 0 !important;
+    }
+
+    @media (max-width: 360px) {
+        .abrehot-site-navbar .nav-inner,
+        .navbar .nav-inner {
+            gap: 4px;
+        }
+
+        .abrehot-site-navbar .brand-mark,
+        .navbar .brand-mark {
+            max-width: min(32vw, 100px) !important;
+        }
+
+        .abrehot-site-navbar .nav-right,
+        .navbar .nav-right {
+            gap: 4px;
+        }
+    }
+
+    .right-header > a {
+        max-width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .right-header img[src*="Abrehot-removebg-preview"] {
+        width: auto !important;
+        height: 38px !important;
+        max-width: min(38vw, 120px) !important;
+        object-fit: contain;
+    }
+
+    .navbar .nav-menu-panel,
+    .abrehot-site-navbar .nav-menu-panel {
+        min-width: min(220px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+    }
+
+    .mode-switcher {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+
+    .mode-switcher .mode-btn {
+        min-width: 0;
+        max-width: 100%;
+        white-space: normal;
+    }
+
+    .right-header,
+    .head-buttons {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .right-header > *,
+    .head-buttons > a {
+        min-width: 0;
+    }
+
+    .head-buttons > a {
+        flex: 1 1 140px;
+    }
+
+    .head-buttons button,
+    .actionButtons button,
+    .buttons button {
+        width: 100%;
+    }
+
+    .footer {
+        padding: 28px 16px !important;
+    }
+
+    .footer-links {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+
+    .social-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .tf-searchbar {
+        flex-wrap: wrap;
+        padding: 10px;
+    }
+
+    .tf-searchbar input {
+        min-width: 0;
+    }
+
+    .tf-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea {
+        min-width: 0;
+        font-size: 16px !important;
+    }
+
+    button,
+    .btn,
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px;
+        max-width: 100%;
+    }
+
+    .notification-menu {
+        max-width: calc(100vw - 32px) !important;
+    }
+
+    .stat {
+        min-width: 0;
+        padding: 14px 10px !important;
+    }
+
+    .stat h2 {
+        font-size: clamp(22px, 7vw, 32px) !important;
+    }
+
+    h1 {
+        font-size: clamp(1.75rem, 8vw, 2.5rem);
+        overflow-wrap: anywhere;
+    }
+
+    p,
+    a,
+    td,
+    th {
+        overflow-wrap: anywhere;
+    }
+
+    .table-scroll {
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-scroll table {
+        min-width: 560px;
+    }
+}
+
+@media (max-width: 380px) {
+    .stats,
+    .footer-links {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .navbar .notification {
+        display: none;
+    }
+}

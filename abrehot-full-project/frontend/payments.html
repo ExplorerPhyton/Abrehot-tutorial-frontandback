@@ -59,7 +59,7 @@
             <div class="connect">
                 <div>
                     <label for="apiBase">API address</label>
-                    <input type="text" id="apiBase" placeholder="https://api.abrehottutoring.com.et/api">
+                    <input type="text" id="apiBase" placeholder="https://abrehot-tutorial-frontandback.onrender.com/api">
                 </div>
                 <div>
                     <label for="secret">Admin secret</label>
@@ -89,7 +89,7 @@
         var currentStatus = 'pending';
 
         var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
-        apiBaseEl.value = sessionStorage.getItem('abrehot_admin_api') || (isLocal ? 'http://localhost:5000/api' : 'https://api.abrehottutoring.com.et/api');
+        apiBaseEl.value = sessionStorage.getItem('abrehot_admin_api') || (isLocal ? 'http://localhost:5000/api' : 'https://abrehot-tutorial-frontandback.onrender.com/api');
         secretEl.value = sessionStorage.getItem('abrehot_admin_secret') || '';
 
         function esc(s) {

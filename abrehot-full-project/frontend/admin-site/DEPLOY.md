@@ -15,8 +15,8 @@ www.abrehottutoring.com.et anymore).
 | `index.html` meta | `noindex, nofollow` — belt and suspenders with robots.txt |
 
 The API endpoint is chosen automatically: `localhost` builds call
-`http://localhost:5000/api`, anything else calls the Railway API
-(`abrehot-tutorial-frontandback-production.up.railway.app/api`).
+`http://localhost:5000/api`, anything else calls the Render API
+(`https://abrehot-tutorial-frontandback.onrender.com/api`).
 
 ## Plesk setup (one time)
 
@@ -35,13 +35,12 @@ The API endpoint is chosen automatically: `localhost` builds call
 4. Open `https://admin.abrehottutoring.com.et/` and log in with the
    `ADMIN_SECRET` from the backend's environment variables.
 
-## Backend (already handled in this repo)
+## Backend
 
 `backend/server.js` CORS automatically allows any **https** origin on
-`abrehottutoring.com.et` and its first-party subdomains — so the new admin
-subdomain works on Railway with **no environment-variable change**. If you
-ever move the panel to a different domain, add that origin to `CLIENT_ORIGIN`
-in the Railway variables instead.
+`abrehottutoring.com.et` and its first-party subdomains. If the panel is served
+from a different domain, add that origin to `CLIENT_ORIGIN` in the backend's
+environment variables.
 
 The API itself is protected by the `x-admin-secret` header check
 (`backend/middleware/adminAuth.js`), which is unchanged.

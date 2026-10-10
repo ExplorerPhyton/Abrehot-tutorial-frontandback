@@ -2,13 +2,8 @@
 // Include this on any page BEFORE your page-specific script:
 //   <script src="js/api.js"></script>   (use "../js/api.js" from inside /dashboards)
 
-// Pages opened from disk (file://) or a dev server on localhost use the local
-// backend; the deployed site uses the Railway-hosted API. When the Plesk
-// api subdomain works again, switch this back to
-// https://api.abrehottutoring.com.et/api
-const API_BASE = location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname)
-  ? 'http://localhost:5000/api'
-  : 'https://abrehot-tutorial-frontandback-production.up.railway.app/api';
+// Use the deployed API from both local and deployed frontend pages.
+const API_BASE = 'https://abrehot-tutorial-frontandback.onrender.com/api';
 
 function getToken() {
   return localStorage.getItem('abrehot_token');
