@@ -2,10 +2,12 @@ const router = require('express').Router();
 const Booking = require('../models/Booking');
 const TutorProfile = require('../models/TutorProfile');
 const Child = require('../models/Child');
+const PricingRate = require('../models/PricingRate');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
 const { notifyAdmin } = require('../utils/mailer');
 const { notify } = require('../utils/notifications');
 const { calculateSubscription } = require('../utils/subscription');
+const { DEFAULT_PRICES, resolveBookingPrice } = require('../utils/pricing');
 
 function toArray(value) {
   if (value === undefined || value === null || value === '') return [];
@@ -73,13 +75,33 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       grade, subject, other, topic, goal,
       session, groupMode, groupSize, platform, city, address, language,
       date, time, duration, notes, tutorId, childId,
-      planType, selectedDays, selectedTimeSlots, packageId,
+      planType, selectedDays, selectedTimeSlots, pricingPlanId: submittedPricingPlanId, quotedPrice,
     } = req.body;
 
     if (!grade) {
       return res.status(400).json({ message: 'Grade is required' });
     }
 
+    const savedRates = await PricingRate.find().select('planId price -_id').lean();
+    const prices = Object.assign(
+      {},
+      DEFAULT_PRICES,
+      Object.fromEntries(savedRates.map((rate) => [rate.planId, rate.price]))
+    );
+    const priceQuote = resolveBookingPrice(
+      { subject, grade, planType: planType || 'hourly', session, groupSize, selectedDays, duration },
+      prices
+    );
+    if (!priceQuote) {
+      return res.status(400).json({
+        message: 'No price is configured for this grade, subject, group size, and plan. Choose an available tutoring plan.',
+      });
+    }
+    if ((submittedPricingPlanId && submittedPricingPlanId !== priceQuote.planId)
+      || (quotedPrice !== undefined && Number(quotedPrice) !== priceQuote.amount)) {
+      return res.status(409).json({ message: 'The price changed while you were booking. Please review the updated price and try again.' });
+    }
+    const packageId = priceQuote.packageId;
     const selectedPackage = TUTORING_PACKAGES[packageId];
     if (!selectedPackage) {
       return res.status(400).json({ message: 'Please choose a valid tutoring package.' });
@@ -188,31 +210,11 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       }
     }
 
-    // Snapshot the tutor's rate at booking time so the price shown today
-    // stays stable even if the tutor changes their profile later.
-    const tutorRate = chosenTutor.price != null ? Number(chosenTutor.price) : undefined;
-
-    // Group sessions are a flat split of the tutor's hourly rate across the
-    // attending students — no extra discount, the split IS the saving. Each
-    // student pays rate / groupSize, and the whole group collectively pays the
-    // full hourly rate (perPersonPrice * groupSize === tutorRate, modulo rounding).
-    let perPersonPrice, groupTotalPrice;
-    if (session === 'group' && tutorRate != null) {
-      const size = Number(groupSize);
-      perPersonPrice = Math.round((tutorRate / size) * 100) / 100;
-      groupTotalPrice = tutorRate;
-    }
-
     let subscription;
     try {
       subscription = calculateSubscription({
         planType,
-        packageId,
-        tutorRate,
-        session,
-        groupSize,
         selectedDays: toArray(selectedDays),
-        duration,
       });
     } catch (err) {
       return res.status(400).json({ message: err.message });
@@ -231,10 +233,10 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       groupMode: session === 'group' ? groupMode : undefined,
       groupSize: session === 'group' ? Number(groupSize) : undefined,
       packageId,
-      packageClassSize: selectedPackage.classSize,
-      studentFee: selectedPackage.fee,
+      packageClassSize: priceQuote.classSize,
+      studentFee: priceQuote.fee,
       teacherPayment: selectedPackage.teacherPayment,
-      packageFee: selectedPackage.fee,
+      packageFee: priceQuote.fee,
       platform,
       city,
       address,
@@ -248,11 +250,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       selectedDays: ['weekly', 'monthly'].includes(planType) ? toArray(selectedDays) : [],
       selectedTimeSlots: ['weekly', 'monthly'].includes(planType) ? (selectedTimeSlots || []) : [],
       status: 'pending', // Awaiting admin approval — see /api/admin/bookings/:id/approve|reject
-      tutorRate,
-      perPersonPrice,
-      groupTotalPrice,
       subscriptionFrequency: subscription.frequency,
-      subscriptionAmount: subscription.amount,
       subscriptionStatus: subscription.frequency ? 'pending' : undefined,
       ...(req.paymentFields || {}), // paymentStatus, and paymentMethod/paymentScreenshot/transactionId for paid packages — set by validatePaymentOnCreate
     });
@@ -260,7 +258,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     res.status(201).json({ message: 'Booking request submitted! An admin will review and approve it shortly.', booking });
 
     const groupLine = session === 'group'
-      ? `Group session for ${booking.groupSize} students — ${perPersonPrice != null ? perPersonPrice + ' ETB/person' : 'rate split equally'} (${groupMode})\n`
+      ? `Group session for ${booking.groupSize} students (${groupMode})\n`
       : '';
 
     notifyAdmin(

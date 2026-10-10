@@ -60,6 +60,8 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/children', require('./routes/children'));
 app.use('/api/book-ads', require('./routes/bookads'));
+app.use('/api/tutor-books', require('./routes/tutorBooks'));
+app.use('/api/pricing', require('./routes/pricing'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

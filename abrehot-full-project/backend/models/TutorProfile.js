@@ -27,8 +27,6 @@ const tutorProfileSchema = new mongoose.Schema(
     address: String,
     // Actual uploaded profile photo stored as a base64 data URL (for tutor cards)
     profilePhotoUrl: { type: String, default: null },
-    price: Number, // hourly rate in ETB
-    monthlyPrice: Number, // monthly plan fee in ETB
     availability: String, // free-text, e.g. "Monday-Friday, 4-8 PM"
     availableDays: [String], // e.g. ['Monday', 'Wednesday', 'Friday']
     availableTimeSlots: [

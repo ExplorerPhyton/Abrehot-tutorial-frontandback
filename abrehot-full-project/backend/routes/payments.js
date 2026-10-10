@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
 const { subscriptionEndDate } = require('../utils/subscription');
+const { sendToUser } = require('../utils/mailer');
 
 const router = express.Router();
 
@@ -99,7 +100,7 @@ router.patch('/:id', async (req, res, next) => {
 
     const booking = await Booking.findByIdAndUpdate(id, update, { new: true, runValidators: false })
       .populate('tutor', 'fullname user')
-      .populate('requestedBy', 'fullname');
+      .populate('requestedBy', 'fullname email');
     if (!booking) return res.status(404).json({ message: 'Booking not found.' });
 
     // Notifications (best effort: never fail the review because of them)
@@ -125,6 +126,34 @@ router.patch('/:id', async (req, res, next) => {
       if (notes.length) await Notification.insertMany(notes);
     } catch (e) {
       console.error('Payment notification failed', e);
+    }
+
+    // Confirmation email to the payer (best effort: never fail the review
+    // because of it — sendToUser never throws either).
+    if (approved && booking.requestedBy && booking.requestedBy.email) {
+      try {
+        const site = (process.env.SITE_URL || 'https://abrehottutoring.com.et').replace(/\/+$/, '');
+        const chatUrl = site + '/chat.html?bookingId=' + booking._id;
+        const details = [
+          'Tutor: ' + ((booking.tutor && booking.tutor.fullname) || 'your tutor'),
+          'Subject(s): ' + ((booking.subject || []).join(', ') || '-'),
+          booking.session ? 'Session: ' + booking.session : null,
+          booking.paymentMethod ? 'Paid via: ' + booking.paymentMethod : null,
+          booking.subscriptionEndsAt ? 'Subscription active until: ' + booking.subscriptionEndsAt.toDateString() : null,
+        ].filter(Boolean);
+        await sendToUser(
+          booking.requestedBy.email,
+          'Payment confirmed — Abrehot Online Tutorials',
+          'Hi ' + (booking.requestedBy.fullname || 'there') + ',\n\n' +
+            'Good news! Your payment was approved by our team.\n\n' +
+            details.join('\n') + '\n\n' +
+            'You can now chat with your tutor:\n' + chatUrl + '\n\n' +
+            'If anything looks wrong, just reply to this email.\n\n' +
+            '— Abrehot Online Tutorials'
+        );
+      } catch (e) {
+        console.error('Payment confirmation email failed', e);
+      }
     }
 
     res.json({ message: 'Payment ' + booking.paymentStatus + '.', paymentStatus: booking.paymentStatus });

@@ -56,12 +56,6 @@ const bookingSchema = new mongoose.Schema(
 
     // Pricing snapshot, captured from the tutor's rate at booking time so later
     // rate changes on the tutor's profile never rewrite past bookings.
-    // tutorRate is the hourly rate; for group sessions perPersonPrice is that
-    // rate split equally (tutorRate / groupSize) and groupTotalPrice is what the
-    // whole group collectively pays (the full hourly rate).
-    tutorRate: Number,
-    perPersonPrice: Number,
-    groupTotalPrice: Number,
 
     city: String,
     address: String,
