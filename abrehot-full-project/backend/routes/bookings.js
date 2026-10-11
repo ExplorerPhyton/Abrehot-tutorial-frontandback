@@ -289,6 +289,10 @@ router.post('/', attachUserIfPresent, async (req, res) => {
 // GET /api/bookings/mine — a logged-in user's own booking requests, as the requester
 // (for parent-dash.html and student-dash.html)
 router.get('/mine', requireAuth, async (req, res) => {
+  await Booking.updateMany(
+    { requestedBy: req.user.id, paymentStatus: 'approved', status: 'pending' },
+    { $set: { status: 'confirmed' } }
+  );
   const bookings = await Booking.find({ requestedBy: req.user.id })
     .populate('tutor', 'fullname')
     .populate('child', 'name grade')
@@ -302,6 +306,10 @@ router.get('/mine', requireAuth, async (req, res) => {
 router.get('/for-tutor', requireAuth, async (req, res) => {
   const profile = await TutorProfile.findOne({ user: req.user.id }).sort({ createdAt: -1 });
   if (!profile) return res.json([]); // not a tutor / no application yet — just show nothing
+  await Booking.updateMany(
+    { tutor: profile._id, paymentStatus: 'approved', status: 'pending' },
+    { $set: { status: 'confirmed' } }
+  );
   const bookings = await Booking.find({ tutor: profile._id, status: { $ne: 'pending' } })
     .populate('requestedBy', 'fullname email phone role')
     .populate('child', 'name grade')

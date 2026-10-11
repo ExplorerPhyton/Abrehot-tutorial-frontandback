@@ -227,6 +227,10 @@ router.post('/tutors/:id/reject', async (req, res) => {
 
 // GET /api/admin/bookings — quick visibility into incoming booking requests
 router.get('/bookings', async (req, res) => {
+  await Booking.updateMany(
+    { paymentStatus: 'approved', status: 'pending' },
+    { $set: { status: 'confirmed' } }
+  );
   const bookings = await Booking.find()
     .populate('tutor', 'fullname user')
     .populate('requestedBy', 'fullname email')

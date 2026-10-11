@@ -71,14 +71,16 @@ router.patch('/:id', async (req, res, next) => {
     }
 
     const approved = action === 'approve';
-    const existingBooking = await Booking.findById(id).select('subscriptionFrequency').lean();
+    const existingBooking = await Booking.findById(id).select('subscriptionFrequency status').lean();
     if (!existingBooking) return res.status(404).json({ message: 'Booking not found.' });
     const reviewTime = new Date();
+    const newlyConfirmed = approved && existingBooking.status === 'pending';
     const update = approved
       ? {
           $set: {
             paymentStatus: 'approved',
             paymentReviewedAt: reviewTime,
+            ...(newlyConfirmed ? { status: 'confirmed' } : {}),
             ...(existingBooking.subscriptionFrequency
               ? {
                   subscriptionStatus: 'active',
@@ -111,15 +113,15 @@ router.patch('/:id', async (req, res, next) => {
         notes.push({
           user: booking.requestedBy._id,
           message: approved
-            ? 'Your payment was approved. You can now chat with ' + ((booking.tutor && booking.tutor.fullname) || 'your tutor') + '.'
+            ? 'Your payment was approved and your booking is confirmed. You can now chat with ' + ((booking.tutor && booking.tutor.fullname) || 'your tutor') + '.'
             : 'Your payment was rejected: ' + booking.paymentNote,
           link: approved ? chatLink : 'book.html',
         });
       }
-      if (approved && booking.tutor && booking.tutor.user) {
+      if (newlyConfirmed && booking.tutor && booking.tutor.user) {
         notes.push({
           user: booking.tutor.user,
-          message: 'You have a new booking' + (booking.requestedBy ? ' from ' + booking.requestedBy.fullname : '') + '.',
+          message: 'You have a new confirmed booking' + (booking.requestedBy ? ' from ' + booking.requestedBy.fullname : '') + '.',
           link: chatLink,
         });
       }
@@ -156,7 +158,7 @@ router.patch('/:id', async (req, res, next) => {
       }
     }
 
-    res.json({ message: 'Payment ' + booking.paymentStatus + '.', paymentStatus: booking.paymentStatus });
+    res.json({ message: 'Payment ' + booking.paymentStatus + '.', paymentStatus: booking.paymentStatus, bookingStatus: booking.status });
   } catch (err) {
     next(err);
   }
