@@ -1,8 +1,64 @@
 const router = require('express').Router();
+const multer = require('multer');
 const TutorProfile = require('../models/TutorProfile');
+const TutorIntroVideo = require('../models/TutorIntroVideo');
 const Rating = require('../models/Rating');
+const Subject = require('../models/Subject');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
 const { notifyAdmin } = require('../utils/mailer');
+const { DEFAULT_SUBJECTS } = require('../utils/subjects');
+const { inspectIntroVideo, sendIntroVideo } = require('../utils/introVideo');
+
+const MAX_INTRO_VIDEO_SIZE = 15 * 1024 * 1024;
+const introVideoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_INTRO_VIDEO_SIZE, files: 1, fields: 0 },
+  fileFilter(req, file, callback) {
+    const allowed = (file.mimetype === 'video/mp4' && /\.mp4$/i.test(file.originalname))
+      || (file.mimetype === 'video/webm' && /\.webm$/i.test(file.originalname));
+    if (!allowed) return callback(new Error('Upload an MP4 or WebM video.'));
+    callback(null, true);
+  },
+});
+
+function handleIntroVideoUpload(req, res, next) {
+  introVideoUpload.single('videoFile')(req, res, (err) => {
+    if (!err) return next();
+    const message = err.code === 'LIMIT_FILE_SIZE'
+      ? 'Intro videos must be 15 MB or smaller.'
+      : err.message || 'Could not upload this video.';
+    res.status(400).json({ message });
+  });
+}
+
+async function addIntroVideoUrls(tutors) {
+  if (!tutors.length) return [];
+  const videoRows = await TutorIntroVideo.find({ tutor: { $in: tutors.map((tutor) => tutor._id) } })
+    .select('tutor -_id')
+    .lean();
+  const videoTutorIds = new Set(videoRows.map((video) => String(video.tutor)));
+  return tutors.map((tutor) => {
+    const result = tutor.toObject();
+    if (videoTutorIds.has(String(tutor._id))) {
+      result.introVideoUrl = '/api/tutors/' + tutor._id + '/intro-video';
+    }
+    return result;
+  });
+}
+
+router.get('/subjects', async (req, res, next) => {
+  try {
+    const subjects = await Subject.find().select('name -_id').sort({ name: 1 }).lean();
+    const names = new Map(DEFAULT_SUBJECTS.map((name) => [name.toLowerCase(), name]));
+    subjects.forEach(({ name }) => names.set(name.toLowerCase(), name));
+    res.json({
+      subjects: Array.from(names.values()),
+      customSubjects: subjects.map(({ name }) => name),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 // Helper: HTML checkboxes with the same `name` submit as a single value when only
 // one is checked, and as an array when several are checked. Normalize to an array.
@@ -72,7 +128,11 @@ router.get('/me', requireAuth, async (req, res) => {
   if (!profile) {
     return res.status(404).json({ message: 'No tutor application found for this account yet. Submit one via becomeatutor.html.' });
   }
-  res.json(profile.toObject());
+  const result = profile.toObject();
+  if (await TutorIntroVideo.exists({ tutor: profile._id })) {
+    result.introVideoUrl = '/api/tutors/' + profile._id + '/intro-video';
+  }
+  res.json(result);
 });
 
 // PATCH /api/tutors/me — used by the tutor dashboard profile and availability controls
@@ -92,6 +152,36 @@ router.patch('/me', requireAuth, async (req, res) => {
   res.json(profile.toObject());
 });
 
+router.post('/me/intro-video', requireAuth, handleIntroVideoUpload, async (req, res, next) => {
+  try {
+    if (req.user.role !== 'Tutor') return res.status(403).json({ message: 'Only tutor accounts can upload an introduction video.' });
+    if (!req.file) return res.status(400).json({ message: 'Choose an MP4 or WebM video to upload.' });
+    const tutor = await TutorProfile.findOne({ user: req.user.id }).sort({ createdAt: -1 });
+    if (!tutor) return res.status(403).json({ message: 'Submit a tutor application before uploading an introduction video.' });
+    const extension = req.file.mimetype === 'video/mp4' ? '.mp4' : '.webm';
+    const duration = await inspectIntroVideo(req.file.buffer, extension);
+    const video = await TutorIntroVideo.findOneAndUpdate(
+      { tutor: tutor._id },
+      {
+        $set: {
+          fileData: req.file.buffer,
+          contentType: req.file.mimetype,
+          fileSize: req.file.size,
+          duration,
+        },
+      },
+      { new: true, upsert: true, runValidators: true }
+    ).select('-fileData');
+    res.status(201).json({
+      message: 'Introduction video saved.',
+      video: { fileSize: video.fileSize, duration: video.duration, updatedAt: video.updatedAt },
+    });
+  } catch (err) {
+    if (err.statusCode) return res.status(err.statusCode).json({ message: err.message });
+    next(err);
+  }
+});
+
 // GET /api/tutors — matches the "Find Your Tutor" search on tutors.html
 // Supports query params: ?subject=Mathematics&city=Addis%20Ababa&language=Amharic&grade=Grade%209-10&mode=Online
 router.get('/', async (req, res) => {
@@ -106,7 +196,7 @@ router.get('/', async (req, res) => {
     if (city) filter.city = { $regex: city, $options: 'i' };
 
     const tutors = await TutorProfile.find(filter).sort({ createdAt: -1 });
-    res.json(tutors);
+    res.json(await addIntroVideoUrls(tutors));
   } catch (err) {
     res.status(500).json({ message: 'Could not fetch tutors', error: err.message });
   }
@@ -121,7 +211,7 @@ router.get('/recommended', async (req, res) => {
   const tutors = await TutorProfile.find({ status: 'approved' })
     .sort({ averageRating: -1, ratingCount: -1, createdAt: -1 })
     .limit(limit);
-  res.json(tutors);
+  res.json(await addIntroVideoUrls(tutors));
 });
 
 // --- Rating & review routes MUST come BEFORE /:id so Express doesn't
@@ -188,12 +278,25 @@ router.get('/:id/reviews', async (req, res) => {
   }
 });
 
+router.get('/:id/intro-video', async (req, res, next) => {
+  try {
+    const tutor = await TutorProfile.findOne({ _id: req.params.id, status: 'approved' }).select('_id');
+    if (!tutor) return res.status(404).json({ message: 'Tutor video not found.' });
+    const video = await TutorIntroVideo.findOne({ tutor: tutor._id }).select('+fileData');
+    if (!video) return res.status(404).json({ message: 'Tutor video not found.' });
+    sendIntroVideo(req, res, video);
+  } catch (err) {
+    if (err.name === 'CastError') return res.status(404).json({ message: 'Tutor video not found.' });
+    next(err);
+  }
+});
+
 // GET /api/tutors/:id — a single tutor's public profile (must come LAST among /:id routes)
 router.get('/:id', async (req, res) => {
   try {
     const tutor = await TutorProfile.findById(req.params.id);
     if (!tutor) return res.status(404).json({ message: 'Tutor not found' });
-    res.json(tutor);
+    res.json((await addIntroVideoUrls([tutor]))[0]);
   } catch (err) {
     res.status(400).json({ message: 'Invalid tutor id' });
   }

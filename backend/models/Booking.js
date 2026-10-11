@@ -38,6 +38,8 @@ const bookingSchema = new mongoose.Schema(
     paymentStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
     paymentNote: { type: String, trim: true }, // admin's reason when rejected
     paymentReviewedAt: { type: Date },
+    zoomMeetingId: { type: String },
+    zoomJoinUrl: { type: String },
     studentFee: { type: String },
     teacherPayment: { type: Number },
     packageFee: { type: String },

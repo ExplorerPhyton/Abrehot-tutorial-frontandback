@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Notification = require('../models/Notification');
 const { subscriptionEndDate } = require('../utils/subscription');
+const { sendToUser } = require('../utils/mailer');
+const { createZoomMeeting, isZoomBooking } = require('../utils/zoom');
 
 const router = express.Router();
 
@@ -70,14 +72,25 @@ router.patch('/:id', async (req, res, next) => {
     }
 
     const approved = action === 'approve';
-    const existingBooking = await Booking.findById(id).select('subscriptionFrequency').lean();
+    const existingBooking = await Booking.findById(id)
+      .select('subscriptionFrequency status platform dateKey date time duration subject zoomMeetingId zoomJoinUrl')
+      .lean();
     if (!existingBooking) return res.status(404).json({ message: 'Booking not found.' });
     const reviewTime = new Date();
+    const newlyConfirmed = approved && existingBooking.status === 'pending';
+    let zoomMeeting = existingBooking.zoomJoinUrl
+      ? { id: existingBooking.zoomMeetingId, joinUrl: existingBooking.zoomJoinUrl }
+      : null;
+    if (approved && isZoomBooking(existingBooking) && !zoomMeeting) {
+      zoomMeeting = await createZoomMeeting(existingBooking);
+    }
     const update = approved
       ? {
           $set: {
             paymentStatus: 'approved',
             paymentReviewedAt: reviewTime,
+            ...(newlyConfirmed ? { status: 'confirmed' } : {}),
+            ...(zoomMeeting ? { zoomMeetingId: zoomMeeting.id, zoomJoinUrl: zoomMeeting.joinUrl } : {}),
             ...(existingBooking.subscriptionFrequency
               ? {
                   subscriptionStatus: 'active',
@@ -99,7 +112,7 @@ router.patch('/:id', async (req, res, next) => {
 
     const booking = await Booking.findByIdAndUpdate(id, update, { new: true, runValidators: false })
       .populate('tutor', 'fullname user')
-      .populate('requestedBy', 'fullname');
+      .populate('requestedBy', 'fullname email');
     if (!booking) return res.status(404).json({ message: 'Booking not found.' });
 
     // Notifications (best effort: never fail the review because of them)
@@ -110,15 +123,19 @@ router.patch('/:id', async (req, res, next) => {
         notes.push({
           user: booking.requestedBy._id,
           message: approved
-            ? 'Your payment was approved. You can now chat with ' + ((booking.tutor && booking.tutor.fullname) || 'your tutor') + '.'
+            ? 'Your payment was approved and your booking is confirmed.' +
+              (booking.zoomJoinUrl ? ' Join your Zoom session: ' + booking.zoomJoinUrl : '') +
+              ' You can now chat with ' + ((booking.tutor && booking.tutor.fullname) || 'your tutor') + '.'
             : 'Your payment was rejected: ' + booking.paymentNote,
           link: approved ? chatLink : 'book.html',
         });
       }
-      if (approved && booking.tutor && booking.tutor.user) {
+      if (newlyConfirmed && booking.tutor && booking.tutor.user) {
         notes.push({
           user: booking.tutor.user,
-          message: 'You have a new booking' + (booking.requestedBy ? ' from ' + booking.requestedBy.fullname : '') + '.',
+          message: 'You have a new confirmed booking' +
+            (booking.requestedBy ? ' from ' + booking.requestedBy.fullname : '') +
+            (booking.zoomJoinUrl ? '. Zoom link: ' + booking.zoomJoinUrl : '.'),
           link: chatLink,
         });
       }
@@ -127,7 +144,41 @@ router.patch('/:id', async (req, res, next) => {
       console.error('Payment notification failed', e);
     }
 
-    res.json({ message: 'Payment ' + booking.paymentStatus + '.', paymentStatus: booking.paymentStatus });
+    // Confirmation email to the payer (best effort: never fail the review
+    // because of it — sendToUser never throws either).
+    if (approved && booking.requestedBy && booking.requestedBy.email) {
+      try {
+        const site = (process.env.SITE_URL || 'https://abrehottutoring.com.et').replace(/\/+$/, '');
+        const chatUrl = site + '/chat.html?bookingId=' + booking._id;
+        const details = [
+          'Tutor: ' + ((booking.tutor && booking.tutor.fullname) || 'your tutor'),
+          'Subject(s): ' + ((booking.subject || []).join(', ') || '-'),
+          booking.session ? 'Session: ' + booking.session : null,
+          booking.paymentMethod ? 'Paid via: ' + booking.paymentMethod : null,
+          booking.subscriptionEndsAt ? 'Subscription active until: ' + booking.subscriptionEndsAt.toDateString() : null,
+          booking.zoomJoinUrl ? 'Zoom meeting: ' + booking.zoomJoinUrl : null,
+        ].filter(Boolean);
+        await sendToUser(
+          booking.requestedBy.email,
+          'Payment confirmed — Abrehot Online Tutorials',
+          'Hi ' + (booking.requestedBy.fullname || 'there') + ',\n\n' +
+            'Good news! Your payment was approved by our team.\n\n' +
+            details.join('\n') + '\n\n' +
+            'You can now chat with your tutor:\n' + chatUrl + '\n\n' +
+            'If anything looks wrong, just reply to this email.\n\n' +
+            '— Abrehot Online Tutorials'
+        );
+      } catch (e) {
+        console.error('Payment confirmation email failed', e);
+      }
+    }
+
+    res.json({
+      message: 'Payment ' + booking.paymentStatus + '.',
+      paymentStatus: booking.paymentStatus,
+      bookingStatus: booking.status,
+      ...(booking.zoomJoinUrl ? { zoomJoinUrl: booking.zoomJoinUrl } : {}),
+    });
   } catch (err) {
     next(err);
   }

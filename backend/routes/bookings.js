@@ -2,10 +2,12 @@ const router = require('express').Router();
 const Booking = require('../models/Booking');
 const TutorProfile = require('../models/TutorProfile');
 const Child = require('../models/Child');
+const PricingRate = require('../models/PricingRate');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
 const { notifyAdmin } = require('../utils/mailer');
 const { notify } = require('../utils/notifications');
 const { calculateSubscription } = require('../utils/subscription');
+const { DEFAULT_PRICES, resolveBookingPrice } = require('../utils/pricing');
 
 function toArray(value) {
   if (value === undefined || value === null || value === '') return [];
@@ -73,13 +75,33 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       grade, subject, other, topic, goal,
       session, groupMode, groupSize, platform, city, address, language,
       date, time, duration, notes, tutorId, childId,
-      planType, selectedDays, selectedTimeSlots, packageId,
+      planType, selectedDays, selectedTimeSlots, pricingPlanId: submittedPricingPlanId, quotedPrice,
     } = req.body;
 
     if (!grade) {
       return res.status(400).json({ message: 'Grade is required' });
     }
 
+    const savedRates = await PricingRate.find().select('planId price -_id').lean();
+    const prices = Object.assign(
+      {},
+      DEFAULT_PRICES,
+      Object.fromEntries(savedRates.map((rate) => [rate.planId, rate.price]))
+    );
+    const priceQuote = resolveBookingPrice(
+      { subject, grade, planType: planType || 'hourly', session, groupSize, selectedDays, duration },
+      prices
+    );
+    if (!priceQuote) {
+      return res.status(400).json({
+        message: 'No price is configured for this grade, subject, group size, and plan. Choose an available tutoring plan.',
+      });
+    }
+    if ((submittedPricingPlanId && submittedPricingPlanId !== priceQuote.planId)
+      || (quotedPrice !== undefined && Number(quotedPrice) !== priceQuote.amount)) {
+      return res.status(409).json({ message: 'The price changed while you were booking. Please review the updated price and try again.' });
+    }
+    const packageId = priceQuote.packageId;
     const selectedPackage = TUTORING_PACKAGES[packageId];
     if (!selectedPackage) {
       return res.status(400).json({ message: 'Please choose a valid tutoring package.' });
@@ -211,10 +233,10 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       groupMode: session === 'group' ? groupMode : undefined,
       groupSize: session === 'group' ? Number(groupSize) : undefined,
       packageId,
-      packageClassSize: selectedPackage.classSize,
-      studentFee: selectedPackage.fee,
+      packageClassSize: priceQuote.classSize,
+      studentFee: priceQuote.fee,
       teacherPayment: selectedPackage.teacherPayment,
-      packageFee: selectedPackage.fee,
+      packageFee: priceQuote.fee,
       platform,
       city,
       address,
@@ -267,6 +289,10 @@ router.post('/', attachUserIfPresent, async (req, res) => {
 // GET /api/bookings/mine — a logged-in user's own booking requests, as the requester
 // (for parent-dash.html and student-dash.html)
 router.get('/mine', requireAuth, async (req, res) => {
+  await Booking.updateMany(
+    { requestedBy: req.user.id, paymentStatus: 'approved', status: 'pending' },
+    { $set: { status: 'confirmed' } }
+  );
   const bookings = await Booking.find({ requestedBy: req.user.id })
     .populate('tutor', 'fullname')
     .populate('child', 'name grade')
@@ -280,6 +306,10 @@ router.get('/mine', requireAuth, async (req, res) => {
 router.get('/for-tutor', requireAuth, async (req, res) => {
   const profile = await TutorProfile.findOne({ user: req.user.id }).sort({ createdAt: -1 });
   if (!profile) return res.json([]); // not a tutor / no application yet — just show nothing
+  await Booking.updateMany(
+    { tutor: profile._id, paymentStatus: 'approved', status: 'pending' },
+    { $set: { status: 'confirmed' } }
+  );
   const bookings = await Booking.find({ tutor: profile._id, status: { $ne: 'pending' } })
     .populate('requestedBy', 'fullname email phone role')
     .populate('child', 'name grade')

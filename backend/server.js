@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const Booking = require('./models/Booking');
 
 const app = express();
 
@@ -60,6 +61,8 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/children', require('./routes/children'));
 app.use('/api/book-ads', require('./routes/bookads'));
+app.use('/api/tutor-books', require('./routes/tutorBooks'));
+app.use('/api/pricing', require('./routes/pricing'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
@@ -71,6 +74,16 @@ app.use((err, req, res, next) => {
 
 // --- Start ---
 const PORT = process.env.PORT || 5000;
-connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Abrehot backend running on http://localhost:${PORT}`));
-});
+connectDB()
+  .then(() => Booking.updateMany(
+    { paymentStatus: 'approved', status: 'pending' },
+    { $set: { status: 'confirmed' } }
+  ))
+  .then((result) => {
+    if (result.modifiedCount) console.log('Previously approved bookings confirmed:', result.modifiedCount);
+    app.listen(PORT, () => console.log(`Abrehot backend running on http://localhost:${PORT}`));
+  })
+  .catch((err) => {
+    console.error('Backend startup failed:', err);
+    process.exit(1);
+  });
