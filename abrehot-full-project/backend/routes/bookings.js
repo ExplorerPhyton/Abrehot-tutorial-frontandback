@@ -4,7 +4,7 @@ const TutorProfile = require('../models/TutorProfile');
 const Child = require('../models/Child');
 const PricingRate = require('../models/PricingRate');
 const { attachUserIfPresent, requireAuth } = require('../middleware/auth');
-const { notifyAdmin } = require('../utils/mailer');
+const { notifyAdmin, sendToUser } = require('../utils/mailer');
 const { notify } = require('../utils/notifications');
 const { calculateSubscription } = require('../utils/subscription');
 const { DEFAULT_PRICES, resolveBookingPrice } = require('../utils/pricing');
@@ -74,7 +74,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     const {
       grade, subject, other, topic, goal,
       session, groupMode, groupSize, platform, city, address, language,
-      date, time, duration, notes, tutorId, childId,
+      date, time, duration, notes, tutorId, childId, contactEmail,
       planType, selectedDays, selectedTimeSlots, pricingPlanId: submittedPricingPlanId, quotedPrice,
     } = req.body;
 
@@ -132,6 +132,12 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     // tutors through this form.
     if (req.user && req.user.role === 'Tutor') {
       return res.status(403).json({ message: 'Tutor accounts cannot book tutoring sessions.' });
+    }
+    const emailRecipient = req.user && req.user.email
+      ? req.user.email
+      : typeof contactEmail === 'string' ? contactEmail.trim().toLowerCase() : '';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRecipient) || emailRecipient.length > 254) {
+      return res.status(400).json({ message: 'Enter a valid email address to receive your booking updates.' });
     }
 
     // A booking with no tutor attached has nobody to accept/act on it — it just
@@ -196,9 +202,11 @@ router.post('/', attachUserIfPresent, async (req, res) => {
     // Session-type-specific requirements: an online meeting platform only makes
     // sense for online sessions (including online group sessions), and shouldn't
     // be forced on in-person bookings.
-    if (effectiveMode === 'online' && !platform) {
+    const onlinePlatforms = new Set(['googleMeet', 'zoom', 'telegram']);
+    if (effectiveMode === 'online' && !onlinePlatforms.has(platform)) {
       return res.status(400).json({ message: 'Please choose an online meeting platform.' });
     }
+    const selectedPlatform = effectiveMode === 'online' ? platform : undefined;
 
     // If a childId was sent, make sure it actually belongs to whoever is logged in —
     // otherwise a parent could book "for" someone else's child.
@@ -222,6 +230,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
 
     const booking = await Booking.create({
       requestedBy: req.user ? req.user.id : undefined,
+      contactEmail: req.user && req.user.email ? undefined : emailRecipient,
       tutor: tutorId || undefined,
       child: child ? child._id : undefined,
       grade,
@@ -237,7 +246,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       studentFee: priceQuote.fee,
       teacherPayment: selectedPackage.teacherPayment,
       packageFee: priceQuote.fee,
-      platform,
+      platform: selectedPlatform,
       city,
       address,
       language,
@@ -255,7 +264,32 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       ...(req.paymentFields || {}), // paymentStatus, and paymentMethod/paymentScreenshot/transactionId for paid packages — set by validatePaymentOnCreate
     });
 
-    res.status(201).json({ message: 'Booking request submitted! An admin will review and approve it shortly.', booking });
+    const bookingEmailDelivery = await sendToUser(
+          emailRecipient,
+          'Booking request received — Abrehot Online Tutorials',
+          'Hi ' + (req.user.fullname || 'there') + ',\n\n' +
+            'We received your tutoring request and will review it shortly.\n\n' +
+            'Tutor: ' + (chosenTutor.fullname || 'your tutor') + '\n' +
+            'Subject(s): ' + ((booking.subject || []).join(', ') || other || '-') + '\n' +
+            'Session: ' + (session || '-') + '\n' +
+            'Meeting platform: ' + ({ googleMeet: 'Google Meet', zoom: 'Zoom', telegram: 'Telegram' }[selectedPlatform] || 'In person') + '\n' +
+            `Preferred date/time: ${dateKey} ${time}\n\n` +
+            'If you selected an online platform, the meeting link will be emailed after your payment is approved.\n\n' +
+            '— Abrehot Online Tutorials'
+        );
+    if (bookingEmailDelivery.sent) {
+      booking.bookingEmailSentAt = new Date();
+      try {
+        await Booking.updateOne({ _id: booking._id }, { $set: { bookingEmailSentAt: booking.bookingEmailSentAt } });
+      } catch (emailTrackingError) {
+        console.error('Could not save booking receipt email status', emailTrackingError);
+      }
+    }
+    res.status(201).json({
+      message: 'Booking request submitted! An admin will review and approve it shortly.',
+      booking,
+      bookingEmailDelivery,
+    });
 
     const groupLine = session === 'group'
       ? `Group session for ${booking.groupSize} students (${groupMode})\n`
@@ -265,7 +299,7 @@ router.post('/', attachUserIfPresent, async (req, res) => {
       `New booking request awaiting approval (${grade})`,
       `Subject(s): ${(booking.subject || []).join(', ') || other || '-'}\n` +
         (child ? `For: ${child.name}\n` : '') +
-        `Session: ${session || '-'} via ${platform || '-'}\n` +
+        `Session: ${session || '-'} via ${selectedPlatform || '-'}\n` +
         groupLine +
         `City: ${city || '-'}\n` +
         `Date/time: ${date || '-'} ${time || ''}\n` +

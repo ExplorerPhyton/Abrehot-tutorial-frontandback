@@ -66,14 +66,14 @@ async function notifyAdmin(subject, text) {
 // approved"). Same contract as notifyAdmin: never throws and never blocks
 // the caller when mail isn't configured.
 async function sendToUser(to, subject, text) {
-  if (!to) return;
+  if (!to) return { sent: false, reason: 'no-recipient' };
   const t = getTransporter();
   if (!t) {
     if (!warnedOnce) {
       console.log('[mailer] Email notifications are off — set SMTP_HOST/SMTP_USER/SMTP_PASS/MAIL_FROM (or GMAIL_USER/GMAIL_APP_PASSWORD) in .env to enable them.');
       warnedOnce = true;
     }
-    return;
+    return { sent: false, reason: 'not-configured' };
   }
   try {
     await t.sendMail({
@@ -82,8 +82,10 @@ async function sendToUser(to, subject, text) {
       subject,
       text,
     });
+    return { sent: true };
   } catch (err) {
     console.error('[mailer] Failed to send user email:', err.message);
+    return { sent: false, reason: 'send-failed', message: err.message };
   }
 }
 

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bookingSchema = new mongoose.Schema(
   {
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // optional, if logged in
+    contactEmail: { type: String, trim: true, lowercase: true, maxlength: 254 },
     tutor: { type: mongoose.Schema.Types.ObjectId, ref: 'TutorProfile' }, // optional, if booking a specific tutor
     child: { type: mongoose.Schema.Types.ObjectId, ref: 'Child' }, // who the session is actually for, when requestedBy is a Parent
 
@@ -38,10 +39,16 @@ const bookingSchema = new mongoose.Schema(
     paymentStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
     paymentNote: { type: String, trim: true }, // admin's reason when rejected
     paymentReviewedAt: { type: Date },
+    googleMeetEventId: { type: String },
+    googleMeetJoinUrl: { type: String },
+    zoomMeetingId: { type: String },
+    zoomJoinUrl: { type: String },
+    bookingEmailSentAt: { type: Date },
+    confirmationEmailSentAt: { type: Date },
     studentFee: { type: String },
     teacherPayment: { type: Number },
     packageFee: { type: String },
-    platform: { type: String, enum: ['googleMeet', 'zoom', 'microsoftTeams', 'telegram'] },
+    platform: { type: String, enum: ['googleMeet', 'zoom', 'telegram'] },
 
     planType: { type: String, enum: ['hourly', 'weekly', 'monthly'], default: 'hourly' },
     selectedDays: [String], // for recurring plans: e.g. ['Monday', 'Wednesday', 'Friday']

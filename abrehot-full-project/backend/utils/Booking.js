@@ -41,7 +41,7 @@ const bookingSchema = new mongoose.Schema(
     studentFee: { type: String },
     teacherPayment: { type: Number },
     packageFee: { type: String },
-    platform: { type: String, enum: ['googleMeet', 'zoom', 'microsoftTeams', 'telegram'] },
+    platform: { type: String, enum: ['googleMeet', 'zoom', 'telegram'] },
 
     // Plan type: 'hourly' session vs 'monthly' recurring plan
     planType: { type: String, enum: ['hourly', 'monthly'], default: 'hourly' },
