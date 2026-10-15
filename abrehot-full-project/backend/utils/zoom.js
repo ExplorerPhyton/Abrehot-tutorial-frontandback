@@ -24,8 +24,47 @@ async function getAccessToken() {
     {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: '',
+      signal: AbortSignal.timeout(15000),
+    }
+  );
+  const result = await response.json();
+  if (!response.ok || !result.access_token) {
+    throw new Error(result.reason || result.message || `Zoom authentication failed (HTTP ${response.status}).`);
+  }
+
+  cachedToken = {
+    value: result.access_token,
+    expiresAt: Date.now() + Math.max(0, Number(result.expires_in || 0) - 60) * 1000,
+  };
+  return cachedToken.value;
+}
+
+function meetingStart(booking) {
+  const date = booking.dateKey || (booking.date instanceof Date ? booking.date.toISOString().slice(0, 10) : '');
+  const time = String(booking.time || '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
+    throw new Error('The booking needs a valid date and time before a Zoom meeting can be created.');
+  }
+  return `${date}T${time}:00`;
+}
+
+function meetingDuration(booking) {
+  const durations = { '1 Hour': 60, '1.5 Hours': 90, '2 Hours': 120, '2 + Hours': 120 };
+  return durations[booking.duration] || 60;
+}
+
+async function createZoomMeeting(booking) {
+  const accessToken = await getAccessToken();
+  const subjects = Array.isArray(booking.subject) ? booking.subject.join(', ') : '';
+  const response = await fetch(`${ZOOM_API}/users/me/meetings`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       topic: `Abrehot tutoring${subjects ? `: ${subjects}` : ''}`,
