@@ -610,12 +610,20 @@
                         && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(payment.paymentScreenshot)
                         ? '<img class="payment-screenshot" src="' + escapeHtml(payment.paymentScreenshot) + '" alt="Payment receipt screenshot">'
                         : '<p class="empty">No payment screenshot was submitted.</p>';
+                    const needsConfirmationRetry = payment.paymentStatus === 'approved'
+                        && (!payment.confirmationEmailSentAt
+                            || (payment.platform === 'zoom' && !payment.zoomJoinUrl)
+                            || (payment.platform === 'googleMeet' && !payment.googleMeetJoinUrl));
                     return '<div class="card">'
                         + '<h3>' + escapeHtml(payment.grade) + ' — '
                         + escapeHtml((Array.isArray(payment.subject) ? payment.subject : []).join(', ') || payment.otherSubject || 'No subject')
                         + ' (Tutor: ' + escapeHtml(tutorName) + ')</h3>'
                         + '<p><strong>Student:</strong> ' + escapeHtml(requesterName)
                         + (payment.requestedBy && payment.requestedBy.email ? ' (' + escapeHtml(payment.requestedBy.email) + ')' : '') + '</p>'
+                        + '<p><strong>Confirmation email:</strong> '
+                        + escapeHtml(payment.confirmationEmailSentAt ? 'Sent' : 'Not sent')
+                        + ' &nbsp; <strong>Recipient:</strong> '
+                        + escapeHtml((payment.requestedBy && payment.requestedBy.email) || payment.contactEmail || '-') + '</p>'
                         + '<p><strong>Payment method:</strong> ' + escapeHtml(payment.paymentMethod || '-')
                         + ' &nbsp; <strong>Transaction/reference:</strong> ' + escapeHtml(payment.transactionId || '-') + '</p>'
                         + '<p><strong>Payment status:</strong> ' + escapeHtml(payment.paymentStatus || status) + '</p>'
@@ -626,9 +634,12 @@
                         + (payment.paymentNote ? '<p><strong>Review note:</strong> ' + escapeHtml(payment.paymentNote) + '</p>' : '')
                         + (status === 'pending'
                             ? '<div class="actions">'
-                                + '<button onclick="reviewPayment(\'' + payment._id + '\', \'approve\', this)">Approve</button>'
-                                + '<button class="reject-btn" onclick="reviewPayment(\'' + payment._id + '\', \'reject\', this)">Reject</button>'
+                                + '<button onclick="reviewPayment(\'' + payment._id + '\', \'approve\', this, \'' + status + '\')">Approve</button>'
+                                + '<button class="reject-btn" onclick="reviewPayment(\'' + payment._id + '\', \'reject\', this, \'' + status + '\')">Reject</button>'
                                 + '</div>'
+                            : '')
+                        + (status === 'approved' && needsConfirmationRetry
+                            ? '<div class="actions"><button onclick="reviewPayment(\'' + payment._id + '\', \'approve\', this, \'' + status + '\')">Retry meeting/email</button></div>'
                             : '')
                         + '</div>';
                 }).join('');
@@ -644,7 +655,7 @@
             }
         }
 
-        async function reviewPayment(id, action, button) {
+        async function reviewPayment(id, action, button, status) {
             const body = { action: action };
             if (action === 'reject') {
                 const note = window.prompt('Please give a reason for rejecting this payment:');
@@ -657,8 +668,19 @@
             }
             button.disabled = true;
             try {
-                await adminRequest('/admin/payments/' + encodeURIComponent(id), { method: 'PATCH', body: body });
-                await renderPayments('pending');
+                const result = await adminRequest('/admin/payments/' + encodeURIComponent(id), { method: 'PATCH', body: body });
+                if (action === 'approve' && result.emailDelivery && !result.emailDelivery.sent && !result.emailDelivery.alreadySent) {
+                    const meetingFailure = result.zoomDelivery && !result.zoomDelivery.created && result.zoomDelivery.reason !== 'not-required'
+                        ? 'Zoom: ' + result.zoomDelivery.reason
+                        : result.googleMeetDelivery && !result.googleMeetDelivery.created && result.googleMeetDelivery.reason !== 'not-required'
+                            ? 'Google Meet: ' + result.googleMeetDelivery.reason
+                            : '';
+                    const emailFailure = result.emailDelivery.message || result.emailDelivery.reason;
+                    window.alert('Payment is approved, but the confirmation email was not sent. '
+                        + (meetingFailure || 'Email: ' + emailFailure)
+                        + '. Fix the issue and use Retry meeting/email to try again.');
+                }
+                await renderPayments(status || 'pending');
             } catch (err) {
                 button.disabled = false;
                 window.alert('Could not ' + action + ' payment: ' + err.message);
