@@ -81,6 +81,7 @@ router.patch('/:id', async (req, res, next) => {
     const activateSubscription = approved &&
       existingBooking.subscriptionFrequency &&
       existingBooking.paymentStatus !== 'approved';
+    const newlyApproved = approved && existingBooking.paymentStatus !== 'approved';
     const newlyConfirmed = approved && existingBooking.status === 'pending';
     let zoomMeeting = existingBooking.zoomJoinUrl
       ? { id: existingBooking.zoomMeetingId, joinUrl: existingBooking.zoomJoinUrl }
@@ -146,7 +147,7 @@ router.patch('/:id', async (req, res, next) => {
       const notes = [];
       const meetingUrl = booking.googleMeetJoinUrl || booking.zoomJoinUrl;
       const meetingName = booking.googleMeetJoinUrl ? 'Google Meet' : 'Zoom';
-      if (booking.requestedBy) {
+      if (booking.requestedBy && (newlyApproved || !approved)) {
         notes.push({
           user: booking.requestedBy._id,
           message: approved
@@ -172,12 +173,21 @@ router.patch('/:id', async (req, res, next) => {
     }
 
     const emailRecipient = (booking.requestedBy && booking.requestedBy.email) || booking.contactEmail;
+    const meetingLinkPending =
+      (isZoomBooking(booking) && !booking.zoomJoinUrl) ||
+      (isGoogleMeetBooking(booking) && !booking.googleMeetJoinUrl);
     const shouldSendConfirmationEmail = approved &&
       Boolean(emailRecipient) &&
+      !meetingLinkPending &&
       (!existingBooking.confirmationEmailSentAt ||
         (zoomDelivery.created && !zoomDelivery.alreadyCreated) ||
         (googleMeetDelivery.created && !googleMeetDelivery.alreadyCreated));
     let emailDelivery = { sent: false, reason: 'not-approved' };
+    if (approved && meetingLinkPending) {
+      emailDelivery = { sent: false, reason: 'meeting-not-ready' };
+    } else if (approved && !emailRecipient) {
+      emailDelivery = { sent: false, reason: 'no-recipient' };
+    }
     if (shouldSendConfirmationEmail) {
       try {
         const site = (process.env.SITE_URL || 'https://abrehottutoring.com.et').replace(/\/+$/, '');
@@ -188,14 +198,14 @@ router.patch('/:id', async (req, res, next) => {
           'Tutor: ' + ((booking.tutor && booking.tutor.fullname) || 'your tutor'),
           'Subject(s): ' + ((booking.subject || []).join(', ') || '-'),
           booking.session ? 'Session: ' + booking.session : null,
+          booking.dateKey ? 'Date: ' + booking.dateKey : null,
+          booking.time ? 'Time: ' + booking.time + ' (Africa/Addis_Ababa)' : null,
+          booking.duration ? 'Duration: ' + booking.duration : null,
           booking.paymentMethod ? 'Paid via: ' + booking.paymentMethod : null,
           booking.subscriptionEndsAt ? 'Subscription active until: ' + booking.subscriptionEndsAt.toDateString() : null,
           booking.platform ? 'Meeting platform: ' + (platformNames[booking.platform] || booking.platform) : null,
           meetingUrl ? (booking.googleMeetJoinUrl ? 'Google Meet link: ' : 'Zoom link: ') + meetingUrl : null,
           booking.platform === 'telegram' ? 'Your tutor will share the Telegram session details through chat.' : null,
-          booking.platform && !meetingUrl && booking.platform !== 'telegram'
-            ? 'Your meeting link is being prepared and will be sent in a follow-up email.'
-            : null,
         ].filter(Boolean);
         emailDelivery = await sendToUser(
           emailRecipient,
@@ -218,10 +228,8 @@ router.patch('/:id', async (req, res, next) => {
       }
     }
 
-    if (approved && !shouldSendConfirmationEmail && existingBooking.confirmationEmailSentAt) {
+    if (approved && !meetingLinkPending && !shouldSendConfirmationEmail && existingBooking.confirmationEmailSentAt) {
       emailDelivery = { sent: true, alreadySent: true };
-    } else if (approved && !emailRecipient) {
-      emailDelivery = { sent: false, reason: 'no-recipient' };
     }
 
     res.json({
